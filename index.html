@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    
+    <!-- PWA основные мета-теги -->
+    <meta name="application-name" content="EvPower">
+    <meta name="description" content="Управление зарядкой электромобилей в Кыргызстане. Найдите ближайшую станцию, начните зарядку через QR-код.">
+    <meta name="theme-color" content="#10B981" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="EvPower">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-TileColor" content="#10B981">
+    <meta name="msapplication-TileImage" content="/icons/icon-144x144.png">
+    
+    <!-- Иконки -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.svg" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png">
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="EvPower - Зарядные станции для электромобилей">
+    <meta property="og:description" content="Найдите ближайшую зарядную станцию, начните зарядку через QR-код">
+    <meta property="og:image" content="https://app.evpower.kg/icons/icon-512x512.png">
+    <meta property="og:url" content="https://app.evpower.kg">
+    <meta property="og:site_name" content="EvPower">
+    <!-- Temporarily disabled for development -->
+    <!-- <meta http-equiv="Content-Security-Policy" 
+          content="default-src 'self'; 
+                   script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://api-maps.yandex.ru https://yandex.ru https://yastatic.net; 
+                   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://yandex.st https://yastatic.net; 
+                   font-src 'self' https://fonts.gstatic.com https://yandex.st https://yastatic.net; 
+                   img-src 'self' data: https: blob:; 
+                   connect-src 'self' https://ocpp.evpower.kg wss://ocpp.evpower.kg https://*.supabase.co https://api-maps.yandex.ru https://yastatic.net wss://localhost:*;" /> -->
+    <title>EvPower - Зарядные станции для электромобилей</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

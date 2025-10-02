@@ -1,0 +1,117 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import './styles/theme.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  /* Improve touch responsiveness */
+  button, a, input, select, textarea {
+    touch-action: manipulation;
+  }
+}
+
+/* Utility для отступа снизу под bottom navigation */
+@layer utilities {
+  .pb-bottom-nav {
+    padding-bottom: 5rem; /* 80px - высота нижней навигации + отступ */
+  }
+  
+  .mb-bottom-nav {
+    margin-bottom: 5rem; /* 80px - высота нижней навигации + отступ */
+  }
+  
+  .bottom-nav-space {
+    bottom: 5rem; /* 80px - позиция над нижней навигацией */
+  }
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+  
+  .btn-primary {
+    @apply bg-primary-500 text-white hover:bg-primary-600 focus:ring-primary-500;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-500;
+  }
+  
+  .btn-outline {
+    @apply border-2 border-primary-500 text-primary-500 hover:bg-primary-500 hover:text-white focus:ring-primary-500;
+  }
+  
+  .card {
+    @apply bg-white rounded-xl shadow-sm border border-gray-100 p-6;
+  }
+  
+  .input {
+    @apply block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm;
+  }
+}
+
+/* Loading animations */
+.skeleton {
+  @apply animate-pulse bg-gray-200 rounded;
+}
+
+.spinner {
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #10b981;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* PWA specific styles */
+@media (display-mode: standalone) {
+  body {
+    /* Allow text selection but prevent callouts */
+    -webkit-touch-callout: none;
+    touch-action: manipulation;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .card {
+    @apply bg-gray-800 border-gray-700 text-white;
+  }
+}
+
+/* Custom styles for EvPower PWA */
+:root {
+  --primary-cyan: #00BCD4;
+  --primary-yellow: #FFD600;
+  --primary-green: #10B981;
+  --gray-bg: #F5F5F5;
+}
+
+/* Safe area for iOS devices */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* Prevent pull-to-refresh on iOS */
+body {
+  overscroll-behavior-y: contain;
+}
+
+/* Full height for mobile */
+html, body, #root {
+  height: 100%;
+  overflow-x: hidden;
+}

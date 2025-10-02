@@ -1,0 +1,48 @@
+/* Цветовая схема EvPower */
+:root {
+  /* Основные цвета */
+  --primary-green: #10B981;
+  --primary-yellow: #FCD34D;
+  --primary-blue: #06B6D4;
+  
+  /* Фоновые цвета */
+  --bg-main: #F3F4F6;
+  --bg-card: #FFFFFF;
+  --bg-dark: #1F2937;
+  
+  /* Текстовые цвета */
+  --text-primary: #111827;
+  --text-secondary: #6B7280;
+  --text-light: #9CA3AF;
+  
+  /* Статусы */
+  --status-available: #10B981;
+  --status-occupied: #F59E0B;
+  --status-offline: #EF4444;
+  --status-maintenance: #6B7280;
+  
+  /* Тени */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  
+  /* Радиусы */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  
+  /* Анимации */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Глобальные стили */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+}

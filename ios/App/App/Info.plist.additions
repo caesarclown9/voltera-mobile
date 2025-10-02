@@ -1,0 +1,38 @@
+<!-- Add these entries to Info.plist for certificate pinning with TrustKit -->
+
+<key>TSKConfiguration</key>
+<dict>
+    <key>TSKSwizzleNetworkDelegates</key>
+    <true/>
+    <key>TSKPinnedDomains</key>
+    <dict>
+        <key>ocpp.evpower.kg</key>
+        <dict>
+            <key>TSKEnforcePinning</key>
+            <true/>
+            <key>TSKIncludeSubdomains</key>
+            <false/>
+            <key>TSKPublicKeyHashes</key>
+            <array>
+                <!-- Replace with actual certificate SHA256 hashes -->
+                <string>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</string>
+                <string>BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=</string>
+            </array>
+            <key>TSKReportUris</key>
+            <array>
+                <string>https://api.evpower.kg/security/pinning-report</string>
+            </array>
+        </dict>
+        <key>api.evpower.kg</key>
+        <dict>
+            <key>TSKEnforcePinning</key>
+            <true/>
+            <key>TSKIncludeSubdomains</key>
+            <true/>
+            <key>TSKPublicKeyHashes</key>
+            <array>
+                <string>CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC=</string>
+            </array>
+        </dict>
+    </dict>
+</dict>

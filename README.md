@@ -140,7 +140,7 @@ cd android
 
 ```
 evpower-mobile/
-├── src/
+├── src/                  # React приложение
 │   ├── api/              # API типы и конфигурация
 │   ├── components/       # Переиспользуемые компоненты
 │   ├── features/         # Модули приложения
@@ -151,15 +151,34 @@ evpower-mobile/
 │   │   └── profile/      # Профиль пользователя
 │   ├── services/         # Сервисы и API клиенты
 │   ├── hooks/            # React хуки
-│   ├── utils/            # Утилиты
-│   └── App.tsx           # Главный компонент
-├── android/              # Android проект
-├── ios/                  # iOS проект (в разработке)
+│   └── utils/            # Утилиты
+│
+├── docs/                 # 📄 Документация
+│   ├── google-play/      # Google Play документация
+│   │   ├── SUBMISSION_CHECKLIST.md
+│   │   ├── DATA_SAFETY.md
+│   │   └── store-listings/
+│   ├── legal/            # Юридические документы
+│   │   ├── PRIVACY_POLICY.md
+│   │   └── TERMS_OF_SERVICE.md
+│   └── development/      # Техническая документация
+│
+├── scripts/              # 🔧 Скрипты
+│   ├── build/            # Build скрипты
+│   │   ├── android-debug.bat
+│   │   └── android-release.sh
+│   ├── setup/            # Setup скрипты
+│   │   └── create-keystore.ps1
+│   └── utils/            # Utility скрипты
+│
+├── android/              # Android native проект
+├── ios/                  # iOS native проект
 ├── public/               # Статические файлы
-├── PRIVACY_POLICY.md              # Privacy Policy
-├── TERMS_OF_SERVICE.md            # Terms of Service
-├── GOOGLE_PLAY_DATA_SAFETY.md     # Data Safety для Google Play
-├── GOOGLE_PLAY_SUBMISSION_CHECKLIST.md  # Чеклист сабмита
+├── screenshots/          # Скриншоты для stores
+│
+├── .env.example          # Environment variables template
+├── README.md             # Главная документация
+├── package.json          # Dependencies
 └── capacitor.config.ts   # Capacitor конфигурация
 ```
 
@@ -193,10 +212,10 @@ evpower-mobile/
 
 Перед публикацией в Google Play и App Store ознакомьтесь с документацией:
 
-- 📋 [Google Play Submission Checklist](./GOOGLE_PLAY_SUBMISSION_CHECKLIST.md)
-- 🔒 [Google Play Data Safety](./GOOGLE_PLAY_DATA_SAFETY.md)
-- 📜 [Privacy Policy](./PRIVACY_POLICY.md)
-- 📜 [Terms of Service](./TERMS_OF_SERVICE.md)
+- 📋 [Google Play Submission Checklist](./docs/google-play/GOOGLE_PLAY_SUBMISSION_CHECKLIST.md)
+- 🔒 [Google Play Data Safety](./docs/google-play/GOOGLE_PLAY_DATA_SAFETY.md)
+- 📜 [Privacy Policy](./docs/legal/PRIVACY_POLICY.md)
+- 📜 [Terms of Service](./docs/legal/TERMS_OF_SERVICE.md)
 
 ---
 

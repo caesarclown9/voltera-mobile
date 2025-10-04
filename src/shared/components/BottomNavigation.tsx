@@ -48,7 +48,13 @@ export function BottomNavigation() {
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white shadow-lg safe-area-bottom z-50">
+    <nav
+      className="fixed left-0 right-0 bg-white shadow-lg z-50"
+      style={{
+        bottom: '0',
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)'
+      }}
+    >
       <div className="flex justify-around items-center h-16 px-2">
         {navItems.map((item) => {
           // Skip auth-required items if not authenticated
@@ -57,7 +63,7 @@ export function BottomNavigation() {
           }
 
           const isActive = location.pathname === item.path
-          
+
           return (
             <Link
               key={item.path}

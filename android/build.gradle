@@ -9,6 +9,7 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:8.3.2'
         classpath 'com.google.gms:google-services:4.4.2'
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.22'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -25,6 +26,29 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+    }
+
+    // Force Java 21 toolchain for all subprojects
+    afterEvaluate { project ->
+        if (project.hasProperty('android')) {
+            project.android {
+                compileOptions {
+                    sourceCompatibility JavaVersion.VERSION_21
+                    targetCompatibility JavaVersion.VERSION_21
+                }
+            }
+        }
+
+        // Configure Kotlin to use Java 21
+        try {
+            project.tasks.withType(Class.forName('org.jetbrains.kotlin.gradle.tasks.KotlinCompile')).configureEach {
+                kotlinOptions {
+                    jvmTarget = "21"
+                }
+            }
+        } catch (ClassNotFoundException e) {
+            // Kotlin plugin not applied to this project, skip
+        }
     }
 }
 

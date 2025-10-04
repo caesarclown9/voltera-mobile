@@ -1,22 +1,22 @@
 import { Search, Filter } from 'lucide-react';
 import { StationMap } from '../features/stations/components/StationMap';
-import { useNavigate } from 'react-router-dom';
-import { useStations } from '../features/stations/hooks/useStations';
-import type { Station } from '../api/types';
+import { useLocations } from '../features/locations/hooks/useLocations';
+import type { Location } from '../api/types';
 
 export const MapPage = () => {
-  const navigate = useNavigate();
-  // Показываем все станции на карте (включая недоступные)
-  const { data: stations = [] } = useStations(false);
-
-  const handleStationClick = (station: Station) => {
-    navigate(`/charging/${station.id}`);
-  };
+  // Получаем локации со станциями (requestGeolocation: true для определения расстояния)
+  const { locations, isLoading, error, userLocation } = useLocations(true);
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
-      {/* Search Bar */}
-      <div className="absolute top-0 left-0 right-0 z-10 p-4">
+      {/* Search Bar - Fixed with safe-area-inset-top */}
+      <div
+        className="absolute left-0 right-0 z-10 px-4 pb-4"
+        style={{
+          top: 'env(safe-area-inset-top, 0px)',
+          paddingTop: 'calc(env(safe-area-inset-top, 0px) + 1rem)'
+        }}
+      >
         <div className="relative">
           <input
             type="text"
@@ -32,7 +32,20 @@ export const MapPage = () => {
 
       {/* Map */}
       <div className="flex-1 relative">
-        <StationMap stations={stations} onStationSelect={handleStationClick} />
+        {isLoading ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="spinner" />
+          </div>
+        ) : error ? (
+          <div className="flex items-center justify-center h-full p-4 text-center">
+            <p className="text-red-600">Ошибка загрузки станций. Попробуйте позже.</p>
+          </div>
+        ) : (
+          <StationMap
+            locations={locations}
+            userLocation={userLocation ? [userLocation.lat, userLocation.lng] : undefined}
+          />
+        )}
       </div>
     </div>
   );

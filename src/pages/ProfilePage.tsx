@@ -18,20 +18,14 @@ export const ProfilePage = () => {
       {/* Header */}
       <div className="bg-white shadow-sm">
         <div className="flex items-center justify-between p-4">
-          <button 
+          <button
             onClick={() => navigate(-1)}
             className="p-2 -ml-2 rounded-full bg-yellow-400 hover:bg-yellow-500"
           >
             <ChevronLeft className="w-6 h-6" />
           </button>
           <h1 className="text-xl font-semibold">Ваш профиль</h1>
-          <button 
-            onClick={handleLogout}
-            className="p-2 bg-gray-600 rounded-lg hover:bg-gray-700"
-            disabled={logoutMutation.isPending}
-          >
-            <LogOut className="w-5 h-5 text-white" />
-          </button>
+          <div className="w-10" /> {/* Пустое место для симметрии */}
         </div>
       </div>
 
@@ -67,21 +61,40 @@ export const ProfilePage = () => {
 
       {/* Action Buttons */}
       <div className="p-4 space-y-3">
-        <button 
+        <button
           onClick={() => navigate('/history')}
           className="w-full bg-cyan-500 text-white py-4 rounded-xl font-semibold hover:bg-cyan-600 transition-colors flex items-center justify-center gap-2"
         >
           <Clock className="w-5 h-5" />
           История зарядок
         </button>
-        
-        <button 
+
+        <button
           onClick={() => navigate('/payments')}
           className="w-full bg-cyan-500 text-white py-4 rounded-xl font-semibold hover:bg-cyan-600 transition-colors flex items-center justify-center gap-2"
         >
           <DollarSign className="w-5 h-5" />
           История платежей
         </button>
+
+        {/* Logout/Login Button */}
+        {user ? (
+          <button
+            onClick={handleLogout}
+            disabled={logoutMutation.isPending}
+            className="w-full bg-red-500 text-white py-4 rounded-xl font-semibold hover:bg-red-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+          >
+            <LogOut className="w-5 h-5" />
+            {logoutMutation.isPending ? 'Выход...' : 'Выйти из аккаунта'}
+          </button>
+        ) : (
+          <button
+            onClick={() => navigate('/auth')}
+            className="w-full bg-green-500 text-white py-4 rounded-xl font-semibold hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
+          >
+            Войти в аккаунт
+          </button>
+        )}
       </div>
 
       {/* Info Section */}

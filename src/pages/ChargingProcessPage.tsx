@@ -179,7 +179,7 @@ export const ChargingProcessPage = () => {
   return (
     <div className={`min-h-screen bg-gradient-to-b from-cyan-50 to-white ${isCharging ? 'pb-40' : 'pb-20'}`}>
       {/* Header */}
-      <div className="bg-white shadow-sm sticky top-0 z-10">
+      <div className="bg-white shadow-sm sticky-header-safe z-10">
         <div className="flex items-center justify-between px-4 py-3">
           <button 
             onClick={() => navigate(-1)}

@@ -1,63 +1,77 @@
 import { YMaps, Map, Placemark, Clusterer, ZoomControl, GeolocationControl } from '@pbe/react-yandex-maps'
-import { useState, useRef, useEffect } from 'react'
-import type { Station } from '../../../api/types'
-import type { StationWithLocation } from '../types'
+import { useState, useRef } from 'react'
+import { StationSelectionModal } from '@/shared/components/StationSelectionModal'
+import type { Location } from '@/api/types'
 
 interface StationMapProps {
-  stations: StationWithLocation[]
+  locations: Location[]
   userLocation?: [number, number] // [lat, lng]
-  onStationSelect?: (station: Station) => void
   focusLocation?: { lat: number; lng: number; zoom?: number }
-  selectedStationId?: string
+  selectedLocationId?: string
 }
 
-export function StationMap({ stations = [], userLocation, onStationSelect, focusLocation, selectedStationId }: StationMapProps) {
-  const [selectedLocation, setSelectedLocation] = useState<Station | null>(null)
-  
-  // Автоматически выбираем станцию если передан selectedStationId
-  useEffect(() => {
-    if (selectedStationId && stations) {
-      const station = stations.find(s => s.id === selectedStationId)
-      if (station) {
-        setSelectedLocation(station)
-      }
-    }
-  }, [selectedStationId, stations])
+/**
+ * Компонент карты с маркерами локаций (не отдельных станций!)
+ *
+ * Логика цветов маркеров:
+ * - ЗЕЛЁНЫЙ: location.status === 'available' (есть хотя бы 1 свободный коннектор)
+ * - ЖЁЛТЫЙ: location.status === 'occupied' или 'partial' (все коннекторы заняты)
+ * - СЕРЫЙ: location.status === 'offline' или 'maintenance' (станции недоступны)
+ */
+export function StationMap({
+  locations = [],
+  userLocation,
+  focusLocation,
+  selectedLocationId
+}: StationMapProps) {
+  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null)
   const mapRef = useRef<any>(null)
   const clustererRef = useRef<any>(null)
 
   // Центр карты - используем focusLocation если есть, иначе текущую локацию или Бишкек
-  const mapCenter: [number, number] = focusLocation 
+  const mapCenter: [number, number] = focusLocation
     ? [focusLocation.lat, focusLocation.lng]
     : userLocation || [42.8746, 74.5698]
-  
+
   // Зум карты - используем focusLocation.zoom если есть, иначе стандартный
   const mapZoom = focusLocation?.zoom || 13
 
-  const getStationIcon = (station: StationWithLocation) => {
-    // Цвета согласно статусам backend API
-    let fillColor = '#6b7280'; // серый по умолчанию (недоступна)
+  /**
+   * Определяет цвет маркера локации на основе её статуса
+   * Использует данные из API (location.status уже рассчитан на backend)
+   */
+  const getLocationMarkerColor = (location: Location): string => {
+    switch (location.status) {
+      case 'available':
+        // Есть хотя бы 1 свободный коннектор
+        return '#22c55e' // green-500
 
-    // Определяем цвет на основе статуса от backend
-    switch (station.status) {
-      case 'active':
-        fillColor = '#22c55e'; // зеленый - станция активна
-        break;
+      case 'occupied':
+      case 'partial':
+        // Все коннекторы заняты, но станции работают
+        return '#eab308' // yellow-500
+
+      case 'offline':
       case 'maintenance':
-        fillColor = '#8b5cf6'; // фиолетовый - обслуживание
-        break;
-      case 'inactive':
       default:
-        fillColor = '#6b7280'; // серый - недоступна
-        break;
+        // Все станции недоступны или в обслуживании
+        return '#ef4444' // red-500 - заметный цвет для offline станций
     }
-    
+  }
+
+  /**
+   * Генерирует SVG иконку для маркера локации
+   */
+  const getLocationIcon = (location: Location) => {
+    const fillColor = getLocationMarkerColor(location)
+    const stationsCount = location.stations?.length || location.stations_count || 1
+
     return {
       iconLayout: 'default#image',
       iconImageHref: `data:image/svg+xml;base64,${btoa(`
         <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
           <circle cx="20" cy="20" r="18" fill="${fillColor}" stroke="#fff" stroke-width="2"/>
-          <text x="20" y="20" text-anchor="middle" dominant-baseline="central" fill="white" font-family="Arial" font-size="16" font-weight="bold">1</text>
+          <text x="20" y="20" text-anchor="middle" dominant-baseline="central" fill="white" font-family="Arial" font-size="14" font-weight="bold">${stationsCount}</text>
         </svg>
       `)}`,
       iconImageSize: [40, 40],
@@ -65,6 +79,9 @@ export function StationMap({ stations = [], userLocation, onStationSelect, focus
     }
   }
 
+  /**
+   * Иконка для маркера местоположения пользователя
+   */
   const getUserLocationIcon = () => ({
     iconLayout: 'default#image',
     iconImageHref: `data:image/svg+xml;base64,${btoa(`
@@ -77,21 +94,27 @@ export function StationMap({ stations = [], userLocation, onStationSelect, focus
     iconImageOffset: [-12, -12],
   })
 
-  const handleLocationClick = (location: StationWithLocation) => {
+  /**
+   * Обработчик клика по маркеру локации
+   * Открывает модальное окно со списком станций
+   */
+  const handleLocationClick = (location: Location) => {
     setSelectedLocation(location)
   }
-  
-  const handleStationSelect = (stationId: string) => {
-    // Навигация к странице зарядки с ID конкретной станции
-    onStationSelect?.({ id: stationId } as Station)
+
+  /**
+   * Закрытие модального окна
+   */
+  const handleCloseModal = () => {
     setSelectedLocation(null)
   }
 
-
-  // Создаем кастомный макет для кластеров
+  /**
+   * Создаем кастомный макет для кластеров
+   */
   const createClusterLayout = (ymaps: any) => {
     if (!ymaps) return null
-    
+
     const ClusterIconLayout = ymaps.templateLayoutFactory.createClass(
       '<div style="position: absolute; width: 40px; height: 40px; left: -20px; top: -20px; font-family: Arial, sans-serif;">' +
       '<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">' +
@@ -100,15 +123,27 @@ export function StationMap({ stations = [], userLocation, onStationSelect, focus
       '<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-weight: bold; font-size: 14px;">{{ properties.geoObjects.length }}</div>' +
       '</div>'
     )
-    
+
     return ClusterIconLayout
+  }
+
+  // Фильтруем локации с валидными координатами
+  const validLocations = locations.filter(
+    loc => loc.latitude != null && loc.longitude != null
+  )
+
+  // DEBUG: временное логирование для отладки
+  console.log('[StationMap] Received locations:', locations.length)
+  console.log('[StationMap] Valid locations:', validLocations.length)
+  if (validLocations.length > 0) {
+    console.log('[StationMap] First location:', validLocations[0])
   }
 
   return (
     <div className="relative h-full w-full">
-      <YMaps 
-        query={{ 
-          // Если ключ не задан, не передаем параметр apikey вовсе, чтобы избежать ошибки Invalid API key
+      <YMaps
+        query={{
+          // Если ключ не задан, не передаем параметр apikey вовсе
           ...(import.meta.env.VITE_YANDEX_MAPS_API_KEY
             ? { apikey: import.meta.env.VITE_YANDEX_MAPS_API_KEY as string }
             : {}),
@@ -120,6 +155,7 @@ export function StationMap({ stations = [], userLocation, onStationSelect, focus
           defaultState={{
             center: mapCenter,
             zoom: mapZoom,
+            controls: [], // Правильный способ убрать стандартные контролы
           }}
           width="100%"
           height="100%"
@@ -127,7 +163,7 @@ export function StationMap({ stations = [], userLocation, onStationSelect, focus
             suppressMapOpenBlock: true,
             yandexMapDisablePoiInteractivity: true,
           }}
-          modules={['geoObject.addon.balloon', 'geoObject.addon.hint', 'templateLayoutFactory']}
+          modules={['templateLayoutFactory']}
           onLoad={(ymaps: any) => {
             // Создаем кастомный макет для кластеров после загрузки карты
             const clusterLayout = createClusterLayout(ymaps)
@@ -140,25 +176,24 @@ export function StationMap({ stations = [], userLocation, onStationSelect, focus
         >
           <ZoomControl />
           <GeolocationControl />
-          
+
           <Clusterer
             instanceRef={(ref: any) => {
               clustererRef.current = ref
-              // Настраиваем обработчик клика после инициализации
+              // Настраиваем обработчик клика кластера
               if (ref && ref.events) {
                 ref.events.add('click', (e: any) => {
                   const cluster = e.get('target')
                   const geoObjects = cluster.getGeoObjects ? cluster.getGeoObjects() : []
-                  
+
                   if (geoObjects && geoObjects.length > 1) {
                     // Получаем bounds всех объектов в кластере
                     const bounds = cluster.getBounds()
-                    
+
                     // Зумируем с отступом, чтобы все маркеры были видны
                     mapRef.current?.setBounds(bounds, {
                       checkZoomRange: true,
                       duration: 300,
-                      // Добавляем отступ для лучшей видимости
                       margin: [50, 50, 50, 50]
                     })
                   }
@@ -167,55 +202,61 @@ export function StationMap({ stations = [], userLocation, onStationSelect, focus
             }}
             options={{
               preset: 'islands#invertedGreenClusterIcons',
-              clusterNumbers: [2, 3, 5, 10], // Кластеризация начинается с 2 станций
+              clusterNumbers: [2, 3, 5, 10],
               groupByCoordinates: false,
-              clusterDisableClickZoom: true, // Отключаем стандартный зум, используем свой
+              clusterDisableClickZoom: true,
               clusterHideIconOnBalloonOpen: false,
               geoObjectHideIconOnBalloonOpen: false,
               hasBalloon: false,
               hasHint: false,
-              gridSize: 60, // Размер сетки для группировки
-              minClusterSize: 2, // Минимум 2 станции для кластера
+              gridSize: 60,
+              minClusterSize: 2,
             }}
-            modules={['clusterer.addon.balloon', 'clusterer.addon.hint']}
           >
-            {stations?.map((station) => (
+            {validLocations.map((location) => (
               <Placemark
-                key={station.id}
-                geometry={[station.latitude, station.longitude]}
-                options={getStationIcon(station)}
-                properties={{
-                  balloonContentHeader: `<strong>${station.locationName || station.model}</strong>`,
-                  balloonContentBody: `
-                    <div>
-                      <p><strong>Адрес:</strong> ${station.locationAddress || 'N/A'}</p>
-                      <p><strong>Статус:</strong> ${
-                        station.status === 'active' ? 'Доступна' :
-                        station.status === 'maintenance' ? 'На обслуживании' :
-                        'Недоступна'
-                      }</p>
-                      <p><strong>Мощность:</strong> ${station.power_capacity} кВт</p>
-                      <p><strong>Разъемы:</strong> ${station.connector_types.join(', ')}</p>
-                      <p><strong>Тариф:</strong> ${station.price_per_kwh.toFixed(2)} сом/кВт⋅ч</p>
-                    </div>
-                  `,
+                key={location.id}
+                geometry={[location.latitude!, location.longitude!]}
+                options={{
+                  ...getLocationIcon(location),
+                  hideIconOnBalloonOpen: false,
+                  openBalloonOnClick: false,
+                  openHintOnHover: false,
+                  hasBalloon: false,
+                  hasHint: false,
                 }}
-                onClick={() => handleLocationClick(station)}
+                properties={{
+                  balloonContent: '',
+                  hintContent: '',
+                }}
+                onClick={() => handleLocationClick(location)}
               />
             ))}
           </Clusterer>
 
+          {/* Маркер местоположения пользователя */}
           {userLocation && (
             <Placemark
               geometry={userLocation}
-              options={getUserLocationIcon()}
-              properties={{
-                balloonContent: 'Вы здесь',
+              options={{
+                ...getUserLocationIcon(),
+                openBalloonOnClick: false,
+                openHintOnHover: false,
               }}
             />
           )}
         </Map>
       </YMaps>
+
+      {/* Модальное окно выбора станции */}
+      {selectedLocation && selectedLocation.stations && (
+        <StationSelectionModal
+          stations={selectedLocation.stations}
+          locationName={selectedLocation.name}
+          isOpen={!!selectedLocation}
+          onClose={handleCloseModal}
+        />
+      )}
     </div>
   )
 }

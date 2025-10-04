@@ -107,7 +107,7 @@ export const ToastContainer = () => {
   };
   
   return (
-    <div className="fixed top-4 right-4 z-50">
+    <div className="fixed top-4 right-4 z-50 safe-area-top">
       {toasts.map((toast) => (
         <div
           key={toast.id}

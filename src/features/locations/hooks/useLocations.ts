@@ -58,15 +58,21 @@ export function useLocations(requestGeolocation: boolean = false) {
     queryFn: async () => {
       const locations = await evpowerApi.getLocations(true);
 
+      // DEBUG: временное логирование
+      console.log('[useLocations] Fetched locations from API:', locations.length)
+      if (locations.length > 0) {
+        console.log('[useLocations] First location:', locations[0])
+      }
+
       // Добавляем расстояние если есть геолокация
       if (userLocation) {
         return addDistanceToLocations(
-          locations, 
-          userLocation.lat, 
+          locations,
+          userLocation.lat,
           userLocation.lng
         );
       }
-      
+
       return locations;
     },
     staleTime: 1000 * 60 * 10, // 10 minutes for reference data

@@ -51,6 +51,12 @@ export interface Station {
   session_fee: number   // Фиксированная плата за сессию
   currency: 'KGS'
   firmware_version?: string
+  is_available?: boolean // Доступность станции (из Supabase)
+  last_heartbeat_at?: string // Последний heartbeat
+  latitude?: number // Координаты из joined location
+  longitude?: number
+  locationName?: string // Название локации
+  locationAddress?: string // Адрес локации
   ocpp_status?: {
     is_online: boolean
     last_heartbeat: string

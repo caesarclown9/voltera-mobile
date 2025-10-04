@@ -94,6 +94,12 @@ android/*.iml
 *.aab
 *.ipa
 
+# Build output files
+evpower-*.apk
+evpower-*.aab
+app-debug.apk
+app-release.apk
+
 # IDE
 *.iml
 .gradle
@@ -112,3 +118,20 @@ DerivedData
 *.temp
 tmp/
 temp/
+
+# Claude Desktop / AI Assistant settings
+.claude/
+.cursor/
+.windsurf/
+
+# Temporary documentation and fixes
+FIXES*.md
+FIXES_*.md
+TODO*.md
+NOTES*.md
+
+# Temporary screenshots (keep final ones in docs/)
+screenshots/photo_*.jpg
+screenshots/photo_*.png
+screenshots/temp_*.jpg
+screenshots/temp_*.png

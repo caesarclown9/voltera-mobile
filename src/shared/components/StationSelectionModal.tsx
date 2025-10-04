@@ -19,13 +19,23 @@ export function StationSelectionModal({
 
   if (!isOpen) return null
 
-  const handleStationSelect = (stationId: string) => {
-    navigate(`/charging/${stationId}`)
+  const handleStationSelect = (station: Station) => {
+    // Проверяем доступность станции
+    if (station.status !== 'active' || !station.is_available) {
+      // Станция недоступна - не переходим
+      return
+    }
+    navigate(`/charging/${station.serial_number}`)
     onClose()
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end pb-16">
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end"
+      style={{
+        paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 4rem)' // 4rem = 64px (высота BottomNavigation)
+      }}
+    >
       <div className="bg-white w-full max-h-[60vh] rounded-t-3xl">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b">
@@ -49,12 +59,17 @@ export function StationSelectionModal({
             const connectorStatus = station.ocpp_status?.connector_status || []
             const availableConnectors = connectorStatus.filter(c => c.status === 'Available').length
             const totalConnectors = connectorStatus.length || station.connectors_count
+            const isAvailable = station.status === 'active' && station.is_available
 
             return (
               <div
                 key={station.id}
-                onClick={() => handleStationSelect(station.id)}
-                className="p-4 border-b hover:bg-gray-50 cursor-pointer"
+                onClick={() => handleStationSelect(station)}
+                className={`p-4 border-b ${
+                  isAvailable
+                    ? 'hover:bg-gray-50 cursor-pointer'
+                    : 'opacity-50 cursor-not-allowed bg-gray-100'
+                }`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">

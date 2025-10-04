@@ -298,10 +298,165 @@ class EvPowerApiService {
    * Получить список локаций со станциями
    */
   async getLocations(includeStations = true): Promise<Location[]> {
-    const response = await this.apiRequest<{ locations: Location[] }>(
-      `/locations?include_stations=${includeStations}`
-    );
-    return response.locations;
+    try {
+      const response = await this.apiRequest<{ locations: Location[] }>(
+        `/locations?include_stations=${includeStations}`
+      );
+
+      // DEBUG: логирование ответа от API
+      console.log('[EvPowerAPI] API response for /locations:', response)
+      console.log('[EvPowerAPI] Locations count from API:', response.locations?.length || 0)
+      if (response.locations && response.locations.length > 0) {
+        console.log('[EvPowerAPI] First location from API:', response.locations[0])
+      }
+
+      return response.locations;
+    } catch (error) {
+      console.warn('[EvPowerAPI] API unavailable, using Supabase fallback', error);
+
+      // Fallback: прямой запрос к Supabase
+      if (includeStations) {
+        const { data: locations, error: locError } = await supabase
+          .from('locations')
+          .select(`
+            id,
+            name,
+            address,
+            city,
+            country,
+            latitude,
+            longitude,
+            status,
+            stations_count,
+            connectors_count,
+            stations (
+              id,
+              serial_number,
+              model,
+              manufacturer,
+              location_id,
+              power_capacity,
+              connector_types,
+              status,
+              connectors_count,
+              price_per_kwh,
+              session_fee,
+              currency,
+              firmware_version,
+              is_available,
+              last_heartbeat_at
+            )
+          `)
+          .eq('status', 'active');
+
+        if (locError) throw locError;
+
+        // DEBUG: временное логирование
+        console.log('[EvPowerAPI] Supabase fallback returned locations:', locations?.length || 0)
+        if (locations && locations.length > 0) {
+          console.log('[EvPowerAPI] First location from Supabase:', locations[0])
+        }
+
+        // Преобразуем к формату API
+        return (locations || []).map(loc => ({
+          id: loc.id,
+          name: loc.name,
+          address: loc.address,
+          city: loc.city,
+          country: loc.country,
+          latitude: loc.latitude,
+          longitude: loc.longitude,
+          status: this.mapLocationStatus(loc.stations || []),
+          stations_count: loc.stations_count || 0,
+          connectors_count: loc.connectors_count || 0,
+          available_connectors: this.countAvailableConnectors(loc.stations || []),
+          stations: (loc.stations || []).map((s: any) => ({
+            id: s.id,
+            serial_number: s.serial_number,
+            model: s.model,
+            manufacturer: s.manufacturer,
+            location_id: s.location_id,
+            power_capacity: s.power_capacity,
+            connector_types: s.connector_types || [],
+            status: s.status,
+            connectors_count: s.connectors_count || 1,
+            price_per_kwh: parseFloat(s.price_per_kwh) || 0,
+            session_fee: parseFloat(s.session_fee) || 0,
+            currency: s.currency || 'KGS',
+            firmware_version: s.firmware_version,
+            is_available: s.is_available ?? true, // Добавляем is_available
+            last_heartbeat_at: s.last_heartbeat_at,
+            // Добавляем координаты из parent location
+            latitude: loc.latitude,
+            longitude: loc.longitude,
+            locationName: loc.name,
+            locationAddress: loc.address
+          }))
+        }));
+      } else {
+        const { data: locations, error: locError } = await supabase
+          .from('locations')
+          .select('id, name, address, city, country, latitude, longitude, status, stations_count, connectors_count')
+          .eq('status', 'active');
+
+        if (locError) throw locError;
+
+        return (locations || []).map(loc => ({
+          ...loc,
+          status: 'available' as const,
+          available_connectors: 0
+        }));
+      }
+    }
+  }
+
+  private mapLocationStatus(stations: any[]): 'available' | 'occupied' | 'offline' | 'maintenance' | 'partial' {
+    if (!stations || stations.length === 0) return 'offline';
+
+    // Фильтруем станции по статусу и heartbeat
+    const now = new Date();
+    const HEARTBEAT_TIMEOUT_MS = 5 * 60 * 1000; // 5 минут
+
+    const onlineStations = stations.filter(s => {
+      // Станция должна быть active
+      if (s.status !== 'active') return false;
+
+      // Проверяем heartbeat
+      if (!s.last_heartbeat_at) return false;
+      const lastHeartbeat = new Date(s.last_heartbeat_at);
+      const timeSinceHeartbeat = now.getTime() - lastHeartbeat.getTime();
+
+      // Heartbeat должен быть свежим (не старше 5 минут)
+      return timeSinceHeartbeat <= HEARTBEAT_TIMEOUT_MS;
+    });
+
+    // Если нет онлайн станций - offline
+    if (onlineStations.length === 0) return 'offline';
+
+    // Проверяем доступность среди онлайн станций
+    const availableStations = onlineStations.filter(s => s.is_available);
+    if (availableStations.length === 0) return 'occupied';
+    if (availableStations.length < onlineStations.length) return 'partial';
+
+    return 'available';
+  }
+
+  private countAvailableConnectors(stations: any[]): number {
+    // Учитываем только онлайн станции с актуальным heartbeat
+    const now = new Date();
+    const HEARTBEAT_TIMEOUT_MS = 5 * 60 * 1000; // 5 минут
+
+    return stations
+      .filter(s => {
+        if (s.status !== 'active' || !s.is_available) return false;
+
+        // Проверяем heartbeat
+        if (!s.last_heartbeat_at) return false;
+        const lastHeartbeat = new Date(s.last_heartbeat_at);
+        const timeSinceHeartbeat = now.getTime() - lastHeartbeat.getTime();
+        return timeSinceHeartbeat <= HEARTBEAT_TIMEOUT_MS;
+      })
+      .reduce((sum, s) => sum + (s.connectors_count || 1), 0);
   }
 
   /**

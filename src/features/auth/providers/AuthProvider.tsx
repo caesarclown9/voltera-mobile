@@ -52,33 +52,35 @@ export function AuthProvider({ children }: AuthProviderProps) {
     initializeAuth()
 
     // Listen for auth state changes
-    const { data: { subscription } } = authService.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = authService.onAuthStateChange(async (event, session) => {
+      console.log('[AuthProvider] Auth state change:', event, session?.user?.id)
+
       if (event === 'SIGNED_IN' && session?.user) {
-        authService.getCurrentUser().then(user => {
-          if (user) {
-            // Преобразуем Client в UnifiedUser
-            const unifiedUser = {
-              id: user.id,
-              email: user.email,
-              phone: user.phone || null,
-              name: user.name || 'User',
-              balance: user.balance || 0,
-              status: 'active' as const,
-              favoriteStations: [],
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString()
-            }
-            login(unifiedUser)
+        const user = await authService.getCurrentUser()
+        if (user) {
+          // Преобразуем Client в UnifiedUser
+          const unifiedUser = {
+            id: user.id,
+            email: user.email,
+            phone: user.phone || null,
+            name: user.name || 'User',
+            balance: user.balance || 0,
+            status: 'active' as const,
+            favoriteStations: [],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
           }
-        })
+          login(unifiedUser)
+        }
       } else if (event === 'SIGNED_OUT') {
-        // Явный выход - очищаем состояние
-        const currentUser = authService.getCurrentUser()
-        currentUser.then(user => {
-          if (!user) {
-            logout()
-          }
-        })
+        // Только если действительно нет пользователя в Supabase
+        const user = await authService.getCurrentUser()
+        if (!user) {
+          logout()
+        }
+      } else if (event === 'TOKEN_REFRESHED') {
+        // Токен обновился - это нормально, не делаем logout
+        console.log('[AuthProvider] Token refreshed')
       }
     })
 

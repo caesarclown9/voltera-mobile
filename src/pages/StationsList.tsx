@@ -60,10 +60,10 @@ export const StationsList = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
-      {/* Header */}
-      <div className="bg-white shadow-sm sticky top-0 z-10">
-        <div className="flex items-center p-4">
-          <button 
+      {/* Header с safe-area */}
+      <div className="bg-white shadow-sm sticky-header-safe z-10">
+        <div className="flex items-center px-4 pb-4">
+          <button
             onClick={() => navigate(-1)}
             className="p-2 -ml-2 rounded-lg hover:bg-gray-100"
           >

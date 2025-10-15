@@ -1,12 +1,5 @@
 import { useState } from "react";
-import {
-  ChevronLeft,
-  CreditCard,
-  Plus,
-  Clock,
-  CheckCircle,
-  XCircle,
-} from "lucide-react";
+import { ChevronLeft, Plus, Clock, CheckCircle, XCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useBalance } from "@/features/balance/hooks/useBalance";
 import { SimpleTopup } from "@/features/balance/components/SimpleTopup";

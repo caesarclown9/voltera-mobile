@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
 import { useLocations } from "../features/locations/hooks/useLocations";
-import { useGeolocation } from "../shared/hooks/useGeolocation";
 import { StationMap } from "../features/stations/components/StationMap";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Location } from "../api/types";
-import { logger } from "../shared/utils/logger";
 import { useAuth } from "../features/auth/hooks/useAuth";
 import { useBalance } from "../features/balance/hooks/useBalance";
 import { SimpleTopup } from "../features/balance/components/SimpleTopup";
@@ -47,7 +45,7 @@ export default function MapHome() {
       // Очищаем state после использования
       navigate(routerLocation.pathname, { replace: true });
     }
-  }, [routerLocation.state, locations]);
+  }, [routerLocation.state, locations, navigate, routerLocation.pathname]);
 
   // Обрабатываем поиск локаций
   const filteredLocations =

@@ -7,7 +7,6 @@ import {
   DollarSign,
   FileText,
   Trash2,
-  AlertTriangle,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStatus, useLogout } from "../features/auth/hooks/useAuth";
@@ -22,17 +21,25 @@ export const ProfilePage = () => {
   const [deleteRequested, setDeleteRequested] = useState(false);
   // Realtime подписка на баланс
   useEffect(() => {
-    const sub = evpowerApi.subscribeToBalance((newBalance: number) => {
+    const sub = evpowerApi.subscribeToBalance(() => {
       // Ничего не делаем здесь напрямую — useBalance сам рефрешнётся через invalidate в хуке QR topup
       // Если потребуется — можно добавить локальный стейт или invalidateQueries
     });
     return () => {
       // sub может быть промисом; безопасно игнорируем, если null
-      Promise.resolve(sub).then((s) => {
-        try {
-          (s as any)?.unsubscribe?.();
-        } catch {}
-      });
+      Promise.resolve(sub)
+        .then((s) => {
+          try {
+            // Пытаемся отписаться, если метод доступен
+            const subscription = s as { unsubscribe?: () => void } | null;
+            subscription?.unsubscribe?.();
+          } catch {
+            // Игнорируем ошибки при отписке
+          }
+        })
+        .catch(() => {
+          // Игнорируем ошибки промиса
+        });
     };
   }, []);
   const logoutMutation = useLogout();

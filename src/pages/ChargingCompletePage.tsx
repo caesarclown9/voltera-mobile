@@ -11,7 +11,6 @@ import {
   Receipt,
 } from "lucide-react";
 import { apiClient } from "../services/evpowerApi";
-import { API_ENDPOINTS } from "../api/endpoints";
 
 interface ChargingCompleteData {
   sessionId: string;

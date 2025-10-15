@@ -1,7 +1,7 @@
 import { evpowerApi } from "@/services/evpowerApi";
 
 export const balanceService = {
-  async getBalance(userId: string) {
+  async getBalance(_userId: string) {
     const balance = await evpowerApi.getBalance();
     return { balance, currency: "KGS" };
   },
@@ -9,16 +9,27 @@ export const balanceService = {
   async generateTopUpQR(amount: number) {
     const res = await evpowerApi.topupWithQR(amount);
     // Возвращаем полный ответ + трансформированные поля для обратной совместимости
+    // Backend может вернуть дополнительные поля помимо типизированного интерфейса
+    const apiRes = res as Record<string, unknown>;
     return {
-      ...res, // Включаем все поля от backend (qr, qr_url, invoice_id, link_app, etc)
-      qrCode: res.qr_code_url || res.qr_url || res.qr_code || res.qr || "",
+      ...res,
+      qrCode:
+        res.qr_code_url ||
+        (apiRes.qr_url as string) ||
+        res.qr_code ||
+        (apiRes.qr as string) ||
+        "",
       paymentId: res.invoice_id || res.order_id || "",
       expiresAt:
         res.qr_expires_at ||
         res.invoice_expires_at ||
         new Date(Date.now() + 5 * 60 * 1000).toISOString(),
       // Для удобства также мапим app_link
-      payment_url: res.payment_url || res.link_app || res.app_link || "",
+      payment_url:
+        (apiRes.payment_url as string) ||
+        (apiRes.link_app as string) ||
+        res.app_link ||
+        "",
     };
   },
 

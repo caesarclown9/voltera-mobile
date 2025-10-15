@@ -354,7 +354,7 @@ class EvPowerApiService {
         `[EvPowerAPI] Locations count from API: ${response.locations?.length || 0}`,
       );
 
-      return response.locations;
+      return response.locations as Location[];
     } catch (error) {
       if (
         import.meta.env.PROD &&
@@ -673,7 +673,7 @@ class EvPowerApiService {
       "/balance/topup-qr",
       { method: "POST", body: requestBody },
       zTopupQRResponse,
-    );
+    ) as Promise<TopupQRResponse>;
   }
 
   /**
@@ -722,7 +722,7 @@ class EvPowerApiService {
       `/payment/status/${invoiceId}`,
       { method: "GET" },
       zPaymentStatus,
-    );
+    ) as Promise<PaymentStatus>;
   }
 
   // ============== HISTORY (через Supabase) ==============

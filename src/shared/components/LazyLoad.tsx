@@ -126,7 +126,7 @@ export const LazyImage: React.FC<LazyImageProps> = ({
 }) => {
   const [imageSrc, setImageSrc] = useState(placeholder);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [hasError, setHasError] = useState(false);
+  const [_hasError, setHasError] = useState(false);
 
   return (
     <LazyLoad

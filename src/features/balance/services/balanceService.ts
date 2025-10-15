@@ -10,7 +10,7 @@ export const balanceService = {
     const res = await evpowerApi.topupWithQR(amount);
     // Возвращаем полный ответ + трансформированные поля для обратной совместимости
     // Backend может вернуть дополнительные поля помимо типизированного интерфейса
-    const apiRes = res as Record<string, unknown>;
+    const apiRes = res as unknown as Record<string, unknown>;
     return {
       ...res,
       qrCode:

@@ -1,17 +1,32 @@
+// TODO: Импорты ниже используются в закомментированном коде для будущих динамических тарифов
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import {
   supabase,
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error - будет использоваться когда включим динамические тарифы
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   supabaseWithTimeout,
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error - будет использоваться когда включим динамические тарифы
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   isSupabaseConfigured,
 } from "../../shared/utils/supabaseHelpers";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { pricingCache } from "./pricingCache";
 import type {
   PricingResult,
-  TariffRule,
+  TariffRule, // eslint-disable-line @typescript-eslint/no-unused-vars
   SessionCostBreakdown,
-  CachedPricing,
+  CachedPricing, // eslint-disable-line @typescript-eslint/no-unused-vars
 } from "./types";
-import { DEFAULT_CURRENCY, DEFAULT_RATE_PER_KWH, CACHE_TTL } from "./types";
-import { parsePrice } from "../../shared/utils/parsers";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import {
+  DEFAULT_CURRENCY,
+  DEFAULT_RATE_PER_KWH,
+  CACHE_TTL as _CACHE_TTL,
+} from "./types";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { parsePrice as _parsePrice } from "../../shared/utils/parsers";
 
 class PricingService {
   private cache = new Map<string, CachedPricing>();
@@ -19,8 +34,10 @@ class PricingService {
 
   /**
    * Инициализирует сервис и кэш
+   * TODO: Будет использоваться когда включим динамические тарифы
    */
-  private async initialize() {
+  // @ts-expect-error - будет использоваться когда включим динамические тарифы
+  private async _initialize() {
     if (this.initialized) return;
     await pricingCache.init();
     this.initialized = true;
@@ -30,10 +47,10 @@ class PricingService {
    * Рассчитывает текущий тариф для станции
    */
   async calculatePricing(
-    stationId: string,
-    connectorType?: string,
-    clientId?: string,
-    powerKw?: number,
+    _stationId: string,
+    _connectorType?: string,
+    _clientId?: string,
+    _powerKw?: number,
   ): Promise<PricingResult> {
     // ВРЕМЕННО: Фиксированная цена 13.5 сом/кВт
     // TODO: В будущем вернуть динамические тарифы из БД
@@ -145,8 +162,10 @@ class PricingService {
 
   /**
    * Получает клиентский тариф если есть
+   * TODO: Будет использоваться когда включим динамические тарифы
    */
-  private async getClientTariff(
+  // @ts-expect-error - будет использоваться когда включим динамические тарифы
+  private async _getClientTariff(
     clientId: string,
     stationId: string,
   ): Promise<PricingResult | null> {
@@ -210,8 +229,10 @@ class PricingService {
 
   /**
    * Находит применимое правило тарифа
+   * TODO: Будет использоваться когда включим динамические тарифы
    */
-  private async findApplicableRule(
+  // @ts-expect-error - будет использоваться когда включим динамические тарифы
+  private async _findApplicableRule(
     tariffPlanId: string,
     connectorType?: string,
     powerKw?: number,
@@ -262,7 +283,7 @@ class PricingService {
         // Проверка времени
         if (rule.time_start && rule.time_end) {
           if (
-            !this.isTimeInRange(currentTime, rule.time_start, rule.time_end)
+            !this._isTimeInRange(currentTime, rule.time_start, rule.time_end)
           ) {
             return false;
           }
@@ -285,8 +306,9 @@ class PricingService {
 
   /**
    * Проверяет попадает ли время в диапазон
+   * TODO: Будет использоваться когда включим динамические тарифы
    */
-  private isTimeInRange(current: string, start: string, end: string): boolean {
+  private _isTimeInRange(current: string, start: string, end: string): boolean {
     // Если конец больше начала - обычный диапазон
     if (start <= end) {
       return current >= start && current <= end;
@@ -297,13 +319,15 @@ class PricingService {
 
   /**
    * Создает PricingResult из правила тарифа
+   * TODO: Будет использоваться когда включим динамические тарифы
    */
-  private buildPricingFromRule(
+  // @ts-expect-error - будет использоваться когда включим динамические тарифы
+  private _buildPricingFromRule(
     rule: TariffRule,
     tariffPlanId: string,
   ): PricingResult {
     // Рассчитываем когда будет следующее изменение тарифа
-    const nextChange = this.calculateNextRateChange(rule);
+    const nextChange = this._calculateNextRateChange(rule);
 
     return {
       rate_per_kwh: rule.price || 0,
@@ -327,8 +351,9 @@ class PricingService {
 
   /**
    * Рассчитывает время следующего изменения тарифа
+   * TODO: Будет использоваться когда включим динамические тарифы
    */
-  private calculateNextRateChange(rule: TariffRule): Date | null {
+  private _calculateNextRateChange(rule: TariffRule): Date | null {
     if (!rule.time_end) return null;
 
     const now = new Date();
@@ -366,8 +391,10 @@ class PricingService {
 
   /**
    * Кэширует результат
+   * TODO: Будет использоваться когда включим динамические тарифы
    */
-  private async cacheResult(key: string, data: PricingResult): Promise<void> {
+  // @ts-expect-error - будет использоваться когда включим динамические тарифы
+  private async _cacheResult(key: string, data: PricingResult): Promise<void> {
     // Memory кэш
     this.cache.set(key, {
       stationId: key.split("-")[0] ?? "",

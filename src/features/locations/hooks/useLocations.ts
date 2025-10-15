@@ -4,13 +4,7 @@ import { evpowerApi } from "@/services/evpowerApi";
 // WebSocket для локаций отключён, используем только HTTP + Supabase там, где нужно
 import { calculateDistance } from "@/shared/utils/geo";
 import { logger } from "@/shared/utils/logger";
-import type {
-  Location,
-  StationStatusResponse,
-  LocationUpdate,
-  WebSocketLocationUpdate,
-  WebSocketStationUpdate,
-} from "../../../api/types";
+import type { Location, StationStatusResponse } from "../../../api/types";
 
 // Helper: добавляет расстояние к локациям
 function addDistanceToLocations(
@@ -61,8 +55,6 @@ export function useLocations(requestGeolocation: boolean = false) {
       );
     }
   }, [requestGeolocation]);
-
-  const queryClient = useQueryClient();
 
   const {
     data: locations,
@@ -168,57 +160,9 @@ export function useLocationUpdates(channels: string[] = ["all"]) {
   useEffect(() => {
     // Ранее здесь подключались к WS и подписывались на каналы.
     // Теперь real-time обновления статусов обеспечиваются через Supabase и периодический refetch.
-    const handleUpdate = (
-      data: WebSocketLocationUpdate | WebSocketStationUpdate,
-    ) => {
-      if (data.type === "location_status_update") {
-        // Обновляем кэш локаций
-        queryClient.setQueryData(
-          ["locations"],
-          (oldData: Location[] | undefined) => {
-            if (!oldData) return oldData;
-
-            return oldData.map((location) =>
-              location.id === data.location_id
-                ? {
-                    ...location,
-                    status: data.status,
-                    stations_summary: data.stations_summary,
-                  }
-                : location,
-            );
-          },
-        );
-
-        // Обновляем кэш конкретной локации
-        queryClient.invalidateQueries({
-          queryKey: ["location", data.location_id],
-        });
-      }
-
-      if (data.type === "station_status_update") {
-        // Обновляем кэш статуса станции
-        queryClient.setQueryData(
-          ["station-status", data.station_id],
-          (oldData: StationStatusResponse | undefined) => {
-            if (!oldData) return oldData;
-
-            return {
-              ...oldData,
-              station_status: data.status,
-              connectors: data.connectors,
-              available_connectors: data.connectors.filter((c) => c.available)
-                .length,
-              occupied_connectors: data.connectors.filter((c) => !c.available)
-                .length,
-            };
-          },
-        );
-      }
-    };
-
-    // Ничего не делаем: WS отключен
+    // WS отключен, ничего не делаем
     return () => {};
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [channels.join(","), queryClient]);
 
   return {
@@ -238,7 +182,6 @@ export function useStations(requestGeolocation: boolean = false) {
     "useStations from useLocations is deprecated. Use features/stations/hooks/useStations instead",
   );
 
-  const queryClient = useQueryClient();
   const [userLocation, setUserLocation] = useState<{
     lat: number;
     lng: number;

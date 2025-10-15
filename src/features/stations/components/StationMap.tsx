@@ -14,7 +14,6 @@ interface StationMapProps {
   locations: Location[];
   userLocation?: [number, number]; // [lat, lng]
   focusLocation?: { lat: number; lng: number; zoom?: number };
-  selectedLocationId?: string;
 }
 
 /**
@@ -29,7 +28,6 @@ export function StationMap({
   locations = [],
   userLocation,
   focusLocation,
-  selectedLocationId,
 }: StationMapProps) {
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(
     null,

@@ -1,9 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { evpowerApi, unifiedApi } from "@/services/evpowerApi";
-import type {
-  UnifiedChargingSession,
-  UnifiedTransaction,
-} from "../../auth/types/unified.types";
+import { unifiedApi } from "@/services/evpowerApi";
 import type {
   ChargingHistoryItem,
   TransactionHistoryItem,

@@ -22,9 +22,6 @@ export default function MapHome() {
   const [focusLocation, setFocusLocation] = useState<
     { lat: number; lng: number; zoom?: number } | undefined
   >(undefined);
-  const [selectedLocationId, setSelectedLocationId] = useState<
-    string | undefined
-  >(undefined);
   const { user } = useAuth();
   const { data: balance } = useBalance();
 
@@ -36,11 +33,8 @@ export default function MapHome() {
   // Обрабатываем навигацию со страницы списка станций
   useEffect(() => {
     if (routerLocation.state?.focusLocation && locations) {
-      const locationId = routerLocation.state.selectedLocationId;
-
       // Устанавливаем фокус на локацию
       setFocusLocation(routerLocation.state.focusLocation);
-      setSelectedLocationId(locationId);
 
       // Очищаем state после использования
       navigate(routerLocation.pathname, { replace: true });
@@ -132,7 +126,6 @@ export default function MapHome() {
             locations={filteredLocations}
             userLocation={userLocationCoords}
             focusLocation={focusLocation}
-            selectedLocationId={selectedLocationId}
           />
         )}
       </div>

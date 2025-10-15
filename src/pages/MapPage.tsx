@@ -1,7 +1,6 @@
-import { Search, Filter } from 'lucide-react';
-import { StationMap } from '../features/stations/components/StationMap';
-import { useLocations } from '../features/locations/hooks/useLocations';
-import type { Location } from '../api/types';
+import { Search, Filter } from "lucide-react";
+import { StationMap } from "../features/stations/components/StationMap";
+import { useLocations } from "../features/locations/hooks/useLocations";
 
 export const MapPage = () => {
   // Получаем локации со станциями (requestGeolocation: true для определения расстояния)
@@ -13,8 +12,8 @@ export const MapPage = () => {
       <div
         className="absolute left-0 right-0 z-10 px-4 pb-4"
         style={{
-          top: 'env(safe-area-inset-top, 0px)',
-          paddingTop: 'calc(env(safe-area-inset-top, 0px) + 1rem)'
+          top: "env(safe-area-inset-top, 0px)",
+          paddingTop: "calc(env(safe-area-inset-top, 0px) + 1rem)",
         }}
       >
         <div className="relative">
@@ -38,12 +37,16 @@ export const MapPage = () => {
           </div>
         ) : error ? (
           <div className="flex items-center justify-center h-full p-4 text-center">
-            <p className="text-red-600">Ошибка загрузки станций. Попробуйте позже.</p>
+            <p className="text-red-600">
+              Ошибка загрузки станций. Попробуйте позже.
+            </p>
           </div>
         ) : (
           <StationMap
             locations={locations}
-            userLocation={userLocation ? [userLocation.lat, userLocation.lng] : undefined}
+            userLocation={
+              userLocation ? [userLocation.lat, userLocation.lng] : undefined
+            }
           />
         )}
       </div>

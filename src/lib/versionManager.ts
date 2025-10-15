@@ -5,8 +5,6 @@
  * при обновлении приложения
  */
 
-import { del } from "idb-keyval";
-
 // Текущая версия приложения (синхронизируется с package.json)
 export const APP_VERSION = "1.0.1";
 export const APP_BUILD = 37; // Увеличивается при каждой сборке

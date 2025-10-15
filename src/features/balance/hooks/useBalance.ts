@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useCallback } from "react";
 import { evpowerApi, handleApiError } from "@/services/evpowerApi";
-import type { TopupQRResponse, PaymentStatus } from "@/services/evpowerApi";
+import type { PaymentStatus } from "@/services/evpowerApi";
 import { useAuthStore } from "@/features/auth/store";
 import { balanceService } from "../services/balanceService";
 
@@ -75,7 +75,7 @@ export const usePaymentStatus = (invoiceId: string | null, enabled = true) => {
 // Платеж автоматически истекает через 10 минут
 export const useCancelPayment = () => {
   return useMutation<void, Error, string>({
-    mutationFn: async (invoiceId) => {
+    mutationFn: async () => {
       // Placeholder - backend не поддерживает отмену
       console.warn("Cancel payment not supported by backend API");
     },

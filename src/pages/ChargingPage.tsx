@@ -7,10 +7,7 @@ import { useCharging } from "../features/charging/hooks/useCharging";
 import { useBalance } from "../features/balance/hooks/useBalance";
 import { SimpleTopup } from "../features/balance/components/SimpleTopup";
 import { DynamicPricingDisplay } from "../features/pricing/components/DynamicPricingDisplay";
-import {
-  ChargingLimitsSelector,
-  type ChargingLimits,
-} from "../features/charging/components/ChargingLimitsSelector";
+import { type ChargingLimits } from "../features/charging/components/ChargingLimitsSelector";
 import { pricingService } from "../features/pricing/pricingService";
 import { useAuthStatus } from "@/features/auth/hooks/useAuth";
 import { useFavorites } from "@/features/favorites/hooks/useFavorites";
@@ -116,7 +113,7 @@ export const ChargingPage = () => {
     };
 
     loadPrices();
-  }, [stationId, stationStatus]); // stationId and stationStatus as dependencies
+  }, [stationId, stationStatus, selectedConnector]); // Added selectedConnector as dependency
 
   // Обновляем текущую цену при изменении выбранного коннектора
   useEffect(() => {
@@ -152,7 +149,14 @@ export const ChargingPage = () => {
         }
       }
 
-      const chargingParams: any = {
+      interface ChargingParams {
+        stationId: string;
+        connectorId: string;
+        amount_som?: number;
+        energy_kwh?: number;
+      }
+
+      const chargingParams: ChargingParams = {
         stationId: station.id,
         connectorId: selectedConnector.split("-").pop() || "1",
       };

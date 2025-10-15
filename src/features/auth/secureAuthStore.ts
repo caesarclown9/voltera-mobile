@@ -3,10 +3,14 @@
  * Временное решение до миграции на HttpOnly cookies
  */
 
-import { create } from 'zustand';
-import type { UnifiedUser } from './types/unified.types';
-import { SecureTokenStorage, SecurityMonitor, XSSDetector } from '../../utils/tokenSecurity';
-import { supabase } from '../../shared/config/supabase';
+import { create } from "zustand";
+import type { UnifiedUser } from "./types/unified.types";
+import {
+  SecureTokenStorage,
+  SecurityMonitor,
+  XSSDetector,
+} from "../../utils/tokenSecurity";
+import { supabase } from "../../shared/config/supabase";
 
 interface SecureAuthState {
   user: UnifiedUser | null;
@@ -33,16 +37,18 @@ export const useSecureAuthStore = create<SecureAuthState>((set, get) => ({
     if (SecurityMonitor.isLocked()) {
       set({
         isLocked: true,
-        lockoutTimeRemaining: SecurityMonitor.getLockoutTimeRemaining()
+        lockoutTimeRemaining: SecurityMonitor.getLockoutTimeRemaining(),
       });
-      throw new Error('Account temporarily locked due to multiple failed attempts');
+      throw new Error(
+        "Account temporarily locked due to multiple failed attempts",
+      );
     }
 
     // Санитизация данных пользователя
     const sanitizedUser: UnifiedUser = {
       ...user,
-      name: XSSDetector.sanitize(user.name),
-      email: XSSDetector.sanitize(user.email),
+      name: XSSDetector.sanitize(user.name ?? "User"),
+      email: XSSDetector.sanitize(user.email ?? ""),
       phone: user.phone ? XSSDetector.sanitize(user.phone) : null,
     };
 
@@ -57,7 +63,7 @@ export const useSecureAuthStore = create<SecureAuthState>((set, get) => ({
       user: sanitizedUser,
       isAuthenticated: true,
       isLocked: false,
-      lockoutTimeRemaining: 0
+      lockoutTimeRemaining: 0,
     });
   },
 
@@ -69,14 +75,14 @@ export const useSecureAuthStore = create<SecureAuthState>((set, get) => ({
     try {
       await supabase.auth.signOut();
     } catch (error) {
-      console.error('Supabase signout error:', error);
+      console.error("Supabase signout error:", error);
     }
 
     set({
       user: null,
       isAuthenticated: false,
       isLocked: false,
-      lockoutTimeRemaining: 0
+      lockoutTimeRemaining: 0,
     });
   },
 
@@ -91,7 +97,9 @@ export const useSecureAuthStore = create<SecureAuthState>((set, get) => ({
       }
 
       // Проверяем сессию Supabase
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
       if (!session) {
         await get().logout();
@@ -99,32 +107,36 @@ export const useSecureAuthStore = create<SecureAuthState>((set, get) => ({
       }
 
       // Получаем данные пользователя
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       if (user) {
         // Получаем данные из таблицы clients
         const { data: clientData } = await supabase
-          .from('clients')
-          .select('*')
-          .eq('id', user.id)
+          .from("clients")
+          .select("*")
+          .eq("id", user.id)
           .single();
 
         if (clientData) {
           const unifiedUser: UnifiedUser = {
             id: clientData.id,
             email: XSSDetector.sanitize(clientData.email),
-            phone: clientData.phone ? XSSDetector.sanitize(clientData.phone) : null,
-            name: XSSDetector.sanitize(clientData.name || 'User'),
+            phone: clientData.phone
+              ? XSSDetector.sanitize(clientData.phone)
+              : null,
+            name: XSSDetector.sanitize(clientData.name || "User"),
             balance: clientData.balance || 0,
-            status: 'active' as const,
+            status: "active" as const,
             favoriteStations: [],
             createdAt: clientData.created_at,
-            updatedAt: new Date().toISOString()
+            updatedAt: new Date().toISOString(),
           };
 
           set({
             user: unifiedUser,
-            isAuthenticated: true
+            isAuthenticated: true,
           });
 
           // Обновляем время жизни токена при активности
@@ -132,14 +144,17 @@ export const useSecureAuthStore = create<SecureAuthState>((set, get) => ({
         }
       }
     } catch (error) {
-      console.error('Auth check failed:', error);
+      console.error("Auth check failed:", error);
       await get().logout();
     }
   },
 
   refreshToken: async () => {
     try {
-      const { data: { session }, error } = await supabase.auth.refreshSession();
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.refreshSession();
 
       if (error || !session) {
         await get().logout();
@@ -154,7 +169,7 @@ export const useSecureAuthStore = create<SecureAuthState>((set, get) => ({
       // Обновляем данные пользователя
       await get().checkAuth();
     } catch (error) {
-      console.error('Token refresh failed:', error);
+      console.error("Token refresh failed:", error);
       await get().logout();
     }
   },
@@ -164,10 +179,10 @@ export const useSecureAuthStore = create<SecureAuthState>((set, get) => ({
       SecurityMonitor.reset();
       set({
         isLocked: false,
-        lockoutTimeRemaining: 0
+        lockoutTimeRemaining: 0,
       });
     }
-  }
+  },
 }));
 
 /**
@@ -198,7 +213,8 @@ export const useTokenAutoRefresh = () => {
  * Hook для обработки неудачных попыток входа
  */
 export const useAuthAttemptMonitor = () => {
-  const { isLocked, lockoutTimeRemaining, unlockAccount } = useSecureAuthStore();
+  const { isLocked, lockoutTimeRemaining, unlockAccount } =
+    useSecureAuthStore();
 
   const recordFailedAttempt = useCallback(() => {
     SecurityMonitor.recordFailedAttempt();
@@ -206,7 +222,7 @@ export const useAuthAttemptMonitor = () => {
     if (SecurityMonitor.isLocked()) {
       useSecureAuthStore.setState({
         isLocked: true,
-        lockoutTimeRemaining: SecurityMonitor.getLockoutTimeRemaining()
+        lockoutTimeRemaining: SecurityMonitor.getLockoutTimeRemaining(),
       });
     }
   }, []);
@@ -225,9 +241,9 @@ export const useAuthAttemptMonitor = () => {
   return {
     isLocked,
     lockoutTimeRemaining,
-    recordFailedAttempt
+    recordFailedAttempt,
   };
 };
 
 // Добавляем необходимые импорты в начало файла
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback } from "react";

@@ -1,19 +1,16 @@
-import type { CapacitorConfig } from '@capacitor/cli';
+import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
-  appId: 'kg.evpower.app',
-  appName: 'EvPower',
-  webDir: 'dist',
+  appId: "kg.evpower.app",
+  appName: "EvPower",
+  webDir: "dist",
   server: {
     // Для безопасности используем https схему на Android
-    androidScheme: 'https',
+    androidScheme: "https",
     // Исключаем localhost из проверок для разработки
-    cleartext: false
+    cleartext: false,
   },
   plugins: {
-    PushNotifications: {
-      presentationOptions: ["badge", "sound", "alert"]
-    },
     SplashScreen: {
       launchShowDuration: 2000,
       backgroundColor: "#10B981", // Primary green color
@@ -22,24 +19,24 @@ const config: CapacitorConfig = {
       androidSpinnerStyle: "large",
       iosSpinnerStyle: "small",
       splashFullScreen: true,
-      splashImmersive: true
+      splashImmersive: true,
     },
     StatusBar: {
       backgroundColor: "#10B981",
-      style: "LIGHT"
-    }
+      style: "LIGHT",
+    },
   },
   ios: {
     // Настройки для iOS
     contentInset: "automatic",
-    limitsNavigationsToAppBoundDomains: false
+    limitsNavigationsToAppBoundDomains: false,
   },
   android: {
     // Настройки для Android
     allowMixedContent: false,
     captureInput: true,
-    webContentsDebuggingEnabled: true
-  }
+    webContentsDebuggingEnabled: false,
+  },
 };
 
 export default config;

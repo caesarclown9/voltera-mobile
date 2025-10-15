@@ -1,73 +1,80 @@
-import { Link, useLocation } from 'react-router-dom'
-import { useAuthStatus } from '@/features/auth/hooks/useAuth'
-import { motion } from 'framer-motion'
+import { Link, useLocation } from "react-router-dom";
+import { useAuthStatus } from "@/features/auth/hooks/useAuth";
+import { motion } from "framer-motion";
 
 interface NavItem {
-  path: string
-  label: string
-  icon: string
-  color: string
-  authRequired?: boolean
+  path: string;
+  label: string;
+  icon: string;
+  color: string;
+  authRequired?: boolean;
 }
 
 const navItems: NavItem[] = [
   {
-    path: '/',
-    label: 'Карта',
-    icon: '🗺️',
-    color: 'text-cyan-500'
+    path: "/",
+    label: "Карта",
+    icon: "🗺️",
+    color: "text-cyan-500",
   },
   {
-    path: '/stations',
-    label: 'Списком',
-    icon: '📋',
-    color: 'text-cyan-500'
+    path: "/stations",
+    label: "Списком",
+    icon: "📋",
+    color: "text-cyan-500",
   },
   {
-    path: '/favorites',
-    label: 'Избранное',
-    icon: '❤️',
-    color: 'text-cyan-500',
-    authRequired: false
+    path: "/favorites",
+    label: "Избранное",
+    icon: "❤️",
+    color: "text-cyan-500",
+    authRequired: false,
   },
   {
-    path: '/profile',
-    label: 'Профиль',
-    icon: '👤',
-    color: 'text-cyan-500'
-  }
-]
+    path: "/profile",
+    label: "Профиль",
+    icon: "👤",
+    color: "text-cyan-500",
+  },
+];
 
 export function BottomNavigation() {
-  const location = useLocation()
-  const { isAuthenticated } = useAuthStatus()
+  const location = useLocation();
+  const { isAuthenticated } = useAuthStatus();
 
   // Hide navigation on auth pages
-  if (location.pathname.startsWith('/auth')) {
-    return null
+  if (location.pathname.startsWith("/auth")) {
+    return null;
   }
 
   return (
     <nav
       className="fixed left-0 right-0 bg-white shadow-lg z-50"
       style={{
-        bottom: '0',
-        paddingBottom: 'env(safe-area-inset-bottom, 0px)'
+        bottom: "0",
+        paddingBottom: "env(safe-area-inset-bottom, 0px)",
       }}
     >
       <div className="flex justify-around items-center h-16 px-2">
         {navItems.map((item) => {
           // Skip auth-required items if not authenticated
           if (item.authRequired && !isAuthenticated) {
-            return null
+            return null;
           }
 
-          const isActive = location.pathname === item.path
+          const isActive = location.pathname === item.path;
+
+          const target =
+            item.path === "/history" || item.path === "/payments"
+              ? isAuthenticated
+                ? item.path
+                : `${item.path}?auth=required`
+              : item.path;
 
           return (
             <Link
               key={item.path}
-              to={item.path}
+              to={target}
               className="relative flex flex-col items-center justify-center flex-1 py-2"
             >
               {isActive && (
@@ -82,17 +89,21 @@ export function BottomNavigation() {
                 whileTap={{ scale: 0.95 }}
                 className="relative z-10 flex flex-col items-center"
               >
-                <span className={`text-2xl mb-1 ${isActive ? item.color : 'opacity-60'}`}>
+                <span
+                  className={`text-2xl mb-1 ${isActive ? item.color : "opacity-60"}`}
+                >
                   {item.icon}
                 </span>
-                <span className={`text-xs font-medium ${isActive ? 'text-gray-900' : 'text-gray-500'}`}>
+                <span
+                  className={`text-xs font-medium ${isActive ? "text-gray-900" : "text-gray-500"}`}
+                >
                   {item.label}
                 </span>
               </motion.div>
             </Link>
-          )
+          );
         })}
       </div>
     </nav>
-  )
+  );
 }

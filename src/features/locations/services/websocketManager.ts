@@ -1,11 +1,17 @@
 import type {
   WebSocketMessage,
   WebSocketLocationUpdate,
-  WebSocketStationUpdate
-} from '../../../api/types';
-import { supabase } from '../../../shared/config/supabase';
+  WebSocketStationUpdate,
+} from "../../../api/types";
+import {
+  supabase,
+  supabaseWithTimeout,
+  isSupabaseConfigured,
+} from "../../../shared/utils/supabaseHelpers";
 
-type WebSocketUpdateHandler = (data: WebSocketLocationUpdate | WebSocketStationUpdate) => void;
+type WebSocketUpdateHandler = (
+  data: WebSocketLocationUpdate | WebSocketStationUpdate,
+) => void;
 
 export class WebSocketManager {
   private static instance: WebSocketManager;
@@ -28,26 +34,47 @@ export class WebSocketManager {
 
   /**
    * Получение WebSocket URL с client_id
-   * Возвращает null если пользователь не авторизован
+   * Возвращает null если пользователь не авторизован или Supabase не сконфигурирован
    */
   private async getWebSocketUrl(): Promise<string | null> {
-    // Получаем текущего пользователя из Supabase
-    const { data: { user }, error } = await supabase.auth.getUser();
-
-    if (error || !user?.id) {
-      // WebSocket требует авторизации - пропускаем подключение
+    // Если Supabase не сконфигурирован, WebSocket недоступен
+    if (!isSupabaseConfigured()) {
       return null;
     }
 
-    this.clientId = user.id;
+    try {
+      // Получаем текущего пользователя из Supabase с timeout
+      const { data, error } = await supabaseWithTimeout(
+        () => supabase.auth.getUser(),
+        2000,
+        { data: { user: undefined as any }, error: null },
+      );
 
-    const baseUrl = import.meta.env.VITE_WEBSOCKET_URL
-      ? `${import.meta.env.VITE_WEBSOCKET_URL}/api/v1/ws/locations`
-      : 'wss://ocpp.evpower.kg/api/v1/ws/locations';
+      const user = data?.user ?? null;
+      if (error || !user?.id) {
+        // WebSocket требует авторизации - пропускаем подключение
+        return null;
+      }
 
-    // Добавляем client_id
-    const finalUrl = `${baseUrl}?client_id=${this.clientId}`;
-    return finalUrl;
+      this.clientId = user.id;
+
+      // В dev — используем proxy от текущего origin; в prod — VITE_WS_URL или VITE_API_URL (http->ws)
+      const wsEnv: string | undefined = (import.meta as any).env?.VITE_WS_URL;
+      const apiEnv: string | undefined = (import.meta as any).env?.VITE_API_URL;
+      const wsBase = import.meta.env.PROD
+        ? wsEnv ||
+          (apiEnv
+            ? apiEnv.replace(/^http/i, "ws")
+            : location.origin.replace(/^http/i, "ws"))
+        : location.origin.replace(/^http/i, "ws");
+      const baseUrl = `${wsBase}/api/v1/ws/locations`;
+
+      // Добавляем client_id
+      const finalUrl = `${baseUrl}?client_id=${this.clientId}`;
+      return finalUrl;
+    } catch (error) {
+      return null;
+    }
   }
 
   /**
@@ -71,12 +98,12 @@ export class WebSocketManager {
       this.ws = new WebSocket(wsUrl);
 
       this.ws.onopen = () => {
-        console.log('🔗 WebSocket подключен');
+        console.log("[WebSocket] Connected");
         this.reconnectAttempts = 0;
-        
+
         // Восстанавливаем подписки после переподключения
-        this.subscriptions.forEach(channel => {
-          this.sendSubscription('subscribe', channel);
+        this.subscriptions.forEach((channel) => {
+          this.sendSubscription("subscribe", channel);
         });
       };
 
@@ -85,21 +112,20 @@ export class WebSocketManager {
           const data = JSON.parse(event.data);
           this.handleMessage(data);
         } catch (error) {
-          console.error('Ошибка парсинга WebSocket сообщения:', error);
+          console.error("[WebSocket] Parse error:", error);
         }
       };
 
       this.ws.onclose = (event) => {
-        console.log('🔌 WebSocket отключен:', event.code, event.reason);
+        console.log("[WebSocket] Disconnected:", event.code);
         this.handleDisconnect();
       };
 
-      this.ws.onerror = (error) => {
-        console.error('❌ WebSocket ошибка:', error);
+      this.ws.onerror = () => {
+        // Ошибка уже залогирована в onclose, не дублируем
       };
-
     } catch (error) {
-      console.error('Ошибка создания WebSocket подключения:', error);
+      console.error("Ошибка создания WebSocket подключения:", error);
       this.handleDisconnect();
     }
   }
@@ -119,7 +145,7 @@ export class WebSocketManager {
     }
 
     this.subscriptions.clear();
-    console.log('WebSocket отключен пользователем');
+    console.log("WebSocket отключен пользователем");
   }
 
   /**
@@ -127,9 +153,9 @@ export class WebSocketManager {
    */
   subscribe(channel: string): void {
     this.subscriptions.add(channel);
-    
+
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      this.sendSubscription('subscribe', channel);
+      this.sendSubscription("subscribe", channel);
     }
   }
 
@@ -138,9 +164,9 @@ export class WebSocketManager {
    */
   unsubscribe(channel: string): void {
     this.subscriptions.delete(channel);
-    
+
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      this.sendSubscription('unsubscribe', channel);
+      this.sendSubscription("unsubscribe", channel);
     }
   }
 
@@ -172,7 +198,10 @@ export class WebSocketManager {
     return Array.from(this.subscriptions);
   }
 
-  private sendSubscription(action: 'subscribe' | 'unsubscribe', channel: string): void {
+  private sendSubscription(
+    action: "subscribe" | "unsubscribe",
+    channel: string,
+  ): void {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
       return;
     }
@@ -181,37 +210,46 @@ export class WebSocketManager {
 
     try {
       this.ws.send(JSON.stringify(message));
-      console.log(`📡 ${action} on channel:`, channel);
     } catch (error) {
-      console.error(`Ошибка отправки ${action} для канала ${channel}:`, error);
+      console.error(`[WebSocket] Send error for channel ${channel}:`, error);
     }
   }
 
   private handleMessage(data: any): void {
     // Обрабатываем обновления локаций и станций
-    if (data.type === 'location_status_update' || data.type === 'station_status_update') {
-      this.handlers.forEach(handler => {
+    if (
+      data.type === "location_status_update" ||
+      data.type === "station_status_update"
+    ) {
+      this.handlers.forEach((handler) => {
         try {
           handler(data);
         } catch (error) {
-          console.error('Ошибка в обработчике WebSocket сообщения:', error);
+          console.error("Ошибка в обработчике WebSocket сообщения:", error);
         }
       });
     }
   }
 
   private handleDisconnect(): void {
+    // В dev режиме без настроенного Supabase не пытаемся переподключаться
+    if (!isSupabaseConfigured()) {
+      return;
+    }
+
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000); // Exponential backoff с максимумом 30 сек
-      
-      console.log(`🔄 Переподключение через ${delay/1000} сек (попытка ${this.reconnectAttempts + 1}/${this.maxReconnectAttempts})`);
-      
+
+      console.log(
+        `[WebSocket] Reconnecting in ${delay / 1000}s (attempt ${this.reconnectAttempts + 1}/${this.maxReconnectAttempts})`,
+      );
+
       this.reconnectTimer = setTimeout(() => {
         this.reconnectAttempts++;
         this.connect();
       }, delay);
     } else {
-      console.error('❌ Превышено максимальное количество попыток переподключения');
+      console.log("[WebSocket] Max reconnection attempts reached");
     }
   }
 }

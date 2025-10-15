@@ -131,7 +131,13 @@ TODO*.md
 NOTES*.md
 
 # Temporary screenshots (keep final ones in docs/)
-screenshots/photo_*.jpg
-screenshots/photo_*.png
-screenshots/temp_*.jpg
-screenshots/temp_*.png
+screenshots/
+!screenshots/.gitkeep
+
+# Temporary/test icons (keep only production icons)
+public/icons/**/3*.png
+public/icons/**/4*.png
+public/icons/**/*УМ*.png
+
+# Backend documentation (reference only, not part of mobile project)
+release-backend-fin/

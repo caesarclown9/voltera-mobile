@@ -45,5 +45,11 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+    
+    <!-- iOS Privacy Usage Descriptions -->
+    <key>NSCameraUsageDescription</key>
+    <string>Сканирование QR‑кода для начала/оплаты зарядки.</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Поиск ближайших зарядных станций рядом с вами.</string>
 </dict>
 </plist>

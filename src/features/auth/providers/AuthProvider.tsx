@@ -1,93 +1,148 @@
-import { useEffect } from 'react'
-import { useAuthStore } from '../store'
-import { authService } from '../services/authService'
+import { useEffect } from "react";
+import { useAuthStore } from "../store";
+import { authService } from "../services/authService";
 
 interface AuthProviderProps {
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const { login, logout, setInitialized } = useAuthStore()
+  const { login, logout, setInitialized } = useAuthStore();
 
   useEffect(() => {
     // Rehydrate the store on mount
-    useAuthStore.persist.rehydrate()
+    useAuthStore.persist.rehydrate();
 
     // Initialize auth state - проверяем сохраненную сессию
     const initializeAuth = async () => {
       try {
-        const user = await authService.getCurrentUser()
+        console.log("[AuthProvider] Initializing auth...");
+        const user = await authService.getCurrentUser();
+        console.log(
+          "[AuthProvider] InitializeAuth: Got user:",
+          user ? user.id : "null",
+        );
+
         if (user) {
           // Преобразуем Client в UnifiedUser
           const unifiedUser = {
             id: user.id,
             email: user.email,
             phone: user.phone || null,
-            name: user.name || 'User',
+            name: user.name || "User",
             balance: user.balance || 0,
-            status: 'active' as const,
+            status: "active" as const,
             favoriteStations: [],
             createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          }
-          login(unifiedUser)
+            updatedAt: new Date().toISOString(),
+          };
+          console.log("[AuthProvider] InitializeAuth: Logging in user");
+          login(unifiedUser);
         } else {
-          // Проверяем сохраненное состояние
-          const storedAuth = localStorage.getItem('auth-storage')
-          if (!storedAuth || storedAuth === 'null') {
-            // Нет сессии и нет сохраненного состояния
-            setInitialized(true)
-          } else {
-            // Есть сохраненное состояние, но нет сессии в Supabase
-            // Оставляем состояние как есть (пользователь авторизован локально)
-            setInitialized(true)
-          }
+          console.log(
+            "[AuthProvider] InitializeAuth: No user data yet, will wait for INITIAL_SESSION event",
+          );
+          // НЕ вызываем logout - просто ждем INITIAL_SESSION event
+          // который придет с валидными данными
         }
       } catch (error) {
-        console.error('Error initializing auth:', error)
-        setInitialized(true)
+        console.error("[AuthProvider] Error initializing auth:", error);
+        setInitialized(true);
+      } finally {
+        // Всегда помечаем как инициализировано
+        setInitialized(true);
       }
-    }
+    };
 
-    initializeAuth()
+    initializeAuth();
 
     // Listen for auth state changes
-    const { data: { subscription } } = authService.onAuthStateChange(async (event, session) => {
-      console.log('[AuthProvider] Auth state change:', event, session?.user?.id)
+    const {
+      data: { subscription },
+    } = authService.onAuthStateChange(async (event, session) => {
+      console.log(
+        "[AuthProvider] Auth state change:",
+        event,
+        session?.user?.id,
+        "Has session:",
+        !!session,
+      );
 
-      if (event === 'SIGNED_IN' && session?.user) {
-        const user = await authService.getCurrentUser()
+      if (event === "SIGNED_IN" && session?.user) {
+        console.log("[AuthProvider] SIGNED_IN event, fetching user data...");
+        const user = await authService.getCurrentUser();
+        console.log(
+          "[AuthProvider] SIGNED_IN: Got user:",
+          user ? user.id : "null",
+        );
+
         if (user) {
           // Преобразуем Client в UnifiedUser
           const unifiedUser = {
             id: user.id,
             email: user.email,
             phone: user.phone || null,
-            name: user.name || 'User',
+            name: user.name || "User",
             balance: user.balance || 0,
-            status: 'active' as const,
+            status: "active" as const,
             favoriteStations: [],
             createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
+            updatedAt: new Date().toISOString(),
+          };
+          console.log("[AuthProvider] SIGNED_IN: Logging in user");
+          login(unifiedUser);
+        } else {
+          console.warn(
+            "[AuthProvider] SIGNED_IN: User data not found, cannot login",
+          );
+        }
+      } else if (event === "INITIAL_SESSION") {
+        console.log("[AuthProvider] INITIAL_SESSION event");
+        // INITIAL_SESSION может приходить с или без session
+        if (session?.user) {
+          console.log(
+            "[AuthProvider] INITIAL_SESSION: Has session, fetching user data...",
+          );
+          const user = await authService.getCurrentUser();
+          console.log(
+            "[AuthProvider] INITIAL_SESSION: Got user:",
+            user ? user.id : "null",
+          );
+
+          if (user) {
+            const unifiedUser = {
+              id: user.id,
+              email: user.email,
+              phone: user.phone || null,
+              name: user.name || "User",
+              balance: user.balance || 0,
+              status: "active" as const,
+              favoriteStations: [],
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            };
+            console.log("[AuthProvider] INITIAL_SESSION: Logging in user");
+            login(unifiedUser);
+          } else {
+            console.warn(
+              "[AuthProvider] INITIAL_SESSION: Session exists but user data not found",
+            );
           }
-          login(unifiedUser)
+        } else {
+          console.log("[AuthProvider] INITIAL_SESSION: No session");
         }
-      } else if (event === 'SIGNED_OUT') {
-        // Только если действительно нет пользователя в Supabase
-        const user = await authService.getCurrentUser()
-        if (!user) {
-          logout()
-        }
-      } else if (event === 'TOKEN_REFRESHED') {
-        // Токен обновился - это нормально, не делаем logout
-        console.log('[AuthProvider] Token refreshed')
+      } else if (event === "SIGNED_OUT") {
+        console.log("[AuthProvider] SIGNED_OUT - clearing state");
+        logout();
+      } else if (event === "TOKEN_REFRESHED") {
+        console.log("[AuthProvider] Token refreshed");
       }
-    })
+    });
 
     return () => {
-      subscription.unsubscribe()
-    }
-  }, [login, logout])
+      subscription.unsubscribe();
+    };
+  }, [login, logout]);
 
-  return <>{children}</>
+  return <>{children}</>;
 }

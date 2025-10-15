@@ -1,16 +1,65 @@
-import { ChevronLeft, LogOut, Phone, Mail, Clock, DollarSign } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { useAuthStatus, useLogout } from '../features/auth/hooks/useAuth';
-import { useBalance } from '../features/balance/hooks/useBalance';
+import {
+  ChevronLeft,
+  LogOut,
+  Phone,
+  Mail,
+  Clock,
+  DollarSign,
+  FileText,
+  Trash2,
+  AlertTriangle,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useAuthStatus, useLogout } from "../features/auth/hooks/useAuth";
+import { useBalance } from "../features/balance/hooks/useBalance";
+import { useEffect, useState } from "react";
+import { evpowerApi } from "@/services/evpowerApi";
 
 export const ProfilePage = () => {
   const navigate = useNavigate();
   const { user } = useAuthStatus();
-  const { data: balanceData } = useBalance();
+  const { data: balanceData, isLoading: isBalanceLoading } = useBalance();
+  const [deleteRequested, setDeleteRequested] = useState(false);
+  // Realtime подписка на баланс
+  useEffect(() => {
+    const sub = evpowerApi.subscribeToBalance((newBalance: number) => {
+      // Ничего не делаем здесь напрямую — useBalance сам рефрешнётся через invalidate в хуке QR topup
+      // Если потребуется — можно добавить локальный стейт или invalidateQueries
+    });
+    return () => {
+      // sub может быть промисом; безопасно игнорируем, если null
+      Promise.resolve(sub).then((s) => {
+        try {
+          (s as any)?.unsubscribe?.();
+        } catch {}
+      });
+    };
+  }, []);
   const logoutMutation = useLogout();
-  
+
   const handleLogout = async () => {
-    await logoutMutation.mutateAsync();
+    console.log("[ProfilePage] Logout button clicked");
+    try {
+      await logoutMutation.mutateAsync();
+      console.log("[ProfilePage] Logout mutation completed successfully");
+    } catch (error) {
+      console.error("[ProfilePage] Logout mutation failed:", error);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!confirm("Удалить аккаунт и данные? Это действие необратимо.")) return;
+    try {
+      await evpowerApi.requestAccountDeletion();
+      alert(
+        "Запрос на удаление отправлен. Мы обработаем его в ближайшее время.",
+      );
+      setDeleteRequested(true);
+      await handleLogout();
+    } catch (e) {
+      alert("Не удалось запросить удаление. Попробуйте позже.");
+      console.error(e);
+    }
   };
 
   return (
@@ -37,7 +86,9 @@ export const ProfilePage = () => {
           </div>
           {user && (
             <>
-              <p className="text-xl font-semibold mb-2">{user.name || 'Пользователь'}</p>
+              <p className="text-xl font-semibold mb-2">
+                {user.name || "Пользователь"}
+              </p>
               {user.email && (
                 <div className="flex items-center gap-2 text-gray-600 mb-1">
                   <Mail className="w-4 h-4" />
@@ -52,7 +103,10 @@ export const ProfilePage = () => {
               )}
               <div className="mt-4 px-4 py-2 bg-gray-100 rounded-lg">
                 <p className="text-sm text-gray-600">Баланс</p>
-                <p className="text-2xl font-bold text-green-600">{balanceData?.balance || 0} {balanceData?.currency || 'сом'}</p>
+                <p className="text-2xl font-bold text-green-600">
+                  {isBalanceLoading ? "…" : (balanceData?.balance ?? 0)}{" "}
+                  {balanceData?.currency || "сом"}
+                </p>
               </div>
             </>
           )}
@@ -62,7 +116,7 @@ export const ProfilePage = () => {
       {/* Action Buttons */}
       <div className="p-4 space-y-3">
         <button
-          onClick={() => navigate('/history')}
+          onClick={() => navigate("/history" + (!user ? "?auth=required" : ""))}
           className="w-full bg-cyan-500 text-white py-4 rounded-xl font-semibold hover:bg-cyan-600 transition-colors flex items-center justify-center gap-2"
         >
           <Clock className="w-5 h-5" />
@@ -70,11 +124,20 @@ export const ProfilePage = () => {
         </button>
 
         <button
-          onClick={() => navigate('/payments')}
+          onClick={() =>
+            navigate("/payments" + (!user ? "?auth=required" : ""))
+          }
           className="w-full bg-cyan-500 text-white py-4 rounded-xl font-semibold hover:bg-cyan-600 transition-colors flex items-center justify-center gap-2"
         >
           <DollarSign className="w-5 h-5" />
           История платежей
+        </button>
+
+        <button
+          onClick={() => navigate("/about")}
+          className="w-full bg-gray-100 text-gray-800 py-4 rounded-xl font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
+        >
+          <FileText className="w-5 h-5" />О приложении
         </button>
 
         {/* Logout/Login Button */}
@@ -85,11 +148,11 @@ export const ProfilePage = () => {
             className="w-full bg-red-500 text-white py-4 rounded-xl font-semibold hover:bg-red-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
           >
             <LogOut className="w-5 h-5" />
-            {logoutMutation.isPending ? 'Выход...' : 'Выйти из аккаунта'}
+            {logoutMutation.isPending ? "Выход..." : "Выйти из аккаунта"}
           </button>
         ) : (
           <button
-            onClick={() => navigate('/auth')}
+            onClick={() => navigate("/auth")}
             className="w-full bg-green-500 text-white py-4 rounded-xl font-semibold hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
           >
             Войти в аккаунт
@@ -97,30 +160,25 @@ export const ProfilePage = () => {
         )}
       </div>
 
-      {/* Info Section */}
-      <div className="bg-white mt-2 p-6">
-        <div className="flex items-center gap-3 mb-4">
-          <span className="text-2xl">⚡</span>
-          <h3 className="text-lg font-semibold">
-            EvPower - Революция в зарядке электромобилей в Кыргызстане!
-          </h3>
-        </div>
-        
-        <p className="text-gray-600 mb-4">
-          Оплата происходит через сервис О!Деньги, ваши платежи защищены.
-        </p>
-        
-        <p className="text-gray-600 mb-6">
-          Всегда можете позвонить нам на горячую линию.
-        </p>
-        
-        <button 
-          onClick={() => window.open('tel:+996555123456', '_self')}
-          className="w-full bg-orange-500 text-white py-3 rounded-xl font-semibold hover:bg-orange-600 transition-colors flex items-center justify-center gap-2"
+      {/* Compact: только кнопки без инфо-блоков */}
+      <div className="p-4 space-y-3">
+        <button
+          onClick={() => window.open("tel:+996555123456", "_self")}
+          className="w-full bg-orange-500 text-white py-4 rounded-xl font-semibold hover:bg-orange-600 transition-colors flex items-center justify-center gap-2"
         >
           <Phone className="w-5 h-5" />
           Телефон поддержки
         </button>
+        {user && (
+          <button
+            onClick={handleDeleteAccount}
+            disabled={deleteRequested}
+            className={`w-full py-4 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2 ${deleteRequested ? "bg-red-300 text-white cursor-not-allowed" : "bg-red-600 text-white hover:bg-red-700"}`}
+          >
+            <Trash2 className="w-5 h-5" />
+            {deleteRequested ? "Запрос отправлен" : "Удалить аккаунт и данные"}
+          </button>
+        )}
       </div>
     </div>
   );

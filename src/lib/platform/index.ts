@@ -11,43 +11,37 @@ export {
   getPlatform,
   isIOS,
   isAndroid,
-  getPlatformInfo
-} from './env';
+  getPlatformInfo,
+} from "./env";
 
 // Экспорт безопасного хранилища
 export {
   secureStorage,
   authStorage,
-  type StorageResult
-} from './secureStorage';
+  type StorageResult,
+} from "./secureStorage";
 
 // Экспорт геолокации
 export {
   geolocationService,
   type Coordinates,
   type GeolocationResult,
-  type GeolocationOptions
-} from './geolocation';
+  type GeolocationOptions,
+} from "./geolocation";
 
 // Экспорт QR сканера
 export {
   qrScannerService,
   type QRScanResult,
-  type QRScanOptions
-} from './qrScanner';
+  type QRScanOptions,
+} from "./qrScanner";
 
 // Экспорт работы с сетью
 export {
   networkService,
   type NetworkStatus,
   type ConnectionType,
-  type NetworkStatusChangeCallback
-} from './network';
+  type NetworkStatusChangeCallback,
+} from "./network";
 
-// Экспорт push-уведомлений
-export {
-  pushNotificationService,
-  type PushNotification,
-  type TokenCallback,
-  type NotificationCallback
-} from './push';
+// Push notifications disabled in Variant A

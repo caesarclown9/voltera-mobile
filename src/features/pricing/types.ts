@@ -97,7 +97,7 @@ export interface CachedPricing {
 }
 
 // Константы
-export const DEFAULT_CURRENCY = 'KGS';
-export const DEFAULT_RATE_PER_KWH = 17; // Fallback цена
+export const DEFAULT_CURRENCY = "KGS";
+export const DEFAULT_RATE_PER_KWH = 13.5; // Фиксированная цена сом/кВт
 export const CACHE_TTL = 5 * 60 * 1000; // 5 минут
 export const OFFLINE_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 часа

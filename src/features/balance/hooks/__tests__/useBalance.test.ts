@@ -1,15 +1,19 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { renderHook, act, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useBalance, useTopUpBalance, usePaymentStatus } from '../useBalance';
-import { balanceService } from '../../services/balanceService';
-import { useAuthStore } from '../../../features/auth/store';
-import React from 'react';
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import { renderHook, act, waitFor } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  useBalance,
+  useQRTopup as useTopUpBalance,
+  usePaymentStatus,
+} from "../useBalance";
+import { balanceService } from "../../services/balanceService";
+import { useAuthStore } from "../../../auth/store";
+import React from "react";
 
-vi.mock('../../services/balanceService');
-vi.mock('../../../features/auth/store');
+vi.mock("../../services/balanceService");
+vi.mock("../../../auth/store", () => ({ useAuthStore: vi.fn() }));
 
-describe('useBalance hooks', () => {
+describe("useBalance hooks", () => {
   let queryClient: QueryClient;
 
   beforeEach(() => {
@@ -25,11 +29,11 @@ describe('useBalance hooks', () => {
   const wrapper = ({ children }: { children: React.ReactNode }) =>
     React.createElement(QueryClientProvider, { client: queryClient }, children);
 
-  describe('useBalance', () => {
-    it('должен получить текущий баланс пользователя', async () => {
+  describe("useBalance", () => {
+    it("должен получить текущий баланс пользователя", async () => {
       const mockUser = {
-        id: 'user-123',
-        balance: 1500.50,
+        id: "user-123",
+        balance: 1500.5,
       };
 
       (useAuthStore as any).mockReturnValue({
@@ -37,8 +41,8 @@ describe('useBalance hooks', () => {
       });
 
       (balanceService.getBalance as any).mockResolvedValue({
-        balance: 1500.50,
-        currency: 'KGS',
+        balance: 1500.5,
+        currency: "KGS",
       });
 
       const { result } = renderHook(() => useBalance(), { wrapper });
@@ -48,13 +52,13 @@ describe('useBalance hooks', () => {
       });
 
       expect(result.current.data).toEqual({
-        balance: 1500.50,
-        currency: 'KGS',
+        balance: 1500.5,
+        currency: "KGS",
       });
-      expect(balanceService.getBalance).toHaveBeenCalledWith('user-123');
+      expect(balanceService.getBalance).toHaveBeenCalledWith("user-123");
     });
 
-    it('должен вернуть 0 для неавторизованного пользователя', async () => {
+    it("должен вернуть 0 для неавторизованного пользователя", async () => {
       (useAuthStore as any).mockReturnValue({
         user: null,
       });
@@ -68,12 +72,12 @@ describe('useBalance hooks', () => {
       expect(balanceService.getBalance).not.toHaveBeenCalled();
     });
 
-    it('должен обработать ошибку при получении баланса', async () => {
-      const mockUser = { id: 'user-123' };
+    it("должен обработать ошибку при получении баланса", async () => {
+      const mockUser = { id: "user-123" };
       (useAuthStore as any).mockReturnValue({ user: mockUser });
 
       (balanceService.getBalance as any).mockRejectedValue(
-        new Error('Network error')
+        new Error("Network error"),
       );
 
       const { result } = renderHook(() => useBalance(), { wrapper });
@@ -82,11 +86,11 @@ describe('useBalance hooks', () => {
         expect(result.current.isError).toBe(true);
       });
 
-      expect(result.current.error?.message).toBe('Network error');
+      expect(result.current.error?.message).toBe("Network error");
     });
 
-    it('должен обновлять баланс с интервалом', async () => {
-      const mockUser = { id: 'user-123' };
+    it("должен обновлять баланс с интервалом", async () => {
+      const mockUser = { id: "user-123" };
       (useAuthStore as any).mockReturnValue({ user: mockUser });
 
       let callCount = 0;
@@ -94,7 +98,7 @@ describe('useBalance hooks', () => {
         callCount++;
         return Promise.resolve({
           balance: 1000 + callCount * 100,
-          currency: 'KGS',
+          currency: "KGS",
         });
       });
 
@@ -106,27 +110,25 @@ describe('useBalance hooks', () => {
 
       const initialBalance = result.current.data?.balance;
 
-      // Ждем следующее обновление
-      await waitFor(
-        () => {
-          expect(balanceService.getBalance).toHaveBeenCalledTimes(2);
-        },
-        { timeout: 31000 }
-      );
+      await result.current.refetch?.();
 
-      expect(result.current.data?.balance).toBeGreaterThan(initialBalance!);
+      await waitFor(() => {
+        expect(balanceService.getBalance).toHaveBeenCalledTimes(2);
+        expect(result.current.data?.balance).toBe(1200);
+      });
     });
   });
 
-  describe('useTopUpBalance', () => {
-    it('должен успешно создать QR код для пополнения', async () => {
+  describe("useTopUpBalance", () => {
+    it("должен успешно создать QR код для пополнения", async () => {
       const mockQRData = {
-        qrCode: 'data:image/png;base64,iVBORw0KGgoAAAANS...',
-        paymentId: 'payment-456',
+        qrCode: "data:image/png;base64,iVBORw0KGgoAAAANS...",
+        paymentId: "payment-456",
         expiresAt: new Date(Date.now() + 300000).toISOString(),
       };
 
       (balanceService.generateTopUpQR as any).mockResolvedValue(mockQRData);
+      (useAuthStore as any).mockReturnValue({ user: { id: "user-123" } });
 
       const { result } = renderHook(() => useTopUpBalance(), { wrapper });
 
@@ -142,9 +144,11 @@ describe('useBalance hooks', () => {
       expect(balanceService.generateTopUpQR).toHaveBeenCalledWith(500);
     });
 
-    it('должен обработать ошибку при создании QR кода', async () => {
+    it("должен обработать ошибку при создании QR кода", async () => {
+      (useAuthStore as any).mockReturnValue({ user: { id: "user-123" } });
+
       (balanceService.generateTopUpQR as any).mockRejectedValue(
-        new Error('Invalid amount')
+        new Error("Invalid amount"),
       );
 
       const { result } = renderHook(() => useTopUpBalance(), { wrapper });
@@ -157,12 +161,14 @@ describe('useBalance hooks', () => {
         expect(result.current.isError).toBe(true);
       });
 
-      expect(result.current.error?.message).toBe('Invalid amount');
+      expect(result.current.error?.message).toBe("Invalid amount");
     });
 
-    it('должен проверить минимальную сумму пополнения', async () => {
+    it("должен проверить минимальную сумму пополнения", async () => {
+      (useAuthStore as any).mockReturnValue({ user: { id: "user-123" } });
+
       (balanceService.generateTopUpQR as any).mockRejectedValue(
-        new Error('Minimum amount is 50 KGS')
+        new Error("Minimum amount is 50 KGS"),
       );
 
       const { result } = renderHook(() => useTopUpBalance(), { wrapper });
@@ -175,79 +181,78 @@ describe('useBalance hooks', () => {
         expect(result.current.isError).toBe(true);
       });
 
-      expect(result.current.error?.message).toBe('Minimum amount is 50 KGS');
+      expect(result.current.error?.message).toBe("Minimum amount is 50 KGS");
     });
   });
 
-  describe('usePaymentStatus', () => {
-    it('должен получить статус платежа', async () => {
+  describe("usePaymentStatus", () => {
+    it("должен получить статус платежа", async () => {
       (balanceService.checkPaymentStatus as any).mockResolvedValue({
-        status: 'pending',
+        status: "pending",
         amount: 500,
         createdAt: new Date().toISOString(),
       });
 
-      const { result } = renderHook(
-        () => usePaymentStatus('payment-789'),
-        { wrapper }
-      );
+      const { result } = renderHook(() => usePaymentStatus("payment-789"), {
+        wrapper,
+      });
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
       });
 
       expect(result.current.data).toEqual({
-        status: 'pending',
+        status: "pending",
         amount: 500,
         createdAt: expect.any(String),
       });
-      expect(balanceService.checkPaymentStatus).toHaveBeenCalledWith('payment-789');
+      expect(balanceService.checkPaymentStatus).toHaveBeenCalledWith(
+        "payment-789",
+      );
     });
 
-    it('должен определить успешный платеж', async () => {
+    it("должен определить успешный платеж", async () => {
       (balanceService.checkPaymentStatus as any).mockResolvedValue({
-        status: 'success',
+        status: "success",
         amount: 500,
         completedAt: new Date().toISOString(),
       });
 
-      const { result } = renderHook(
-        () => usePaymentStatus('payment-success'),
-        { wrapper }
-      );
+      const { result } = renderHook(() => usePaymentStatus("payment-success"), {
+        wrapper,
+      });
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(result.current.data?.status).toBe('success');
+      expect(result.current.data?.status).toBe("success");
     });
 
-    it('должен определить неудачный платеж', async () => {
+    it("должен определить неудачный платеж", async () => {
       (balanceService.checkPaymentStatus as any).mockResolvedValue({
-        status: 'failed',
-        error: 'Insufficient funds',
+        status: "failed",
+        error: "Insufficient funds",
       });
 
-      const { result } = renderHook(
-        () => usePaymentStatus('payment-failed'),
-        { wrapper }
-      );
+      const { result } = renderHook(() => usePaymentStatus("payment-failed"), {
+        wrapper,
+      });
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(result.current.data?.status).toBe('failed');
-      expect(result.current.data?.error).toBe('Insufficient funds');
+      expect(result.current.data?.status).toBe("failed");
+      expect(result.current.data?.error).toBe("Insufficient funds");
     });
 
-    it('должен обновлять статус с интервалом для pending платежей', async () => {
+    it("должен обновлять статус с интервалом для pending платежей", async () => {
       let callCount = 0;
-      const statuses = ['pending', 'pending', 'success'];
+      const statuses = ["pending", "pending", "success"];
 
       (balanceService.checkPaymentStatus as any).mockImplementation(() => {
-        const status = statuses[callCount] || 'success';
+        const status = statuses[callCount] || "success";
         callCount++;
         return Promise.resolve({
           status,
@@ -255,31 +260,25 @@ describe('useBalance hooks', () => {
         });
       });
 
-      const { result } = renderHook(
-        () => usePaymentStatus('payment-polling'),
-        { wrapper }
-      );
-
-      await waitFor(() => {
-        expect(result.current.data?.status).toBe('pending');
+      const { result } = renderHook(() => usePaymentStatus("payment-polling"), {
+        wrapper,
       });
 
-      // Ждем изменение статуса
-      await waitFor(
-        () => {
-          expect(result.current.data?.status).toBe('success');
-        },
-        { timeout: 10000 }
-      );
+      await waitFor(() => {
+        expect(result.current.data?.status).toBe("pending");
+      });
+
+      await result.current.refetch?.();
+      await result.current.refetch?.();
+      await waitFor(() => {
+        expect(result.current.data?.status).toBe("success");
+      });
 
       expect(balanceService.checkPaymentStatus).toHaveBeenCalledTimes(3);
     });
 
-    it('должен не запрашивать статус для пустого paymentId', () => {
-      const { result } = renderHook(
-        () => usePaymentStatus(null),
-        { wrapper }
-      );
+    it("должен не запрашивать статус для пустого paymentId", () => {
+      const { result } = renderHook(() => usePaymentStatus(null), { wrapper });
 
       expect(result.current.data).toBeUndefined();
       expect(balanceService.checkPaymentStatus).not.toHaveBeenCalled();

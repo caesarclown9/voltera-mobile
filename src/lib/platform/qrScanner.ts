@@ -3,10 +3,11 @@
  * Согласно MOBILE_PLAN.md - native: MLKit; web: html5-qrcode
  */
 
-import { BarcodeScanner } from '@capacitor-mlkit/barcode-scanning';
-import { isNativePlatform } from './env';
-import { logger } from '@/shared/utils/logger';
-import { Html5Qrcode } from 'html5-qrcode';
+import { BarcodeScanner } from "@capacitor-mlkit/barcode-scanning";
+import { isNativePlatform } from "./env";
+import { logger } from "@/shared/utils/logger";
+type Html5QrcodeType = typeof import("html5-qrcode").Html5Qrcode;
+let Html5QrcodeLazy: Html5QrcodeType | null = null;
 
 /**
  * Интерфейс для результата сканирования
@@ -35,7 +36,7 @@ export interface QRScanOptions {
  * Сервис для работы с QR сканером
  */
 class QRScannerService {
-  private html5QrCode: Html5Qrcode | null = null;
+  private html5QrCode: InstanceType<Html5QrcodeType> | null = null;
   private isScanning = false;
 
   /**
@@ -45,18 +46,20 @@ class QRScannerService {
     try {
       if (isNativePlatform()) {
         const { camera } = await BarcodeScanner.checkPermissions();
-        return camera === 'granted' || camera === 'limited';
+        return camera === "granted" || camera === "limited";
       } else {
         // Для веба проверяем через Permissions API
-        if ('permissions' in navigator && 'camera' in navigator.permissions) {
-          const result = await navigator.permissions.query({ name: 'camera' as PermissionName });
-          return result.state === 'granted';
+        if ("permissions" in navigator && "camera" in navigator.permissions) {
+          const result = await navigator.permissions.query({
+            name: "camera" as PermissionName,
+          });
+          return result.state === "granted";
         }
         // Если API недоступно, предполагаем что разрешения будут запрошены
         return true;
       }
     } catch (error) {
-      logger.error('QRScanner: failed to check permissions', error);
+      logger.error("QRScanner: failed to check permissions", error);
       return false;
     }
   }
@@ -68,21 +71,23 @@ class QRScannerService {
     try {
       if (isNativePlatform()) {
         const { camera } = await BarcodeScanner.requestPermissions();
-        return camera === 'granted' || camera === 'limited';
+        return camera === "granted" || camera === "limited";
       } else {
         // Для веба разрешения запрашиваются при первом использовании камеры
         // Пробуем получить доступ к камере
         try {
-          const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+          });
           // Сразу останавливаем поток, так как это только проверка
-          stream.getTracks().forEach(track => track.stop());
+          stream.getTracks().forEach((track) => track.stop());
           return true;
         } catch {
           return false;
         }
       }
     } catch (error) {
-      logger.error('QRScanner: failed to request permissions', error);
+      logger.error("QRScanner: failed to request permissions", error);
       return false;
     }
   }
@@ -99,7 +104,7 @@ class QRScannerService {
         if (!granted) {
           return {
             success: false,
-            error: 'Камера не разрешена пользователем'
+            error: "Камера не разрешена пользователем",
           };
         }
       }
@@ -110,10 +115,13 @@ class QRScannerService {
         return await this.scanWeb(options);
       }
     } catch (error) {
-      logger.error('QRScanner: scan failed', error);
+      logger.error("QRScanner: scan failed", error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Не удалось отсканировать QR код'
+        error:
+          error instanceof Error
+            ? error.message
+            : "Не удалось отсканировать QR код",
       };
     }
   }
@@ -128,7 +136,7 @@ class QRScannerService {
       if (!supported) {
         return {
           success: false,
-          error: 'QR сканер не поддерживается на этом устройстве'
+          error: "QR сканер не поддерживается на этом устройстве",
         };
       }
 
@@ -138,40 +146,48 @@ class QRScannerService {
 
       if (barcodes.length > 0) {
         const barcode = barcodes[0];
-        logger.info('QRScanner: successfully scanned', { format: barcode.format });
+        if (!barcode) {
+          return {
+            success: false,
+            error: "QR код не найден",
+          };
+        }
+        logger.info("QRScanner: successfully scanned", {
+          format: barcode.format,
+        });
 
         return {
           success: true,
-          data: barcode.rawValue
+          data: barcode.rawValue,
         };
       }
 
       return {
         success: false,
-        error: 'QR код не найден'
+        error: "QR код не найден",
       };
     } catch (error) {
-      logger.error('QRScanner: native scan error', error);
+      logger.error("QRScanner: native scan error", error);
 
       // Обработка специфичных ошибок
       if (error instanceof Error) {
-        if (error.message.includes('cancelled')) {
+        if (error.message.includes("cancelled")) {
           return {
             success: false,
-            error: 'Сканирование отменено'
+            error: "Сканирование отменено",
           };
         }
-        if (error.message.includes('permission')) {
+        if (error.message.includes("permission")) {
           return {
             success: false,
-            error: 'Нет доступа к камере'
+            error: "Нет доступа к камере",
           };
         }
       }
 
       return {
         success: false,
-        error: 'Ошибка сканирования'
+        error: "Ошибка сканирования",
       };
     }
   }
@@ -180,12 +196,12 @@ class QRScannerService {
    * Сканирует QR код в вебе
    */
   private async scanWeb(options: QRScanOptions): Promise<QRScanResult> {
-    return new Promise((resolve) => {
+    return new Promise(async (resolve) => {
       // Создаем контейнер для сканера если его нет
-      let scannerContainer = document.getElementById('qr-scanner-container');
+      let scannerContainer = document.getElementById("qr-scanner-container");
       if (!scannerContainer) {
-        scannerContainer = document.createElement('div');
-        scannerContainer.id = 'qr-scanner-container';
+        scannerContainer = document.createElement("div");
+        scannerContainer.id = "qr-scanner-container";
         scannerContainer.style.cssText = `
           position: fixed;
           top: 0;
@@ -203,8 +219,8 @@ class QRScannerService {
       }
 
       // Добавляем область для видео
-      const videoContainer = document.createElement('div');
-      videoContainer.id = 'qr-video-container';
+      const videoContainer = document.createElement("div");
+      videoContainer.id = "qr-video-container";
       videoContainer.style.cssText = `
         width: 100%;
         max-width: 500px;
@@ -214,8 +230,8 @@ class QRScannerService {
       `;
 
       // Добавляем кнопку закрытия
-      const closeButton = document.createElement('button');
-      closeButton.textContent = '✕ Закрыть';
+      const closeButton = document.createElement("button");
+      closeButton.textContent = "✕ Закрыть";
       closeButton.style.cssText = `
         position: absolute;
         top: 20px;
@@ -231,52 +247,57 @@ class QRScannerService {
         this.stopWebScanner();
         resolve({
           success: false,
-          error: 'Сканирование отменено пользователем'
+          error: "Сканирование отменено пользователем",
         });
       };
 
       scannerContainer.appendChild(closeButton);
       scannerContainer.appendChild(videoContainer);
 
-      // Инициализируем html5-qrcode
-      this.html5QrCode = new Html5Qrcode('qr-video-container');
+      // Инициализируем html5-qrcode лениво
+      if (!Html5QrcodeLazy) {
+        const mod = await import("html5-qrcode");
+        Html5QrcodeLazy = mod.Html5Qrcode;
+      }
+      this.html5QrCode = new (Html5QrcodeLazy as any)("qr-video-container");
       this.isScanning = true;
 
       // Настройки сканера
       const qrCodeSuccessCallback = (decodedText: string) => {
-        logger.info('QRScanner: successfully scanned QR code');
+        logger.info("QRScanner: successfully scanned QR code");
         this.stopWebScanner();
         resolve({
           success: true,
-          data: decodedText
+          data: decodedText,
         });
       };
 
       const qrCodeErrorCallback = (errorMessage: string) => {
         // Игнорируем постоянные ошибки "QR code not found"
-        if (!errorMessage.includes('NotFoundException')) {
-          logger.debug('QRScanner: scan attempt', errorMessage);
+        if (!errorMessage.includes("NotFoundException")) {
+          logger.debug("QRScanner: scan attempt", errorMessage);
         }
       };
 
       // Запускаем сканер
-      this.html5QrCode
+      const qrInstance = this.html5QrCode;
+      (qrInstance as any)
         .start(
-          { facingMode: 'environment' }, // Используем заднюю камеру
+          { facingMode: "environment" }, // Используем заднюю камеру
           {
             fps: 10,
             qrbox: { width: 250, height: 250 },
-            aspectRatio: 1.0
+            aspectRatio: 1.0,
           },
           qrCodeSuccessCallback,
-          qrCodeErrorCallback
+          qrCodeErrorCallback,
         )
         .catch((err: Error) => {
-          logger.error('QRScanner: failed to start web scanner', err);
+          logger.error("QRScanner: failed to start web scanner", err);
           this.stopWebScanner();
           resolve({
             success: false,
-            error: 'Не удалось запустить камеру'
+            error: "Не удалось запустить камеру",
           });
         });
 
@@ -287,7 +308,7 @@ class QRScannerService {
             this.stopWebScanner();
             resolve({
               success: false,
-              error: 'Время сканирования истекло'
+              error: "Время сканирования истекло",
             });
           }
         }, options.timeout);
@@ -303,10 +324,10 @@ class QRScannerService {
       this.html5QrCode
         .stop()
         .then(() => {
-          logger.debug('QRScanner: web scanner stopped');
+          logger.debug("QRScanner: web scanner stopped");
         })
         .catch((err) => {
-          logger.error('QRScanner: error stopping web scanner', err);
+          logger.error("QRScanner: error stopping web scanner", err);
         });
     }
 
@@ -314,7 +335,7 @@ class QRScannerService {
     this.html5QrCode = null;
 
     // Удаляем контейнер сканера
-    const container = document.getElementById('qr-scanner-container');
+    const container = document.getElementById("qr-scanner-container");
     if (container) {
       container.remove();
     }

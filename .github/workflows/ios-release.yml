@@ -1,0 +1,149 @@
+name: iOS Release to App Store
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number (e.g., 1.0.2)'
+        required: true
+        default: '1.0.2'
+      build_number:
+        description: 'Build number (e.g., 2)'
+        required: true
+        default: '2'
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy to App Store
+    runs-on: macos-13
+    timeout-minutes: 60
+
+    steps:
+      # ===== Checkout code =====
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      # ===== Setup Node.js =====
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      # ===== Install dependencies =====
+      - name: 📦 Install npm dependencies
+        run: npm ci
+
+      # ===== Update version =====
+      - name: 🔢 Update version in package.json
+        run: |
+          npm version ${{ github.event.inputs.version }} --no-git-tag-version
+          echo "✅ Updated version to ${{ github.event.inputs.version }}"
+
+      # ===== Build production bundle =====
+      - name: 🏗️ Build production bundle
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_WEBSOCKET_URL: ${{ secrets.VITE_WEBSOCKET_URL }}
+          VITE_YANDEX_MAPS_API_KEY: ${{ secrets.VITE_YANDEX_MAPS_API_KEY }}
+          VITE_USE_REAL_API: true
+          VITE_APP_ENV: production
+        run: |
+          npm run build:no-version
+          echo "✅ Production bundle built successfully"
+
+      # ===== Sync with iOS =====
+      - name: 📱 Sync with iOS
+        run: |
+          npx cap sync ios
+          echo "✅ Capacitor synced with iOS"
+
+      # ===== Setup Ruby =====
+      - name: 💎 Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+          working-directory: ios
+
+      # ===== Install Cocoapods dependencies =====
+      - name: 📦 Install CocoaPods dependencies
+        working-directory: ios/App
+        run: |
+          pod install
+          echo "✅ CocoaPods dependencies installed"
+
+      # ===== Create App Store Connect API Key =====
+      - name: 🔑 Create App Store Connect API Key
+        run: |
+          mkdir -p ~/private_keys
+          echo "${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}" > ~/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}.p8
+          chmod 600 ~/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}.p8
+          echo "✅ API Key created"
+
+      # ===== Update version and build number =====
+      - name: 🔢 Update Xcode version and build number
+        working-directory: ios/App
+        run: |
+          # Set marketing version
+          agvtool new-marketing-version ${{ github.event.inputs.version }}
+
+          # Set build number
+          agvtool new-version -all ${{ github.event.inputs.build_number }}
+
+          echo "✅ Updated Xcode version to ${{ github.event.inputs.version }} build ${{ github.event.inputs.build_number }}"
+
+      # ===== Setup fastlane match =====
+      - name: 🔐 Setup code signing with fastlane match
+        working-directory: ios
+        env:
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.GITHUB_TOKEN }}
+          FASTLANE_USER: ${{ secrets.APPLE_ID }}
+          FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+        run: |
+          bundle exec fastlane match appstore --readonly true
+          echo "✅ Code signing configured"
+
+      # ===== Build and upload to App Store =====
+      - name: 🚀 Build and upload to App Store Connect
+        working-directory: ios
+        env:
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          FASTLANE_USER: ${{ secrets.APPLE_ID }}
+          FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
+          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          bundle exec fastlane release
+          echo "✅ Build uploaded to App Store Connect"
+
+      # ===== Upload logs on failure =====
+      - name: 📋 Upload build logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs
+          path: |
+            ~/Library/Logs/gym/
+            ios/fastlane/report.xml
+          retention-days: 5
+
+      # ===== Notify success =====
+      - name: ✅ Build completed
+        if: success()
+        run: |
+          echo "================================================"
+          echo "✅ iOS build uploaded successfully!"
+          echo "Version: ${{ github.event.inputs.version }}"
+          echo "Build: ${{ github.event.inputs.build_number }}"
+          echo ""
+          echo "Next steps:"
+          echo "1. Go to App Store Connect: https://appstoreconnect.apple.com"
+          echo "2. Wait for build to be processed (~10-20 min)"
+          echo "3. Configure metadata (What's New, screenshots)"
+          echo "4. Submit for review"
+          echo "================================================"

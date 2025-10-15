@@ -1,153 +1,69 @@
-import { useQuery } from '@tanstack/react-query';
-import { evpowerApi, unifiedApi } from '@/services/evpowerApi';
-import type { UnifiedChargingSession, UnifiedTransaction } from '../../auth/types/unified.types';
-import type { ChargingHistoryItem, TransactionHistoryItem, UsageStatistics } from '../types';
-
-// Мок данные для демонстрации (в будущем заменить на реальный API)
-const mockChargingHistory: ChargingHistoryItem[] = [
-  {
-    id: '1',
-    sessionId: 'sess_001',
-    stationId: 'EVI-0011',
-    stationName: 'ТЦ Азия Молл',
-    stationAddress: 'ул. Киевская 148',
-    connectorId: 1,
-    connectorType: 'Type 2',
-    startTime: '2024-01-15T14:30:00Z',
-    endTime: '2024-01-15T15:45:00Z',
-    duration: 4500,
-    energyConsumed: 22.5,
-    totalCost: 382.5,
-    averagePower: 18.0,
-    maxPower: 22.0,
-    status: 'completed',
-    limitType: 'energy',
-    limitValue: 25
-  },
-  {
-    id: '2',
-    sessionId: 'sess_002',
-    stationId: 'EVI-0012',
-    stationName: 'Гипермаркет Глобус',
-    stationAddress: 'пр. Чуй 150/1',
-    connectorId: 2,
-    connectorType: 'CCS2',
-    startTime: '2024-01-14T10:15:00Z',
-    endTime: '2024-01-14T10:45:00Z',
-    duration: 1800,
-    energyConsumed: 35.2,
-    totalCost: 598.4,
-    averagePower: 70.4,
-    maxPower: 80.0,
-    status: 'completed',
-    limitType: 'amount',
-    limitValue: 600
-  },
-  {
-    id: '3',
-    sessionId: 'sess_003',
-    stationId: 'EVI-0013',
-    stationName: 'Парковка Площадь Ала-Тоо',
-    stationAddress: 'пл. Ала-Тоо 1',
-    connectorId: 1,
-    connectorType: 'Type 2',
-    startTime: '2024-01-13T18:00:00Z',
-    endTime: '2024-01-13T19:30:00Z',
-    duration: 5400,
-    energyConsumed: 28.8,
-    totalCost: 489.6,
-    averagePower: 19.2,
-    maxPower: 22.0,
-    status: 'completed',
-    limitType: 'none'
-  }
-];
-
-const mockTransactionHistory: TransactionHistoryItem[] = [
-  {
-    id: 't1',
-    type: 'topup',
-    amount: 500,
-    balance_before: 150,
-    balance_after: 650,
-    timestamp: '2024-01-15T14:00:00Z',
-    description: 'Пополнение через O!Dengi',
-    status: 'success',
-    paymentMethod: 'qr_odengi'
-  },
-  {
-    id: 't2',
-    type: 'charge',
-    amount: -382.5,
-    balance_before: 650,
-    balance_after: 267.5,
-    timestamp: '2024-01-15T15:45:00Z',
-    description: 'Зарядка на ТЦ Азия Молл',
-    status: 'success',
-    sessionId: 'sess_001'
-  },
-  {
-    id: 't3',
-    type: 'topup',
-    amount: 1000,
-    balance_before: 267.5,
-    balance_after: 1267.5,
-    timestamp: '2024-01-14T09:30:00Z',
-    description: 'Пополнение через O!Dengi',
-    status: 'success',
-    paymentMethod: 'qr_odengi'
-  },
-  {
-    id: 't4',
-    type: 'charge',
-    amount: -598.4,
-    balance_before: 1267.5,
-    balance_after: 669.1,
-    timestamp: '2024-01-14T10:45:00Z',
-    description: 'Зарядка на Гипермаркет Глобус',
-    status: 'success',
-    sessionId: 'sess_002'
-  }
-];
+import { useQuery } from "@tanstack/react-query";
+import { evpowerApi, unifiedApi } from "@/services/evpowerApi";
+import type {
+  UnifiedChargingSession,
+  UnifiedTransaction,
+} from "../../auth/types/unified.types";
+import type {
+  ChargingHistoryItem,
+  TransactionHistoryItem,
+  UsageStatistics,
+} from "../types";
 
 // Хук для получения истории зарядок
 export const useChargingHistory = (limit: number = 50) => {
   return useQuery({
-    queryKey: ['charging-history', limit],
+    queryKey: ["charging-history", limit],
     queryFn: async (): Promise<ChargingHistoryItem[]> => {
       try {
         // Получаем историю напрямую через evpowerApi
         const data = await unifiedApi.getChargingHistory(limit);
 
         if (!data || data.length === 0) {
-          // Возвращаем мок данные если нет данных
-          return mockChargingHistory;
+          return [];
         }
 
         // Преобразуем данные в ChargingHistoryItem
-        return data.map((session: any): ChargingHistoryItem => ({
-          id: session.id,
-          sessionId: session.id,
-          stationId: session.station_id,
-          stationName: session.stations?.locations?.name || 'Станция',
-          stationAddress: session.stations?.locations?.address || '',
-          connectorId: session.connector_id,
-          connectorType: 'Type 2', // TODO: получать из данных станции
-          startTime: session.created_at,
-          endTime: session.end_time,
-          duration: session.duration || 0,
-          energyConsumed: session.energy_consumed || 0,
-          totalCost: session.total_cost || 0,
-          averagePower: session.average_power || 0,
-          maxPower: session.max_power || 0,
-          status: session.status || 'completed',
-          limitType: session.limit_type,
-          limitValue: session.limit_value
-        }));
+        return data.map((session: any): ChargingHistoryItem => {
+          // Вычисляем duration из start_time и stop_time
+          const duration =
+            session.start_time && session.stop_time
+              ? Math.floor(
+                  (new Date(session.stop_time).getTime() -
+                    new Date(session.start_time).getTime()) /
+                    1000,
+                )
+              : 0;
+
+          // Вычисляем средню и максимальную мощность
+          const energyKwh = session.energy || 0;
+          const durationHours = duration / 3600;
+          const averagePower =
+            durationHours > 0 ? energyKwh / durationHours : 0;
+
+          return {
+            id: session.id,
+            sessionId: session.id,
+            stationId: session.station_id,
+            stationName: session.stations?.locations?.name || "Станция",
+            stationAddress: session.stations?.locations?.address || "",
+            connectorId: 1, // TODO: добавить поле connector_id в charging_sessions
+            connectorType: "Type 2", // TODO: получать из данных коннектора
+            startTime: session.start_time,
+            endTime: session.stop_time,
+            duration,
+            energyConsumed: energyKwh,
+            totalCost: session.amount || 0,
+            averagePower,
+            maxPower: averagePower, // TODO: хранить max_power в БД
+            status: session.status === "stopped" ? "completed" : session.status,
+            limitType: session.limit_type,
+            limitValue: session.limit_value,
+          };
+        });
       } catch (error) {
-        console.error('Failed to fetch charging history:', error);
-        // В случае ошибки возвращаем мок данные
-        return mockChargingHistory;
+        console.error("Failed to fetch charging history:", error);
+        throw error;
       }
     },
     staleTime: 5 * 60 * 1000, // 5 минут
@@ -159,34 +75,42 @@ export const useChargingHistory = (limit: number = 50) => {
 // Хук для получения истории транзакций
 export const useTransactionHistory = (limit: number = 50) => {
   return useQuery({
-    queryKey: ['transaction-history', limit],
+    queryKey: ["transaction-history", limit],
     queryFn: async (): Promise<TransactionHistoryItem[]> => {
       try {
         // Получаем историю транзакций напрямую через evpowerApi
         const data = await unifiedApi.getTransactionHistory(limit);
 
         if (!data || data.length === 0) {
-          // Возвращаем мок данные если нет данных
-          return mockTransactionHistory;
+          return [];
         }
 
         // Преобразуем данные в TransactionHistoryItem
-        return data.map((tx: any): TransactionHistoryItem => ({
-          id: tx.id,
-          type: tx.type,
-          amount: tx.amount,
-          balance_before: tx.balance_before,
-          balance_after: tx.balance_after,
-          timestamp: tx.created_at,
-          description: tx.description,
-          status: tx.status,
-          sessionId: tx.session_id,
-          paymentMethod: tx.payment_method
-        }));
+        return data.map((tx: any): TransactionHistoryItem => {
+          // Определяем тип транзакции на основе transaction_type
+          let type: "topup" | "charge" | "refund" = "charge";
+          if (tx.transaction_type === "balance_topup") {
+            type = "topup";
+          } else if (tx.transaction_type === "charge_refund") {
+            type = "refund";
+          }
+
+          return {
+            id: tx.id.toString(),
+            type,
+            amount: parseFloat(tx.amount),
+            balance_before: parseFloat(tx.balance_before),
+            balance_after: parseFloat(tx.balance_after),
+            timestamp: tx.created_at,
+            description: tx.description || `Транзакция ${type}`,
+            status: "success", // TODO: добавить поле status в таблицу
+            sessionId: tx.charging_session_id,
+            paymentMethod: "qr_odengi", // TODO: определять по данным
+          };
+        });
       } catch (error) {
-        console.error('Failed to fetch transaction history:', error);
-        // В случае ошибки возвращаем мок данные
-        return mockTransactionHistory;
+        console.error("Failed to fetch transaction history:", error);
+        throw error;
       }
     },
     staleTime: 5 * 60 * 1000, // 5 минут
@@ -198,64 +122,136 @@ export const useTransactionHistory = (limit: number = 50) => {
 // Хук для получения статистики использования
 export const useUsageStatistics = () => {
   return useQuery({
-    queryKey: ['usage-statistics'],
+    queryKey: ["usage-statistics"],
     queryFn: async (): Promise<UsageStatistics> => {
       try {
         // Получаем историю зарядок для расчета статистики
         const chargingHistory = await unifiedApi.getChargingHistory(100);
 
         if (!chargingHistory || chargingHistory.length === 0) {
-          // Используем мок данные если API недоступен
-          const totalEnergy = mockChargingHistory.reduce((sum, item) => sum + item.energyConsumed, 0);
-          const totalCost = mockChargingHistory.reduce((sum, item) => sum + item.totalCost, 0);
-          const totalDuration = mockChargingHistory.reduce((sum, item) => sum + item.duration, 0) / 60;
-
           return {
-            totalSessions: mockChargingHistory.length,
-            totalEnergy,
-            totalCost,
-            totalDuration,
-            averageSessionEnergy: totalEnergy / mockChargingHistory.length,
-            averageSessionCost: totalCost / mockChargingHistory.length,
-            averageSessionDuration: totalDuration / mockChargingHistory.length,
-            favoriteStation: {
-              id: 'EVI-0011',
-              name: 'ТЦ Азия Молл',
-              visitsCount: 5
-            },
-            monthlyData: [
-              { month: 'Декабрь', sessions: 8, energy: 180.5, cost: 3069 },
-              { month: 'Январь', sessions: 3, energy: 86.5, cost: 1470.5 }
-            ]
+            totalSessions: 0,
+            totalEnergy: 0,
+            totalCost: 0,
+            totalDuration: 0,
+            averageSessionEnergy: 0,
+            averageSessionCost: 0,
+            averageSessionDuration: 0,
+            monthlyData: [],
           };
         }
 
-        const totalEnergy = chargingHistory.reduce((sum: number, item: any) => sum + (item.energy_consumed || 0), 0);
-        const totalCost = chargingHistory.reduce((sum: number, item: any) => sum + (item.total_cost || 0), 0);
-        const totalDuration = chargingHistory.reduce((sum: number, item: any) => sum + (item.duration || 0), 0) / 60;
+        // Вычисляем статистику из реальных данных
+        const totalEnergy = chargingHistory.reduce(
+          (sum: number, session: any) => sum + (session.energy || 0),
+          0,
+        );
+        const totalCost = chargingHistory.reduce(
+          (sum: number, session: any) => sum + (session.amount || 0),
+          0,
+        );
+
+        // Вычисляем общую длительность в минутах
+        const totalDuration = chargingHistory.reduce(
+          (sum: number, session: any) => {
+            if (session.start_time && session.stop_time) {
+              const duration =
+                (new Date(session.stop_time).getTime() -
+                  new Date(session.start_time).getTime()) /
+                1000 /
+                60;
+              return sum + duration;
+            }
+            return sum;
+          },
+          0,
+        );
+
+        // Находим любимую станцию
+        const stationCounts = chargingHistory.reduce(
+          (acc: Record<string, any>, session: any) => {
+            const stationId = session.station_id;
+            if (!acc[stationId]) {
+              acc[stationId] = {
+                id: stationId,
+                name: session.stations?.locations?.name || "Станция",
+                count: 0,
+              };
+            }
+            acc[stationId].count++;
+            return acc;
+          },
+          {},
+        );
+
+        const favoriteStation = Object.values(stationCounts).reduce(
+          (max: any, station: any) =>
+            station.count > (max?.count || 0) ? station : max,
+          null,
+        ) as { id: string; name: string; count: number } | null;
+
+        // Группируем по месяцам
+        const monthlyGroups = chargingHistory.reduce(
+          (acc: Record<string, any>, session: any) => {
+            const date = new Date(session.start_time);
+            const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+            const monthName = date.toLocaleDateString("ru-RU", {
+              month: "long",
+              year: "numeric",
+            });
+
+            if (!acc[monthKey]) {
+              acc[monthKey] = {
+                month: monthName.charAt(0).toUpperCase() + monthName.slice(1),
+                sessions: 0,
+                energy: 0,
+                cost: 0,
+              };
+            }
+
+            acc[monthKey].sessions++;
+            acc[monthKey].energy += session.energy || 0;
+            acc[monthKey].cost += session.amount || 0;
+
+            return acc;
+          },
+          {},
+        );
+
+        const monthlyData = Object.values(monthlyGroups).reverse().slice(0, 6);
 
         return {
           totalSessions: chargingHistory.length,
           totalEnergy,
           totalCost,
           totalDuration,
-          averageSessionEnergy: chargingHistory.length > 0 ? totalEnergy / chargingHistory.length : 0,
-          averageSessionCost: chargingHistory.length > 0 ? totalCost / chargingHistory.length : 0,
-          averageSessionDuration: chargingHistory.length > 0 ? totalDuration / chargingHistory.length : 0,
-          monthlyData: []
+          averageSessionEnergy:
+            chargingHistory.length > 0
+              ? totalEnergy / chargingHistory.length
+              : 0,
+          averageSessionCost:
+            chargingHistory.length > 0 ? totalCost / chargingHistory.length : 0,
+          averageSessionDuration:
+            chargingHistory.length > 0
+              ? totalDuration / chargingHistory.length
+              : 0,
+          favoriteStation: favoriteStation
+            ? {
+                id: favoriteStation.id,
+                name: favoriteStation.name,
+                visitsCount: favoriteStation.count,
+              }
+            : undefined,
+          monthlyData: monthlyData as Array<{
+            month: string;
+            sessions: number;
+            energy: number;
+            cost: number;
+          }>,
         };
       } catch (error) {
-        console.error('Failed to fetch usage statistics:', error);
-        return {
-          totalSessions: 0,
-          totalEnergy: 0,
-          totalCost: 0,
-          totalDuration: 0,
-          averageSessionEnergy: 0,
-          averageSessionCost: 0,
-          averageSessionDuration: 0,
-          monthlyData: []
-        };
+        console.error("Failed to fetch usage statistics:", error);
+        throw error;
       }
     },
     staleTime: 10 * 60 * 1000, // 10 минут

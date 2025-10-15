@@ -1,17 +1,17 @@
-import { supabase } from '../../shared/config/supabase';
-import { pricingCache } from './pricingCache';
-import type { 
-  PricingResult, 
+import {
+  supabase,
+  supabaseWithTimeout,
+  isSupabaseConfigured,
+} from "../../shared/utils/supabaseHelpers";
+import { pricingCache } from "./pricingCache";
+import type {
+  PricingResult,
   TariffRule,
   SessionCostBreakdown,
-  CachedPricing
-} from './types';
-import { 
-  DEFAULT_CURRENCY, 
-  DEFAULT_RATE_PER_KWH, 
-  CACHE_TTL 
-} from './types';
-import { parsePrice } from '../../shared/utils/parsers';
+  CachedPricing,
+} from "./types";
+import { DEFAULT_CURRENCY, DEFAULT_RATE_PER_KWH, CACHE_TTL } from "./types";
+import { parsePrice } from "../../shared/utils/parsers";
 
 class PricingService {
   private cache = new Map<string, CachedPricing>();
@@ -33,14 +33,25 @@ class PricingService {
     stationId: string,
     connectorType?: string,
     clientId?: string,
-    powerKw?: number
+    powerKw?: number,
   ): Promise<PricingResult> {
+    // ВРЕМЕННО: Фиксированная цена 13.5 сом/кВт
+    // TODO: В будущем вернуть динамические тарифы из БД
+    return this.getDefaultPricing();
+
+    /*
+    // Закомментировано для будущего использования
     await this.initialize();
-    
+
+    // Если Supabase не сконфигурирован, сразу возвращаем дефолт
+    if (!isSupabaseConfigured()) {
+      return this.getDefaultPricing();
+    }
+
     // Проверяем memory кэш
     const cacheKey = `${stationId}-${connectorType}-${clientId}`;
     const cached = this.cache.get(cacheKey);
-    
+
     if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
       return cached.data;
     }
@@ -48,7 +59,6 @@ class PricingService {
     // Проверяем IndexedDB кэш для offline режима
     const offlineCached = await pricingCache.getCachedPricing(stationId, connectorType, clientId);
     if (offlineCached) {
-      // Обновляем memory кэш
       this.cache.set(cacheKey, {
         stationId: stationId,
         data: offlineCached,
@@ -59,22 +69,25 @@ class PricingService {
 
     try {
       // 1. Получаем данные станции с тарифным планом
-      const { data: station, error: stationError } = await supabase
-        .from('stations')
-        .select(`
-          id,
-          serial_number,
-          price_per_kwh,
-          session_fee,
-          currency,
-          tariff_plan_id,
-          location_id
-        `)
-        .eq('serial_number', stationId)
-        .single();
+      const { data: station, error: stationError } = await supabaseWithTimeout(
+        () => supabase
+          .from('stations')
+          .select(`
+            id,
+            serial_number,
+            price_per_kwh,
+            session_fee,
+            currency,
+            tariff_plan_id,
+            location_id
+          `)
+          .eq('serial_number', stationId)
+          .single(),
+        3000,
+        { data: null, error: new Error('timeout') }
+      );
 
       if (stationError || !station) {
-        console.error('Error fetching station:', stationError);
         return this.getDefaultPricing();
       }
 
@@ -127,29 +140,30 @@ class PricingService {
       console.error('Error calculating pricing:', error);
       return this.getDefaultPricing();
     }
+    */
   }
 
   /**
    * Получает клиентский тариф если есть
    */
   private async getClientTariff(
-    clientId: string, 
-    stationId: string
+    clientId: string,
+    stationId: string,
   ): Promise<PricingResult | null> {
     try {
       const now = new Date().toISOString();
-      
+
       const { data: clientTariff, error } = await supabase
-        .from('client_tariffs')
-        .select('*')
-        .eq('client_id', clientId)
-        .eq('is_active', true)
-        .lte('valid_from', now)
+        .from("client_tariffs")
+        .select("*")
+        .eq("client_id", clientId)
+        .eq("is_active", true)
+        .lte("valid_from", now)
         .or(`valid_until.is.null,valid_until.gte.${now}`)
         .maybeSingle();
-      
+
       if (error) {
-        console.error('Error fetching client tariff:', error);
+        console.error("Error fetching client tariff:", error);
         return null;
       }
 
@@ -163,14 +177,14 @@ class PricingService {
           session_fee: clientTariff.session_fee || 0,
           parking_fee_per_minute: 0,
           currency: DEFAULT_CURRENCY,
-          active_rule: clientTariff.description || 'Персональный тариф',
-          rule_details: { 
-            type: 'client_fixed',
-            tariff_id: clientTariff.id
+          active_rule: clientTariff.description || "Персональный тариф",
+          rule_details: {
+            type: "client_fixed",
+            tariff_id: clientTariff.id,
           },
           time_based: false,
           next_rate_change: null,
-          is_client_tariff: true
+          is_client_tariff: true,
         };
       }
 
@@ -179,15 +193,17 @@ class PricingService {
         const basePricing = await this.calculatePricing(stationId);
         return {
           ...basePricing,
-          rate_per_kwh: basePricing.rate_per_kwh * (1 - clientTariff.discount_percent / 100),
+          rate_per_kwh:
+            basePricing.rate_per_kwh *
+            (1 - clientTariff.discount_percent / 100),
           active_rule: `${basePricing.active_rule} (скидка ${clientTariff.discount_percent}%)`,
-          is_client_tariff: true
+          is_client_tariff: true,
         };
       }
 
       return null;
     } catch (error) {
-      console.error('Error fetching client tariff:', error);
+      console.error("Error fetching client tariff:", error);
       return null;
     }
   }
@@ -198,7 +214,7 @@ class PricingService {
   private async findApplicableRule(
     tariffPlanId: string,
     connectorType?: string,
-    powerKw?: number
+    powerKw?: number,
   ): Promise<TariffRule | null> {
     try {
       const now = new Date();
@@ -208,21 +224,25 @@ class PricingService {
 
       // Получаем все активные правила для тарифного плана
       const { data: rules, error } = await supabase
-        .from('tariff_rules')
-        .select('*')
-        .eq('tariff_plan_id', tariffPlanId)
-        .eq('is_active', true)
-        .order('priority', { ascending: false });
+        .from("tariff_rules")
+        .select("*")
+        .eq("tariff_plan_id", tariffPlanId)
+        .eq("is_active", true)
+        .order("priority", { ascending: false });
 
       if (error || !rules || rules.length === 0) {
-        console.error('Error fetching tariff rules:', error);
+        console.error("Error fetching tariff rules:", error);
         return null;
       }
 
       // Фильтруем правила по условиям
-      const applicableRules = rules.filter(rule => {
+      const applicableRules = rules.filter((rule) => {
         // Проверка типа коннектора
-        if (connectorType && rule.connector_type !== 'ALL' && rule.connector_type !== connectorType) {
+        if (
+          connectorType &&
+          rule.connector_type !== "ALL" &&
+          rule.connector_type !== connectorType
+        ) {
           return false;
         }
 
@@ -241,7 +261,9 @@ class PricingService {
 
         // Проверка времени
         if (rule.time_start && rule.time_end) {
-          if (!this.isTimeInRange(currentTime, rule.time_start, rule.time_end)) {
+          if (
+            !this.isTimeInRange(currentTime, rule.time_start, rule.time_end)
+          ) {
             return false;
           }
         }
@@ -255,9 +277,8 @@ class PricingService {
 
       // Возвращаем правило с наивысшим приоритетом
       return applicableRules.length > 0 ? applicableRules[0] : null;
-
     } catch (error) {
-      console.error('Error finding applicable rule:', error);
+      console.error("Error finding applicable rule:", error);
       return null;
     }
   }
@@ -277,7 +298,10 @@ class PricingService {
   /**
    * Создает PricingResult из правила тарифа
    */
-  private buildPricingFromRule(rule: TariffRule, tariffPlanId: string): PricingResult {
+  private buildPricingFromRule(
+    rule: TariffRule,
+    tariffPlanId: string,
+  ): PricingResult {
     // Рассчитываем когда будет следующее изменение тарифа
     const nextChange = this.calculateNextRateChange(rule);
 
@@ -287,17 +311,17 @@ class PricingService {
       session_fee: rule.session_fee || 0,
       parking_fee_per_minute: rule.parking_fee_per_minute || 0,
       currency: rule.currency || DEFAULT_CURRENCY,
-      active_rule: rule.name || 'Тариф по расписанию',
+      active_rule: rule.name || "Тариф по расписанию",
       rule_details: {
         rule_id: rule.id,
         description: rule.description,
         time_based: !!(rule.time_start && rule.time_end),
         days: rule.days_of_week,
-        weekend: rule.is_weekend
+        weekend: rule.is_weekend,
       },
       time_based: !!(rule.time_start && rule.time_end),
       next_rate_change: nextChange,
-      tariff_plan_id: tariffPlanId
+      tariff_plan_id: tariffPlanId,
     };
   }
 
@@ -308,8 +332,10 @@ class PricingService {
     if (!rule.time_end) return null;
 
     const now = new Date();
-    const [hours, minutes] = rule.time_end.split(':').map(Number);
-    
+    const [hoursStr, minutesStr] = rule.time_end.split(":");
+    const hours = Number(hoursStr ?? 0);
+    const minutes = Number(minutesStr ?? 0);
+
     const nextChange = new Date(now);
     nextChange.setHours(hours, minutes, 0, 0);
 
@@ -331,10 +357,10 @@ class PricingService {
       session_fee: 0,
       parking_fee_per_minute: 0,
       currency: DEFAULT_CURRENCY,
-      active_rule: 'Базовый тариф',
-      rule_details: { type: 'default' },
+      active_rule: "Базовый тариф",
+      rule_details: { type: "default" },
       time_based: false,
-      next_rate_change: null
+      next_rate_change: null,
     };
   }
 
@@ -344,18 +370,18 @@ class PricingService {
   private async cacheResult(key: string, data: PricingResult): Promise<void> {
     // Memory кэш
     this.cache.set(key, {
-      stationId: key.split('-')[0],
+      stationId: key.split("-")[0] ?? "",
       data,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
-    
+
     // IndexedDB кэш для offline
-    const [stationId, connectorType, clientId] = key.split('-');
+    const [stationIdPart, connectorTypePart, clientIdPart] = key.split("-");
     await pricingCache.cachePricing(
-      stationId, 
-      connectorType === 'undefined' ? undefined : connectorType,
-      clientId === 'undefined' ? undefined : clientId,
-      data
+      stationIdPart ?? "",
+      connectorTypePart === "undefined" ? undefined : connectorTypePart,
+      clientIdPart === "undefined" ? undefined : clientIdPart,
+      data,
     );
   }
 
@@ -365,7 +391,7 @@ class PricingService {
   calculateSessionCost(
     energyKwh: number,
     durationMinutes: number,
-    pricing: PricingResult
+    pricing: PricingResult,
   ): SessionCostBreakdown {
     const breakdown: SessionCostBreakdown = {
       energy_cost: 0,
@@ -375,7 +401,7 @@ class PricingService {
       base_amount: 0,
       discount_amount: 0,
       final_amount: 0,
-      currency: pricing.currency
+      currency: pricing.currency,
     };
 
     // Расчет по энергии
@@ -399,10 +425,10 @@ class PricingService {
     }
 
     // Итоги
-    breakdown.base_amount = 
-      breakdown.energy_cost + 
-      breakdown.time_cost + 
-      breakdown.session_fee + 
+    breakdown.base_amount =
+      breakdown.energy_cost +
+      breakdown.time_cost +
+      breakdown.session_fee +
       breakdown.parking_fee;
 
     breakdown.final_amount = breakdown.base_amount - breakdown.discount_amount;
@@ -416,34 +442,38 @@ class PricingService {
   async getDayPricingSchedule(
     stationId: string,
     connectorType?: string,
-    clientId?: string
+    clientId?: string,
   ): Promise<Array<{ time: string; label: string; rate: number }>> {
     const schedule = [];
     const times = [
-      { hour: 0, label: 'Ночь (00:00)' },
-      { hour: 6, label: 'Утро (06:00)' },
-      { hour: 9, label: 'Начало дня (09:00)' },
-      { hour: 12, label: 'День (12:00)' },
-      { hour: 15, label: 'После обеда (15:00)' },
-      { hour: 18, label: 'Вечер (18:00)' },
-      { hour: 21, label: 'Поздний вечер (21:00)' }
+      { hour: 0, label: "Ночь (00:00)" },
+      { hour: 6, label: "Утро (06:00)" },
+      { hour: 9, label: "Начало дня (09:00)" },
+      { hour: 12, label: "День (12:00)" },
+      { hour: 15, label: "После обеда (15:00)" },
+      { hour: 18, label: "Вечер (18:00)" },
+      { hour: 21, label: "Поздний вечер (21:00)" },
     ];
 
     for (const timeSlot of times) {
       // Временно меняем время для расчета
       const testDate = new Date();
       testDate.setHours(timeSlot.hour, 0, 0, 0);
-      
+
       // Очищаем кэш для получения актуального тарифа
       const cacheKey = `${stationId}-${connectorType}-${clientId}`;
       this.cache.delete(cacheKey);
-      
-      const pricing = await this.calculatePricing(stationId, connectorType, clientId);
-      
+
+      const pricing = await this.calculatePricing(
+        stationId,
+        connectorType,
+        clientId,
+      );
+
       schedule.push({
-        time: `${timeSlot.hour.toString().padStart(2, '0')}:00`,
+        time: `${timeSlot.hour.toString().padStart(2, "0")}:00`,
         label: timeSlot.label,
-        rate: pricing.rate_per_kwh
+        rate: pricing.rate_per_kwh,
       });
     }
 

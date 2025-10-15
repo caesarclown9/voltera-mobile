@@ -3,18 +3,18 @@
  * с поддержкой prefetch и error boundaries
  */
 
-import { lazy } from 'react';
-import type { ComponentType } from 'react';
+import { lazy } from "react";
+import type { ComponentType } from "react";
 
 // Тип для lazy компонента с prefetch
 interface LazyRoute {
-  component: React.LazyExoticComponent<ComponentType<any>>;
+  component: React.LazyExoticComponent<ComponentType>;
   prefetch: () => Promise<void>;
 }
 
 // Функция для создания lazy роута с prefetch
 function createLazyRoute(
-  importFn: () => Promise<{ default: ComponentType<any> }>
+  importFn: () => Promise<{ default: ComponentType }>,
 ): LazyRoute {
   const LazyComponent = lazy(importFn);
 
@@ -22,63 +22,65 @@ function createLazyRoute(
     component: LazyComponent,
     prefetch: async () => {
       await importFn();
-    }
+    },
   };
 }
 
 // Определяем все lazy роуты
 export const routes = {
   // Основные страницы
-  MapPage: createLazyRoute(
-    () => import('../pages/MapPage').then(m => ({ default: m.MapPage }))
+  MapPage: createLazyRoute(() =>
+    import("../pages/MapPage").then((m) => ({ default: m.MapPage })),
   ),
 
-  MapHome: createLazyRoute(
-    () => import('../pages/MapHome')
-  ),
+  MapHome: createLazyRoute(() => import("../pages/MapHome")),
 
-  StationsList: createLazyRoute(
-    () => import('../pages/StationsList').then(m => ({ default: m.StationsList }))
+  StationsList: createLazyRoute(() =>
+    import("../pages/StationsList").then((m) => ({ default: m.StationsList })),
   ),
 
   // Страницы зарядки
-  ChargingPage: createLazyRoute(
-    () => import('../pages/ChargingPage').then(m => ({ default: m.ChargingPage }))
+  ChargingPage: createLazyRoute(() =>
+    import("../pages/ChargingPage").then((m) => ({ default: m.ChargingPage })),
   ),
 
-  ChargingProcessPage: createLazyRoute(
-    () => import('../pages/ChargingProcessPage').then(m => ({ default: m.ChargingProcessPage }))
+  ChargingProcessPage: createLazyRoute(() =>
+    import("../pages/ChargingProcessPage").then((m) => ({
+      default: m.ChargingProcessPage,
+    })),
   ),
 
-  ChargingCompletePage: createLazyRoute(
-    () => import('../pages/ChargingCompletePage').then(m => ({ default: m.ChargingCompletePage }))
+  ChargingCompletePage: createLazyRoute(() =>
+    import("../pages/ChargingCompletePage").then((m) => ({
+      default: m.ChargingCompletePage,
+    })),
   ),
 
   // Авторизация
-  Auth: createLazyRoute(
-    () => import('../pages/Auth')
-  ),
+  Auth: createLazyRoute(() => import("../pages/Auth")),
 
   // Профиль и история
-  ProfilePage: createLazyRoute(
-    () => import('../pages/ProfilePage').then(m => ({ default: m.ProfilePage }))
+  ProfilePage: createLazyRoute(() =>
+    import("../pages/ProfilePage").then((m) => ({ default: m.ProfilePage })),
   ),
 
-  HistoryPage: createLazyRoute(
-    () => import('../pages/HistoryPage').then(m => ({ default: m.HistoryPage }))
+  HistoryPage: createLazyRoute(() =>
+    import("../pages/HistoryPage").then((m) => ({ default: m.HistoryPage })),
   ),
 
   // Добавляем отсутствующие страницы
-  PaymentsPage: createLazyRoute(
-    () => import('../pages/PaymentsPage')
+  PaymentsPage: createLazyRoute(() => import("../pages/PaymentsPage")),
+
+  BalancePage: createLazyRoute(() =>
+    import("../pages/BalancePage").then((m) => ({ default: m.BalancePage })),
   ),
 
-  BalancePage: createLazyRoute(
-    () => import('../pages/BalancePage').then(m => ({ default: m.BalancePage }))
+  SettingsPage: createLazyRoute(() =>
+    import("../pages/SettingsPage").then((m) => ({ default: m.SettingsPage })),
   ),
 
-  SettingsPage: createLazyRoute(
-    () => import('../pages/SettingsPage').then(m => ({ default: m.SettingsPage }))
+  AboutPage: createLazyRoute(() =>
+    import("../pages/AboutPage").then((m) => ({ default: m.AboutPage })),
   ),
 };
 
@@ -92,7 +94,7 @@ export const prefetchCriticalRoutes = async () => {
       routes.ChargingPage.prefetch(),
     ]);
   } catch (error) {
-    console.error('Failed to prefetch critical routes:', error);
+    console.error("Failed to prefetch critical routes:", error);
   }
 };
 
@@ -111,18 +113,16 @@ export const prefetchRoute = async (routeName: keyof typeof routes) => {
 // Функция для prefetch связанных роутов
 export const prefetchRelatedRoutes = async (currentRoute: string) => {
   const relatedRoutes: Record<string, (keyof typeof routes)[]> = {
-    '/': ['StationsList', 'ChargingPage'],
-    '/stations': ['ChargingPage', 'MapPage'],
-    '/charging': ['ChargingProcessPage'],
-    '/profile': ['HistoryPage', 'BalancePage', 'SettingsPage'],
-    '/history': ['ProfilePage'],
+    "/": ["StationsList", "ChargingPage"],
+    "/stations": ["ChargingPage", "MapPage"],
+    "/charging": ["ChargingProcessPage"],
+    "/profile": ["HistoryPage", "BalancePage", "SettingsPage", "AboutPage"],
+    "/history": ["ProfilePage"],
   };
 
   const toPrefetch = relatedRoutes[currentRoute];
   if (toPrefetch) {
-    await Promise.all(
-      toPrefetch.map(routeName => prefetchRoute(routeName))
-    );
+    await Promise.all(toPrefetch.map((routeName) => prefetchRoute(routeName)));
   }
 };
 

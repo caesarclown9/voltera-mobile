@@ -1,71 +1,88 @@
-import { useState, useEffect } from 'react'
-import { useLocations, useLocationUpdates } from '../features/locations/hooks/useLocations'
-import { useGeolocation } from '../shared/hooks/useGeolocation'
-import { StationMap } from '../features/stations/components/StationMap'
-import { motion, AnimatePresence } from 'framer-motion'
-import type { Location } from '../api/types'
-import { logger } from '../shared/utils/logger'
-import { useAuth } from '../features/auth/hooks/useAuth'
-import { useBalance } from '../features/balance/hooks/useBalance'
-import { SimpleTopup } from '../features/balance/components/SimpleTopup'
-import { Link, useNavigate, useLocation as useRouterLocation } from 'react-router-dom'
+import { useState, useEffect } from "react";
+import { useLocations } from "../features/locations/hooks/useLocations";
+import { useGeolocation } from "../shared/hooks/useGeolocation";
+import { StationMap } from "../features/stations/components/StationMap";
+import { motion, AnimatePresence } from "framer-motion";
+import type { Location } from "../api/types";
+import { logger } from "../shared/utils/logger";
+import { useAuth } from "../features/auth/hooks/useAuth";
+import { useBalance } from "../features/balance/hooks/useBalance";
+import { SimpleTopup } from "../features/balance/components/SimpleTopup";
+import {
+  Link,
+  useNavigate,
+  useLocation as useRouterLocation,
+} from "react-router-dom";
 
 export default function MapHome() {
-  const navigate = useNavigate()
-  const routerLocation = useRouterLocation()
-  const [searchQuery, setSearchQuery] = useState('')
-  const [showFilters, setShowFilters] = useState(false)
-  const [showSearch, setShowSearch] = useState(false)
-  const [showTopup, setShowTopup] = useState(false)
-  const [focusLocation, setFocusLocation] = useState<{ lat: number; lng: number; zoom?: number } | undefined>(undefined)
-  const [selectedLocationId, setSelectedLocationId] = useState<string | undefined>(undefined)
-  const { user } = useAuth()
-  const { data: balance } = useBalance()
+  const navigate = useNavigate();
+  const routerLocation = useRouterLocation();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const [showTopup, setShowTopup] = useState(false);
+  const [focusLocation, setFocusLocation] = useState<
+    { lat: number; lng: number; zoom?: number } | undefined
+  >(undefined);
+  const [selectedLocationId, setSelectedLocationId] = useState<
+    string | undefined
+  >(undefined);
+  const { user } = useAuth();
+  const { data: balance } = useBalance();
 
   // Получаем локации со станциями (requestGeolocation: true для карты)
-  const { locations, isLoading, error, userLocation } = useLocations(true)
+  const { locations, isLoading, error, userLocation } = useLocations(true);
 
-  // Подключаемся к real-time обновлениям для всех локаций
-  useLocationUpdates(['all'])
-  
+  // WS для локаций отключён. Обновления по статусам обеспечиваются через периодические запросы/кеш.
+
   // Обрабатываем навигацию со страницы списка станций
   useEffect(() => {
     if (routerLocation.state?.focusLocation && locations) {
-      const locationId = routerLocation.state.selectedLocationId
+      const locationId = routerLocation.state.selectedLocationId;
 
       // Устанавливаем фокус на локацию
-      setFocusLocation(routerLocation.state.focusLocation)
-      setSelectedLocationId(locationId)
+      setFocusLocation(routerLocation.state.focusLocation);
+      setSelectedLocationId(locationId);
 
       // Очищаем state после использования
-      navigate(routerLocation.pathname, { replace: true })
+      navigate(routerLocation.pathname, { replace: true });
     }
-  }, [routerLocation.state, locations])
+  }, [routerLocation.state, locations]);
 
   // Обрабатываем поиск локаций
-  const filteredLocations = locations?.filter(location =>
-    location.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    location.address.toLowerCase().includes(searchQuery.toLowerCase())
-  ) || []
+  const filteredLocations =
+    locations?.filter(
+      (location) =>
+        location.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        location.address.toLowerCase().includes(searchQuery.toLowerCase()),
+    ) || [];
 
   // Подсчёт статистики для фильтров
-  const availableLocationsCount = filteredLocations.filter(l => l.status === 'available').length
-  const fastChargersCount = filteredLocations.filter(l =>
-    l.stations?.some(s => s.power_capacity >= 50)
-  ).length
-  const nearbyLocationsCount = filteredLocations.filter(l => {
-    const distance = (l as Location & { distance?: number }).distance ?? 0
-    return distance < 5
-  }).length
+  const availableLocationsCount = filteredLocations.filter(
+    (l) => l.status === "available",
+  ).length;
+  const fastChargersCount = filteredLocations.filter((l) =>
+    l.stations?.some((s) => s.power_capacity >= 50),
+  ).length;
+  const nearbyLocationsCount = filteredLocations.filter((l) => {
+    const distance = (l as Location & { distance?: number }).distance ?? 0;
+    return distance < 5;
+  }).length;
 
   const stationFilters = [
-    { id: 'available', label: 'Доступные', icon: '🟢', count: availableLocationsCount },
-    { id: 'fast', label: 'Быстрые', icon: '⚡', count: fastChargersCount },
-    { id: 'nearby', label: 'Рядом', icon: '📍', count: nearbyLocationsCount },
-  ]
+    {
+      id: "available",
+      label: "Доступные",
+      icon: "🟢",
+      count: availableLocationsCount,
+    },
+    { id: "fast", label: "Быстрые", icon: "⚡", count: fastChargersCount },
+    { id: "nearby", label: "Рядом", icon: "📍", count: nearbyLocationsCount },
+  ];
 
-  const userLocationCoords: [number, number] | undefined =
-    userLocation ? [userLocation.lat, userLocation.lng] : undefined
+  const userLocationCoords: [number, number] | undefined = userLocation
+    ? [userLocation.lat, userLocation.lng]
+    : undefined;
 
   if (error) {
     return (
@@ -78,9 +95,13 @@ export default function MapHome() {
           <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <span className="text-5xl">⚠️</span>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Ошибка загрузки</h2>
-          <p className="text-gray-600 mb-6">Не удалось загрузить список станций</p>
-          <button 
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Ошибка загрузки
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Не удалось загрузить список станций
+          </p>
+          <button
             onClick={() => window.location.reload()}
             className="bg-gradient-to-r from-green-500 to-cyan-500 text-white px-8 py-3 rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all"
           >
@@ -88,7 +109,7 @@ export default function MapHome() {
           </button>
         </motion.div>
       </div>
-    )
+    );
   }
 
   return (
@@ -131,10 +152,18 @@ export default function MapHome() {
                 className="bg-white rounded-2xl shadow-lg p-2 mb-3"
               >
                 <div className="relative">
-                  <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" 
-                       fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  <svg
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
                   </svg>
                   <input
                     type="text"
@@ -146,13 +175,23 @@ export default function MapHome() {
                   />
                   <button
                     onClick={() => {
-                      setShowSearch(false)
-                      setSearchQuery('')
+                      setShowSearch(false);
+                      setSearchQuery("");
                     }}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -167,20 +206,38 @@ export default function MapHome() {
                   onClick={() => setShowSearch(true)}
                   className="bg-white rounded-2xl shadow-lg px-4 py-3 flex items-center gap-2 flex-1"
                 >
-                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  <svg
+                    className="w-5 h-5 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
                   </svg>
                   <span className="text-gray-500">Поиск станций...</span>
                 </button>
-                
+
                 <button
                   onClick={() => setShowFilters(!showFilters)}
                   className="bg-white rounded-2xl shadow-lg p-3"
                 >
-                  <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                          d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                  <svg
+                    className="w-5 h-5 text-gray-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
+                    />
                   </svg>
                 </button>
               </motion.div>
@@ -203,7 +260,9 @@ export default function MapHome() {
                   >
                     <span>{filter.icon}</span>
                     <span className="text-sm font-medium">{filter.label}</span>
-                    <span className="text-xs text-gray-500">({filter.count})</span>
+                    <span className="text-xs text-gray-500">
+                      ({filter.count})
+                    </span>
                   </button>
                 ))}
               </motion.div>
@@ -236,8 +295,12 @@ export default function MapHome() {
       {userLocation && (
         <div className="absolute bottom-24 right-4 bg-white rounded-full shadow-lg p-4">
           <div className="relative">
-            <svg className="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/>
+            <svg
+              className="w-6 h-6 text-green-600"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z" />
             </svg>
             <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
           </div>
@@ -251,17 +314,24 @@ export default function MapHome() {
           className="bg-white rounded-full shadow-lg p-3 hover:shadow-xl transition-shadow"
           title="Список станций"
         >
-          <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                  d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+          <svg
+            className="w-6 h-6 text-gray-700"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 6h16M4 10h16M4 14h16M4 18h16"
+            />
           </svg>
         </Link>
       </div>
 
       {/* Simple Topup Modal */}
-      {showTopup && (
-        <SimpleTopup onClose={() => setShowTopup(false)} />
-      )}
+      {showTopup && <SimpleTopup onClose={() => setShowTopup(false)} />}
     </div>
-  )
+  );
 }

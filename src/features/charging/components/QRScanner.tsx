@@ -1,15 +1,15 @@
-import { useState } from 'react'
-import { qrScannerService } from '@/lib/platform'
+import { useState } from "react";
+import { qrScannerService } from "@/lib/platform";
 
 interface QRScanResult {
-  stationId: string
-  connectorId: string
+  stationId: string;
+  connectorId: string;
 }
 
 interface QRScannerProps {
-  onScan: (result: QRScanResult) => void
-  onError?: (error: string) => void
-  onCancel?: () => void
+  onScan: (result: QRScanResult) => void;
+  onError?: (error: string) => void;
+  onCancel?: () => void;
 }
 
 /**
@@ -17,18 +17,18 @@ interface QRScannerProps {
  * Использует платформенную абстракцию согласно RULES.md
  */
 export function QRScanner({ onScan, onError, onCancel }: QRScannerProps) {
-  const [isScanning, setIsScanning] = useState(false)
-  const [scanError, setScanError] = useState<string | null>(null)
+  const [isScanning, setIsScanning] = useState(false);
+  const [scanError, setScanError] = useState<string | null>(null);
 
   const handleStartScan = async () => {
-    setIsScanning(true)
-    setScanError(null)
+    setIsScanning(true);
+    setScanError(null);
 
     try {
       const result = await qrScannerService.scan({
         showHints: true,
         timeout: 60000, // 1 минута на сканирование
-      })
+      });
 
       if (result.success && result.data) {
         // Парсим QR код станции
@@ -36,67 +36,70 @@ export function QRScanner({ onScan, onError, onCancel }: QRScannerProps) {
         // 1. evpower://station/station_001/connector/1
         // 2. https://app.evpower.kg/charging/station_001?connector=1
 
-        let stationId: string | null = null
-        let connectorId: string | null = null
+        let stationId: string | null = null;
+        let connectorId: string | null = null;
 
         // Пробуем формат deep link
-        const deepLinkMatch = result.data.match(/evpower:\/\/station\/(.+)\/connector\/(.+)/)
+        const deepLinkMatch = result.data.match(
+          /evpower:\/\/station\/(.+)\/connector\/(.+)/,
+        );
         if (deepLinkMatch) {
-          stationId = deepLinkMatch[1]
-          connectorId = deepLinkMatch[2]
+          stationId = deepLinkMatch[1] ?? null;
+          connectorId = deepLinkMatch[2] ?? null;
         }
 
         // Пробуем формат URL
         if (!stationId) {
-          const urlMatch = result.data.match(/\/charging\/([^?]+)/)
-          const connectorMatch = result.data.match(/connector=(\d+)/)
+          const urlMatch = result.data.match(/\/charging\/([^?]+)/);
+          const connectorMatch = result.data.match(/connector=(\d+)/);
 
           if (urlMatch) {
-            stationId = urlMatch[1]
-            connectorId = connectorMatch ? connectorMatch[1] : '1'
+            stationId = urlMatch[1] ?? null;
+            connectorId = connectorMatch ? (connectorMatch[1] ?? null) : null;
           }
         }
 
         // Пробуем простой формат (только ID станции)
         if (!stationId && result.data.match(/^[A-Z0-9_-]+$/i)) {
-          stationId = result.data
-          connectorId = '1' // По умолчанию первый коннектор
+          stationId = result.data;
+          connectorId = "1"; // По умолчанию первый коннектор
         }
 
         if (stationId) {
           onScan({
             stationId,
-            connectorId: connectorId || '1'
-          })
+            connectorId: connectorId || "1",
+          });
         } else {
-          const errorMsg = 'Неверный QR код. Используйте QR код зарядной станции EvPower.'
-          setScanError(errorMsg)
-          onError?.(errorMsg)
+          const errorMsg =
+            "Неверный QR код. Используйте QR код зарядной станции EvPower.";
+          setScanError(errorMsg);
+          onError?.(errorMsg);
         }
       } else {
         // Обработка ошибок сканирования
-        const errorMsg = result.error || 'Не удалось отсканировать QR код'
-        setScanError(errorMsg)
+        const errorMsg = result.error || "Не удалось отсканировать QR код";
+        setScanError(errorMsg);
 
         // Не вызываем onError для отмены пользователем
-        if (!result.error?.includes('отменено')) {
-          onError?.(errorMsg)
+        if (!result.error?.includes("отменено")) {
+          onError?.(errorMsg);
         }
       }
     } catch (error) {
-      const errorMsg = 'Произошла ошибка при сканировании'
-      setScanError(errorMsg)
-      onError?.(errorMsg)
+      const errorMsg = "Произошла ошибка при сканировании";
+      setScanError(errorMsg);
+      onError?.(errorMsg);
     } finally {
-      setIsScanning(false)
+      setIsScanning(false);
     }
-  }
+  };
 
   const handleCancel = () => {
-    setIsScanning(false)
-    setScanError(null)
-    onCancel?.()
-  }
+    setIsScanning(false);
+    setScanError(null);
+    onCancel?.();
+  };
 
   return (
     <div className="flex flex-col items-center space-y-4 p-4">
@@ -158,9 +161,10 @@ export function QRScanner({ onScan, onError, onCancel }: QRScannerProps) {
       {/* Информация о ручном вводе */}
       <div className="mt-6 pt-6 border-t border-gray-200 w-full max-w-sm">
         <p className="text-sm text-gray-500 text-center">
-          Не получается отсканировать? Вы можете выбрать станцию из списка или на карте
+          Не получается отсканировать? Вы можете выбрать станцию из списка или
+          на карте
         </p>
       </div>
     </div>
-  )
+  );
 }

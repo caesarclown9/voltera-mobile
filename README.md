@@ -32,6 +32,7 @@ EvPower - это современное кроссплатформенное м�
 ## 🏗️ Технологический стек
 
 ### Frontend
+
 - **React 18** - UI библиотека
 - **TypeScript** - типизация
 - **Vite** - быстрая сборка
@@ -41,20 +42,24 @@ EvPower - это современное кроссплатформенное м�
 - **React Query** - управление состоянием и кеширование
 
 ### Mobile
+
 - **Capacitor 7** - кроссплатформенная разработка
 - **Android SDK 23-35** - поддержка Android 6.0+
 - **iOS (планируется)** - поддержка iOS
 
 ### Backend Integration
+
 - **Supabase** - аутентификация и база данных
 - **OCPP Backend** - управление зарядными станциями
 - **REST API** - взаимодействие с backend
 
 ### Maps & Location
+
 - **Яндекс.Карты** - отображение карты и станций
 - **Capacitor Geolocation** - определение местоположения
 
 ### Security & Storage
+
 - **Capacitor Secure Storage** - безопасное хранение токенов
 - **IndexedDB** - локальное кеширование данных
 - **HTTPS/TLS** - шифрование передачи данных
@@ -67,26 +72,22 @@ EvPower - это современное кроссплатформенное м�
 
 - **Node.js** >= 18.0.0
 - **npm** >= 9.0.0
-- **Java JDK** 17 (для Android)
+- **Java JDK** 21 (для Android)
 - **Android Studio** (для разработки Android)
 - **Xcode** (для разработки iOS, только macOS)
 
 ### Установка зависимостей
 
-```bash
+```powershell
 # Клонировать репозиторий
 git clone https://github.com/caesarclown9/evpower-mobile-app.git
-cd evpower-mobile-app
+Set-Location evpower-mobile-app
 
 # Установить зависимости
-npm install
+npm ci
 
 # Синхронизировать Capacitor
 npx cap sync
-
-# ВАЖНО: После cap sync исправить Java версию
-sed -i 's/VERSION_21/VERSION_17/g' android/app/capacitor.build.gradle
-sed -i 's/VERSION_21/VERSION_17/g' android/capacitor-cordova-android-plugins/capacitor.build.gradle
 ```
 
 ### Настройка окружения
@@ -102,7 +103,7 @@ VITE_YANDEX_MAPS_API_KEY=your_yandex_maps_key
 
 ### Разработка
 
-```bash
+```powershell
 # Запустить dev-сервер (web)
 npm run dev
 
@@ -118,16 +119,16 @@ npx cap run ios
 
 ### Сборка production
 
-```bash
+```powershell
 # Собрать web-версию
 npm run build
 
 # Собрать Android AAB (для Google Play)
-cd android
-./gradlew bundleRelease
+Set-Location android
+./gradlew.bat bundleRelease
 
 # Собрать Android APK
-./gradlew assembleRelease
+./gradlew.bat assembleRelease
 
 # Файлы будут в:
 # AAB: android/app/build/outputs/bundle/release/app-release.aab
@@ -224,6 +225,7 @@ evpower-mobile/
 ### Google Play Console
 
 1. Создать signed AAB:
+
    ```bash
    cd android
    ./gradlew bundleRelease
@@ -235,7 +237,7 @@ evpower-mobile/
 
 ### App Store (iOS)
 
-*В разработке*
+_В разработке_
 
 ---
 
@@ -243,10 +245,12 @@ evpower-mobile/
 
 ### Scripts
 
-```bash
+```powershell
 # Разработка
 npm run dev              # Dev-сервер
-npm run build            # Production сборка
+npm run build            # Production сборка (с автоинкрементом версии)
+npm run build:no-version # Сборка без обновления версии (для дебага)
+npm run sync-version     # Синхронизация версии между package.json и versionManager
 npm run preview          # Preview production сборки
 
 # Тестирование
@@ -263,9 +267,32 @@ npx cap open android     # Открыть Android Studio
 npx cap run android      # Запустить на Android
 ```
 
+### Управление версиями
+
+**ВАЖНО:** При каждом релизе обновляйте версию в `package.json`, затем запустите `npm run build`
+
+```powershell
+# 1. Обновите версию
+# package.json: "version": "1.0.2"
+
+# 2. Соберите (автоматически синхронизирует версию)
+npm run build
+
+# 3. Проверьте что версия обновилась
+Select-String -Path src/lib/versionManager.ts -Pattern "APP_BUILD"
+```
+
+Это автоматически:
+
+- Увеличит `APP_BUILD` (build number)
+- Обновит `android/app/build.gradle`
+- Запустит миграции кешей при обновлении приложения
+
+📖 Подробнее: [docs/QUICK_START_VERSION.md](./docs/QUICK_START_VERSION.md)
+
 ### Git Workflow
 
-```bash
+```powershell
 # Создать feature branch
 git checkout -b feature/new-feature
 
@@ -297,10 +324,12 @@ npm run test:coverage
 ## 🐛 Debugging
 
 ### Android
+
 - Chrome DevTools: `chrome://inspect`
 - Android Studio Logcat для нативных логов
 
 ### iOS
+
 - Safari Web Inspector для web debugging
 - Xcode console для нативных логов
 
@@ -308,10 +337,12 @@ npm run test:coverage
 
 ## 📊 Статус проекта
 
-- ✅ **Android** - готово к релизу (v1.0.0)
-- 🚧 **iOS** - в разработке
-- ✅ **Backend Integration** - интегрировано
-- ⏳ **OCPP Backend** - требует деплоя
+**Версия:** 1.0.1 | **Build:** 37 | **Последнее обновление:** 2025-10-15
+
+- ✅ **Android** - готово к релизу, APK собран
+- 🚧 **iOS** - подготовлено к деплою (требуется macOS для финального билда)
+- ✅ **Backend Integration** - полностью интегрировано
+- ✅ **OCPP Backend** - работает (https://ocpp.evpower.kg)
 
 ---
 
@@ -346,6 +377,7 @@ npm run test:coverage
 ## 🤝 Поддержка
 
 По вопросам:
+
 - **Email:** support@evpower.kg
 - **GitHub Issues:** [создать issue](https://github.com/caesarclown9/evpower-mobile-app/issues)
 

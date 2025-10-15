@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import type { ReactNode } from 'react';
+import React, { useState, useEffect, useRef } from "react";
+import type { ReactNode } from "react";
 
 interface LazyLoadProps {
   children: ReactNode;
@@ -18,7 +18,7 @@ interface LazyLoadProps {
 export const LazyLoad: React.FC<LazyLoadProps> = ({
   children,
   placeholder = <div className="animate-pulse bg-gray-200 rounded-lg h-32" />,
-  rootMargin = '100px',
+  rootMargin = "100px",
   threshold = 0.1,
   onVisible,
   once = true,
@@ -41,8 +41,10 @@ export const LazyLoad: React.FC<LazyLoadProps> = ({
     }
 
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
+      (entries) => {
+        if (!entries || entries.length === 0) return;
+        const entry = entries[0];
+        if (entry && entry.isIntersecting) {
           setIsVisible(true);
           hasBeenVisible.current = true;
 
@@ -54,14 +56,14 @@ export const LazyLoad: React.FC<LazyLoadProps> = ({
           if (once) {
             observer.disconnect();
           }
-        } else if (!once) {
+        } else if (!once && entry) {
           setIsVisible(false);
         }
       },
       {
         rootMargin,
         threshold,
-      }
+      },
     );
 
     observer.observe(element);
@@ -93,7 +95,7 @@ export const LazyLoad: React.FC<LazyLoadProps> = ({
  */
 export function withLazyLoad<P extends object>(
   Component: React.ComponentType<P>,
-  options?: Omit<LazyLoadProps, 'children'>
+  options?: Omit<LazyLoadProps, "children">,
 ) {
   return (props: P) => (
     <LazyLoad {...options}>
@@ -128,13 +130,7 @@ export const LazyImage: React.FC<LazyImageProps> = ({
 
   return (
     <LazyLoad
-      placeholder={
-        <img
-          src={placeholder}
-          alt={alt}
-          className={className}
-        />
-      }
+      placeholder={<img src={placeholder} alt={alt} className={className} />}
       onVisible={() => {
         // Начинаем загрузку реального изображения
         const img = new Image();
@@ -155,7 +151,7 @@ export const LazyImage: React.FC<LazyImageProps> = ({
       <img
         src={imageSrc}
         alt={alt}
-        className={`${className} ${isLoaded ? 'fade-in' : ''}`}
+        className={`${className} ${isLoaded ? "fade-in" : ""}`}
         loading="lazy"
       />
     </LazyLoad>
@@ -188,12 +184,14 @@ export function LazyList<T>({
     if (!element) return;
 
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && visibleCount < items.length) {
-          setVisibleCount(prev => Math.min(prev + batchSize, items.length));
+      (entries) => {
+        if (!entries || entries.length === 0) return;
+        const entry = entries[0];
+        if (entry && entry.isIntersecting && visibleCount < items.length) {
+          setVisibleCount((prev) => Math.min(prev + batchSize, items.length));
         }
       },
-      { rootMargin: '100px' }
+      { rootMargin: "100px" },
     );
 
     observer.observe(element);
@@ -234,7 +232,7 @@ class ErrorBoundary extends React.Component<{
   }
 
   componentDidCatch(error: Error) {
-    console.error('LazyLoad error:', error);
+    console.error("LazyLoad error:", error);
     if (this.props.onError) {
       this.props.onError();
     }

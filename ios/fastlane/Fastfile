@@ -1,0 +1,63 @@
+# This file contains the fastlane configuration
+# You can find the documentation at https://docs.fastlane.tools
+
+default_platform(:ios)
+
+platform :ios do
+  desc "Release to App Store"
+  lane :release do
+    # Get API Key info from environment
+    api_key_path = File.expand_path("~/private_keys/AuthKey_#{ENV['APP_STORE_CONNECT_API_KEY_KEY_ID']}.p8")
+
+    api_key = app_store_connect_api_key(
+      key_id: ENV['APP_STORE_CONNECT_API_KEY_KEY_ID'],
+      issuer_id: ENV['APP_STORE_CONNECT_API_KEY_ISSUER_ID'],
+      key_filepath: api_key_path,
+      in_house: false
+    )
+
+    # Sync signing with match
+    match(
+      type: "appstore",
+      readonly: true,
+      api_key: api_key
+    )
+
+    # Update code signing settings
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: "App/App.xcodeproj",
+      team_id: ENV["APPLE_TEAM_ID"],
+      profile_name: "match AppStore kg.evpower.app",
+      code_sign_identity: "iPhone Distribution"
+    )
+
+    # Build the app
+    build_app(
+      workspace: "App/App.xcworkspace",
+      scheme: "App",
+      export_method: "app-store",
+      export_options: {
+        provisioningProfiles: {
+          "kg.evpower.app" => "match AppStore kg.evpower.app"
+        }
+      },
+      output_directory: "./build",
+      output_name: "EvPower.ipa"
+    )
+
+    # Upload to TestFlight
+    upload_to_testflight(
+      api_key: api_key,
+      skip_waiting_for_build_processing: true,
+      distribute_external: false,
+      notify_external_testers: false
+    )
+
+    UI.success("✅ Successfully uploaded to TestFlight!")
+    UI.success("Next steps:")
+    UI.success("1. Go to App Store Connect")
+    UI.success("2. Wait for build processing (~10-20 min)")
+    UI.success("3. Configure metadata and submit for review")
+  end
+end

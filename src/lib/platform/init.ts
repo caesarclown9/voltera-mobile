@@ -114,7 +114,3 @@ export const cleanupPlatformServices = () => {
 
   logger.info("Platform: Services cleanup completed");
 };
-
-}
-}
-}

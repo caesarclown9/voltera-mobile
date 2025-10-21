@@ -70,7 +70,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       if (event === "SIGNED_IN" && session?.user) {
         console.log("[AuthProvider] SIGNED_IN event, fetching user data...");
-        const user = await authService.getCurrentUser();
+
+        // Retry механизм для устранения race condition
+        let user = await authService.getCurrentUser();
+        let retries = 0;
+        const maxRetries = 3;
+
+        while (!user && retries < maxRetries) {
+          console.log(
+            `[AuthProvider] SIGNED_IN: Retry ${retries + 1}/${maxRetries}...`,
+          );
+          await new Promise((resolve) => setTimeout(resolve, 300)); // Ждем 300ms
+          user = await authService.getCurrentUser();
+          retries++;
+        }
+
         console.log(
           "[AuthProvider] SIGNED_IN: Got user:",
           user ? user.id : "null",
@@ -93,7 +107,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           login(unifiedUser);
         } else {
           console.warn(
-            "[AuthProvider] SIGNED_IN: User data not found, cannot login",
+            "[AuthProvider] SIGNED_IN: User data not found after retries, cannot login",
           );
         }
       } else if (event === "INITIAL_SESSION") {

@@ -27,6 +27,29 @@
         </trust-anchors>
     </debug-overrides>
 
+    <!-- Yandex Maps - allow all subdomains (API, tiles, static) -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">yandex.ru</domain>
+        <domain includeSubdomains="true">yandex.net</domain>
+        <domain includeSubdomains="true">yandex.com</domain>
+        <domain includeSubdomains="true">maps.yandex.ru</domain>
+        <domain includeSubdomains="true">api-maps.yandex.ru</domain>
+        <domain includeSubdomains="true">vec.maps.yandex.net</domain>
+        <domain includeSubdomains="true">sat.maps.yandex.net</domain>
+        <domain includeSubdomains="true">core-renderer-tiles.maps.yandex.net</domain>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
+
+    <!-- Supabase -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">supabase.co</domain>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
+
     <!-- Default configuration for other domains -->
     <base-config cleartextTrafficPermitted="false">
         <trust-anchors>

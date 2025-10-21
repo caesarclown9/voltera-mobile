@@ -2,12 +2,8 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import {
   supabase,
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error - будет использоваться когда включим динамические тарифы
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   supabaseWithTimeout,
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error - будет использоваться когда включим динамические тарифы
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   isSupabaseConfigured,
 } from "../../shared/utils/supabaseHelpers";
@@ -36,7 +32,6 @@ class PricingService {
    * Инициализирует сервис и кэш
    * TODO: Будет использоваться когда включим динамические тарифы
    */
-  // @ts-expect-error - будет использоваться когда включим динамические тарифы
   private async _initialize() {
     if (this.initialized) return;
     await pricingCache.init();
@@ -164,7 +159,6 @@ class PricingService {
    * Получает клиентский тариф если есть
    * TODO: Будет использоваться когда включим динамические тарифы
    */
-  // @ts-expect-error - будет использоваться когда включим динамические тарифы
   private async _getClientTariff(
     clientId: string,
     stationId: string,
@@ -231,7 +225,6 @@ class PricingService {
    * Находит применимое правило тарифа
    * TODO: Будет использоваться когда включим динамические тарифы
    */
-  // @ts-expect-error - будет использоваться когда включим динамические тарифы
   private async _findApplicableRule(
     tariffPlanId: string,
     connectorType?: string,
@@ -321,7 +314,6 @@ class PricingService {
    * Создает PricingResult из правила тарифа
    * TODO: Будет использоваться когда включим динамические тарифы
    */
-  // @ts-expect-error - будет использоваться когда включим динамические тарифы
   private _buildPricingFromRule(
     rule: TariffRule,
     tariffPlanId: string,
@@ -393,7 +385,6 @@ class PricingService {
    * Кэширует результат
    * TODO: Будет использоваться когда включим динамические тарифы
    */
-  // @ts-expect-error - будет использоваться когда включим динамические тарифы
   private async _cacheResult(key: string, data: PricingResult): Promise<void> {
     // Memory кэш
     this.cache.set(key, {

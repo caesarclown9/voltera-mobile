@@ -757,21 +757,45 @@ class EvPowerApiService {
 
   /**
    * Получить историю транзакций (платежей)
+   * Объединяет данные из balance_topups и payment_transactions_odengi через JOIN
+   * Возвращает все транзакции (успешные и отмененные) с полной информацией
    */
   async getTransactionHistory(limit = 20) {
     const client_id = await this.getClientId();
 
-    // Используем balance_topups вместо payment_transactions_odengi,
-    // потому что только там есть статус платежа
+    // JOIN balance_topups с payment_transactions_odengi для получения balance_before/after
     const { data, error } = await supabase
       .from("balance_topups")
-      .select("*")
+      .select(
+        `
+        *,
+        payment_transactions_odengi!payment_transactions_odengi_balance_topup_id_fkey(
+          balance_before,
+          balance_after,
+          amount,
+          transaction_type
+        )
+      `,
+      )
       .eq("client_id", client_id)
       .order("created_at", { ascending: false })
       .limit(limit);
 
     if (error) throw error;
-    return data;
+
+    // Преобразуем данные для удобства использования
+    return (data || []).map((tx) => ({
+      ...tx,
+      // Для успешных транзакций используем данные из payment_transactions_odengi
+      balance_before:
+        tx.payment_transactions_odengi?.[0]?.balance_before || null,
+      balance_after: tx.payment_transactions_odengi?.[0]?.balance_after || null,
+      amount:
+        tx.payment_transactions_odengi?.[0]?.amount || tx.requested_amount,
+      transaction_type:
+        tx.payment_transactions_odengi?.[0]?.transaction_type ||
+        (tx.status === "canceled" ? "balance_topup_canceled" : "balance_topup"),
+    }));
   }
 
   // ============== REALTIME ==============

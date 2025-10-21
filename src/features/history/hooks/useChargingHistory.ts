@@ -83,10 +83,15 @@ export const useTransactionHistory = (limit: number = 50) => {
 
         // Преобразуем данные в TransactionHistoryItem
         return data.map((tx: any): TransactionHistoryItem => {
-          // Определяем тип транзакции на основе transaction_type
+          // Определяем тип и статус транзакции на основе transaction_type
           let type: "topup" | "charge" | "refund" = "charge";
+          let status: "success" | "pending" | "failed" = "success";
+
           if (tx.transaction_type === "balance_topup") {
             type = "topup";
+          } else if (tx.transaction_type === "balance_topup_canceled") {
+            type = "topup";
+            status = "failed"; // Отмененные транзакции
           } else if (tx.transaction_type === "charge_refund") {
             type = "refund";
           }
@@ -106,7 +111,7 @@ export const useTransactionHistory = (limit: number = 50) => {
             balance_after: parseAmount(tx.balance_after),
             timestamp: tx.created_at,
             description: tx.description || `Транзакция ${type}`,
-            status: "success", // TODO: добавить поле status в таблицу
+            status,
             sessionId: tx.charging_session_id,
             paymentMethod: "qr_odengi", // TODO: определять по данным
           };

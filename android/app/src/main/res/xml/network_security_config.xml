@@ -6,24 +6,16 @@
     <domain-config>
         <domain includeSubdomains="false">ocpp.evpower.kg</domain>
         <pin-set expiration="2026-01-01">
-            <!-- Replace with actual certificate SHA256 hashes -->
-            <!-- Get hash: openssl s_client -connect ocpp.evpower.kg:443 | openssl x509 -pubkey -noout | openssl pkey -pubin -outform der | openssl dgst -sha256 -binary | openssl enc -base64 -->
-            <pin digest="SHA-256">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</pin>
-            <!-- Backup pin -->
-            <pin digest="SHA-256">BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=</pin>
+            <!-- Current certificate hash for ocpp.evpower.kg -->
+            <!-- Generated: 2025-10-21 -->
+            <pin digest="SHA-256">oZb2ItbSoJl3Kamv2sgIeC345I3lhH5V7HblBOPDPUs=</pin>
+            <!-- Backup pin: Let's Encrypt R12 issuer -->
+            <pin digest="SHA-256">SbqmW+BAJEQrrUnIU4uVF0v8P+uz0K3GpCQu2cl/AUo=</pin>
         </pin-set>
         <trustkit-config>
             <report-uri>https://api.evpower.kg/security/pinning-report</report-uri>
             <enforce-pinning>true</enforce-pinning>
         </trustkit-config>
-    </domain-config>
-
-    <!-- Main API -->
-    <domain-config>
-        <domain includeSubdomains="true">api.evpower.kg</domain>
-        <pin-set expiration="2026-01-01">
-            <pin digest="SHA-256">CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC=</pin>
-        </pin-set>
     </domain-config>
 
     <!-- Debug configuration (only in debug builds) -->

@@ -13,6 +13,7 @@ export function SignUpForm({ onSuccess, onSwitchToSignIn }: SignUpFormProps) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [ageConfirmed, setAgeConfirmed] = useState(false);
 
   const signUpMutation = useSignUp();
 
@@ -42,7 +43,8 @@ export function SignUpForm({ onSuccess, onSwitchToSignIn }: SignUpFormProps) {
     validateEmail(email) &&
     validatePhone(phone) &&
     password.length >= 6 &&
-    password === confirmPassword;
+    password === confirmPassword &&
+    ageConfirmed;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -199,6 +201,43 @@ export function SignUpForm({ onSuccess, onSwitchToSignIn }: SignUpFormProps) {
           {confirmPassword && password !== confirmPassword && (
             <p className="mt-1 text-sm text-red-600">Пароли не совпадают</p>
           )}
+        </div>
+
+        {/* Age Confirmation (18+) - Required by Google Play */}
+        <div className="pt-2">
+          <label className="flex items-start gap-3 cursor-pointer group">
+            <input
+              type="checkbox"
+              checked={ageConfirmed}
+              onChange={(e) => setAgeConfirmed(e.target.checked)}
+              className="mt-1 w-5 h-5 rounded border-gray-300 text-green-600 focus:ring-green-500 focus:ring-2 cursor-pointer"
+              required
+            />
+            <span className="text-sm text-gray-700 select-none">
+              Подтверждаю, что мне исполнилось{" "}
+              <span className="font-semibold text-gray-900">18 лет</span> и я
+              принимаю{" "}
+              <a
+                href="/legal/terms.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-cyan-600 hover:text-cyan-700 underline"
+                onClick={(e) => e.stopPropagation()}
+              >
+                Условия использования
+              </a>{" "}
+              и{" "}
+              <a
+                href="/legal/privacy.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-cyan-600 hover:text-cyan-700 underline"
+                onClick={(e) => e.stopPropagation()}
+              >
+                Политику конфиденциальности
+              </a>
+            </span>
+          </label>
         </div>
 
         <button

@@ -91,12 +91,19 @@ export const useTransactionHistory = (limit: number = 50) => {
             type = "refund";
           }
 
+          // Безопасный парсинг числовых значений
+          const parseAmount = (value: any): number => {
+            if (value === null || value === undefined || value === "") return 0;
+            const parsed = parseFloat(value);
+            return isNaN(parsed) ? 0 : parsed;
+          };
+
           return {
             id: tx.id.toString(),
             type,
-            amount: parseFloat(tx.amount),
-            balance_before: parseFloat(tx.balance_before),
-            balance_after: parseFloat(tx.balance_after),
+            amount: parseAmount(tx.amount),
+            balance_before: parseAmount(tx.balance_before),
+            balance_after: parseAmount(tx.balance_after),
             timestamp: tx.created_at,
             description: tx.description || `Транзакция ${type}`,
             status: "success", // TODO: добавить поле status в таблицу

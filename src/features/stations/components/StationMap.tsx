@@ -4,7 +4,6 @@ import {
   Placemark,
   Clusterer,
   ZoomControl,
-  GeolocationControl,
 } from "@pbe/react-yandex-maps";
 import { useState, useRef } from "react";
 import { StationSelectionModal } from "@/shared/components/StationSelectionModal";
@@ -183,7 +182,6 @@ export function StationMap({
           }}
         >
           <ZoomControl />
-          <GeolocationControl />
 
           <Clusterer
             instanceRef={(ref: any) => {

@@ -22,8 +22,8 @@ const config: CapacitorConfig = {
       splashImmersive: true,
     },
     StatusBar: {
-      backgroundColor: "#10B981",
-      style: "LIGHT",
+      // Используем системный стиль по умолчанию (адаптивный)
+      style: "DEFAULT",
     },
   },
   ios: {

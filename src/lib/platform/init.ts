@@ -22,8 +22,20 @@ export const initializePlatformServices = async () => {
     if (Capacitor.isNativePlatform()) {
       // Настройка StatusBar для нативных платформ
       try {
-        await StatusBar.setStyle({ style: Style.Light });
-        await StatusBar.setBackgroundColor({ color: "#10B981" });
+        // На Android настраиваем status bar в правильном порядке
+        if (Capacitor.getPlatform() === "android") {
+          // 1. Сначала делаем overlay
+          await StatusBar.setOverlaysWebView({ overlay: true });
+          // 2. Затем прозрачный фон
+          await StatusBar.setBackgroundColor({ color: "#00000000" });
+          // 3. И наконец темные иконки (для светлого контента)
+          await StatusBar.setStyle({ style: Style.Dark });
+        } else if (Capacitor.getPlatform() === "ios") {
+          // На iOS также используем overlay и темный стиль
+          await StatusBar.setOverlaysWebView({ overlay: true });
+          await StatusBar.setStyle({ style: Style.Dark });
+        }
+
         logger.debug("Platform: StatusBar configured");
       } catch (error) {
         logger.warn("Platform: StatusBar configuration failed", error);

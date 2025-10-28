@@ -39,6 +39,11 @@ supabase-mcp-config.json
 **/GoogleService-Info.plist
 **/serviceAccountKey.json
 
+# MCP Configuration - CONTAINS SUPABASE TOKENS
+.mcp.json
+mcp.json
+**/.mcp.json
+
 # Editor directories
 .vscode/*
 !.vscode/extensions.json

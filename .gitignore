@@ -123,6 +123,7 @@ temp/
 .claude/
 .cursor/
 .windsurf/
+.mcp.json
 
 # Temporary documentation and fixes
 FIXES*.md

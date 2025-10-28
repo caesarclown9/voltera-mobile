@@ -3,8 +3,10 @@
 import {
   supabase,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // @ts-expect-error - Reserved for future dynamic pricing feature
   supabaseWithTimeout,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // @ts-expect-error - Reserved for future dynamic pricing feature
   isSupabaseConfigured,
 } from "../../shared/utils/supabaseHelpers";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -32,6 +34,7 @@ class PricingService {
    * Инициализирует сервис и кэш
    * TODO: Будет использоваться когда включим динамические тарифы
    */
+  // @ts-expect-error - Reserved for future dynamic pricing feature
   private async _initialize() {
     if (this.initialized) return;
     await pricingCache.init();
@@ -159,6 +162,7 @@ class PricingService {
    * Получает клиентский тариф если есть
    * TODO: Будет использоваться когда включим динамические тарифы
    */
+  // @ts-expect-error - Reserved for future dynamic pricing feature
   private async _getClientTariff(
     clientId: string,
     stationId: string,
@@ -225,6 +229,7 @@ class PricingService {
    * Находит применимое правило тарифа
    * TODO: Будет использоваться когда включим динамические тарифы
    */
+  // @ts-expect-error - Reserved for future dynamic pricing feature
   private async _findApplicableRule(
     tariffPlanId: string,
     connectorType?: string,
@@ -314,6 +319,7 @@ class PricingService {
    * Создает PricingResult из правила тарифа
    * TODO: Будет использоваться когда включим динамические тарифы
    */
+  // @ts-expect-error - Reserved for future dynamic pricing feature
   private _buildPricingFromRule(
     rule: TariffRule,
     tariffPlanId: string,
@@ -385,6 +391,7 @@ class PricingService {
    * Кэширует результат
    * TODO: Будет использоваться когда включим динамические тарифы
    */
+  // @ts-expect-error - Reserved for future dynamic pricing feature
   private async _cacheResult(key: string, data: PricingResult): Promise<void> {
     // Memory кэш
     this.cache.set(key, {

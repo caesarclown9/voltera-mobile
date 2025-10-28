@@ -17,15 +17,15 @@ Google Play Store requires that your Privacy Policy is accessible via a **public
 1. **Create a new repository** (or use existing):
    ```bash
    cd /mnt/d/Projects
-   mkdir evpower-legal
-   cd evpower-legal
+   mkdir voltera-legal
+   cd voltera-legal
    git init
    ```
 
 2. **Copy legal files**:
    ```bash
-   cp /mnt/d/Projects/Evpower-mobile/public/legal/privacy.html ./
-   cp /mnt/d/Projects/Evpower-mobile/public/legal/terms.html ./
+   cp /mnt/d/Projects/Voltera-mobile/public/legal/privacy.html ./
+   cp /mnt/d/Projects/Voltera-mobile/public/legal/terms.html ./
    ```
 
 3. **Create index.html** (optional):
@@ -34,10 +34,10 @@ Google Play Store requires that your Privacy Policy is accessible via a **public
    <html lang="ru">
    <head>
        <meta charset="UTF-8">
-       <title>EvPower Legal</title>
+       <title>Voltera Legal</title>
    </head>
    <body>
-       <h1>EvPower Legal Documents</h1>
+       <h1>Voltera Legal Documents</h1>
        <ul>
            <li><a href="privacy.html">Privacy Policy</a></li>
            <li><a href="terms.html">Terms of Service</a></li>
@@ -50,7 +50,7 @@ Google Play Store requires that your Privacy Policy is accessible via a **public
    ```bash
    git add .
    git commit -m "Add legal documents"
-   git remote add origin https://github.com/YOUR_USERNAME/evpower-legal.git
+   git remote add origin https://github.com/YOUR_USERNAME/voltera-legal.git
    git push -u origin main
    ```
 
@@ -61,26 +61,26 @@ Google Play Store requires that your Privacy Policy is accessible via a **public
 
 6. **Your URLs will be**:
    ```
-   Privacy: https://YOUR_USERNAME.github.io/evpower-legal/privacy.html
-   Terms:   https://YOUR_USERNAME.github.io/evpower-legal/terms.html
+   Privacy: https://YOUR_USERNAME.github.io/voltera-legal/privacy.html
+   Terms:   https://YOUR_USERNAME.github.io/voltera-legal/terms.html
    ```
 
-### Option 2: Own Domain (evpower.kg)
+### Option 2: Own Domain (voltera.kg)
 
-If you have hosting for evpower.kg:
+If you have hosting for voltera.kg:
 
 1. **Upload files** to your web server:
    ```
-   /var/www/evpower.kg/legal/privacy.html
-   /var/www/evpower.kg/legal/terms.html
+   /var/www/voltera.kg/legal/privacy.html
+   /var/www/voltera.kg/legal/terms.html
    ```
 
 2. **Configure nginx/apache** to serve static files
 
 3. **Your URLs will be**:
    ```
-   Privacy: https://evpower.kg/legal/privacy.html
-   Terms:   https://evpower.kg/legal/terms.html
+   Privacy: https://voltera.kg/legal/privacy.html
+   Terms:   https://voltera.kg/legal/terms.html
    ```
 
 ### Option 3: Netlify/Vercel (Free Hosting)
@@ -158,7 +158,7 @@ href="https://YOUR_URL/privacy.html"  // Public URL
 - [ ] URLs use HTTPS
 - [ ] URLs accessible without authentication
 - [ ] Content matches app's data collection practices
-- [ ] Email contact visible: support@evpower.kg
+- [ ] Email contact visible: support@voltera.kg
 - [ ] Version and date visible in document
 - [ ] Links tested from mobile devices
 - [ ] URL entered in Google Play Console
@@ -174,4 +174,4 @@ If you need help with deployment:
 ---
 
 **Generated**: 2025-10-21
-**For**: EvPower Mobile App v1.0.1
+**For**: Voltera Mobile App v1.0.1

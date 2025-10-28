@@ -4,7 +4,7 @@ import type {
 } from "@tanstack/react-query-persist-client";
 import { get, set, del } from "idb-keyval";
 
-const IDB_KEY = "EVPOWER_QUERY_CACHE";
+const IDB_KEY = "VOLTERA_QUERY_CACHE";
 const CACHE_VERSION = 5; // Убрана prefetchQuery с пустым queryFn, блокировавшая реальные запросы
 
 export function createIDBPersister(idbValidKey: string = IDB_KEY): Persister {

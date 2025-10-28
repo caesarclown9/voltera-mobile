@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { evpowerApi } from "@/services/evpowerApi";
+import { volteraApi } from "@/services/volteraApi";
 import type {
   StartChargingResponse,
   ChargingStatus,
@@ -52,7 +52,7 @@ export const useStartCharging = () => {
     }
   >({
     mutationFn: async (data) => {
-      return await evpowerApi.startCharging(
+      return await volteraApi.startCharging(
         data.station_id,
         data.connector_id,
         {
@@ -74,7 +74,7 @@ export const useStopCharging = () => {
 
   return useMutation<StopChargingResponse, Error, { session_id: string }>({
     mutationFn: async (data) => {
-      return await evpowerApi.stopCharging(data.session_id);
+      return await volteraApi.stopCharging(data.session_id);
     },
     onSuccess: () => {
       // Update charging status and balance
@@ -90,7 +90,7 @@ export const useChargingStatus = (sessionId?: string) => {
     queryKey: ["charging-status", sessionId],
     queryFn: async () => {
       if (!sessionId) throw new Error("Session ID required");
-      return await evpowerApi.getChargingStatus(sessionId);
+      return await volteraApi.getChargingStatus(sessionId);
     },
     enabled: !!sessionId,
     refetchInterval: (query) => {
@@ -138,7 +138,7 @@ export const useCharging = () => {
   }) => {
     try {
       // Шаг 1: Проверяем доступность станции
-      const stationStatus = await evpowerApi.getStationStatus(data.stationId);
+      const stationStatus = await volteraApi.getStationStatus(data.stationId);
 
       // Проверяем доступность станции
       if (!stationStatus.available_for_charging) {

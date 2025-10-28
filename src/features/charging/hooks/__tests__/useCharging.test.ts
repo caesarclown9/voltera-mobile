@@ -8,8 +8,8 @@ import {
 } from "../useCharging";
 import React from "react";
 
-vi.mock("@/services/evpowerApi", () => ({
-  evpowerApi: {
+vi.mock("@/services/volteraApi", () => ({
+  volteraApi: {
     startCharging: vi.fn(),
     stopCharging: vi.fn(),
     getStationStatus: vi.fn(),
@@ -35,11 +35,11 @@ describe("useCharging hooks", () => {
 
   describe("useStartCharging", () => {
     it("должен успешно начать зарядку", async () => {
-      const { evpowerApi } = await import("@/services/evpowerApi");
-      vi.mocked(evpowerApi.getStationStatus as any).mockResolvedValue({
+      const { volteraApi } = await import("@/services/volteraApi");
+      vi.mocked(volteraApi.getStationStatus as any).mockResolvedValue({
         available_for_charging: true,
       });
-      vi.mocked(evpowerApi.startCharging as any).mockResolvedValue({
+      vi.mocked(volteraApi.startCharging as any).mockResolvedValue({
         success: true,
         session_id: "session-123",
       });
@@ -60,11 +60,11 @@ describe("useCharging hooks", () => {
     });
 
     it("должен обработать ошибку при недоступной станции", async () => {
-      const { evpowerApi } = await import("@/services/evpowerApi");
-      vi.mocked(evpowerApi.getStationStatus as any).mockResolvedValue({
+      const { volteraApi } = await import("@/services/volteraApi");
+      vi.mocked(volteraApi.getStationStatus as any).mockResolvedValue({
         available_for_charging: false,
       });
-      vi.mocked(evpowerApi.startCharging as any).mockRejectedValue(
+      vi.mocked(volteraApi.startCharging as any).mockRejectedValue(
         new Error("Station unavailable"),
       );
 
@@ -89,8 +89,8 @@ describe("useCharging hooks", () => {
 
   describe("useStopCharging", () => {
     it("должен успешно остановить зарядку", async () => {
-      const { evpowerApi } = await import("@/services/evpowerApi");
-      vi.mocked(evpowerApi.stopCharging as any).mockResolvedValue({
+      const { volteraApi } = await import("@/services/volteraApi");
+      vi.mocked(volteraApi.stopCharging as any).mockResolvedValue({
         success: true,
         message: "ok",
       });
@@ -109,8 +109,8 @@ describe("useCharging hooks", () => {
 
   describe("useChargingStatus", () => {
     it("должен получить статус зарядки", async () => {
-      const { evpowerApi } = await import("@/services/evpowerApi");
-      vi.mocked(evpowerApi.getChargingStatus as any).mockResolvedValue({
+      const { volteraApi } = await import("@/services/volteraApi");
+      vi.mocked(volteraApi.getChargingStatus as any).mockResolvedValue({
         success: true,
         session: {
           id: "s1",

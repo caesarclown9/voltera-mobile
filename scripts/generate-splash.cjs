@@ -2,7 +2,7 @@ const sharp = require('sharp');
 const fs = require('fs');
 const path = require('path');
 
-const whiteLogo = path.join(__dirname, '../public/icons/evpower-logo-white.png');
+const whiteLogo = path.join(__dirname, '../public/icons/voltera-logo-white.png');
 const backgroundColor = { r: 16, g: 185, b: 129 }; // #10B981
 
 // Android splash screen sizes

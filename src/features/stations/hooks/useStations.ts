@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { evpowerApi } from '@/services/evpowerApi'
+import { volteraApi } from '@/services/volteraApi'
 import { extractStationsFromLocations, type StationWithLocation } from '../types'
 
 // Get all stations from API with location data
@@ -9,7 +9,7 @@ export const useStations = (onlyAvailable = true, userLocation?: { lat: number; 
     queryFn: async () => {
       try {
         // Получаем все локации со станциями
-        const locations = await evpowerApi.getLocations(true);
+        const locations = await volteraApi.getLocations(true);
 
         // Извлекаем и обогащаем станции данными локаций
         const allStations = extractStationsFromLocations(locations, userLocation);
@@ -35,7 +35,7 @@ export const useStationStatus = (stationId: string) => {
   return useQuery({
     queryKey: ['station-status', stationId],
     queryFn: async () => {
-      return await evpowerApi.getStationStatus(stationId)
+      return await volteraApi.getStationStatus(stationId)
     },
     enabled: !!stationId,
     refetchInterval: 30000, // Update every 30 seconds

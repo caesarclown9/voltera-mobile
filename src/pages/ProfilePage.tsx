@@ -12,7 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStatus, useLogout } from "../features/auth/hooks/useAuth";
 import { useBalance } from "../features/balance/hooks/useBalance";
 import { useEffect, useState } from "react";
-import { evpowerApi } from "@/services/evpowerApi";
+import { volteraApi } from "@/services/volteraApi";
 
 export const ProfilePage = () => {
   const navigate = useNavigate();
@@ -21,7 +21,7 @@ export const ProfilePage = () => {
   const [deleteRequested, setDeleteRequested] = useState(false);
   // Realtime подписка на баланс
   useEffect(() => {
-    const sub = evpowerApi.subscribeToBalance(() => {
+    const sub = volteraApi.subscribeToBalance(() => {
       // Ничего не делаем здесь напрямую — useBalance сам рефрешнётся через invalidate в хуке QR topup
       // Если потребуется — можно добавить локальный стейт или invalidateQueries
     });
@@ -57,7 +57,7 @@ export const ProfilePage = () => {
   const handleDeleteAccount = async () => {
     if (!confirm("Удалить аккаунт и данные? Это действие необратимо.")) return;
     try {
-      await evpowerApi.requestAccountDeletion();
+      await volteraApi.requestAccountDeletion();
       alert(
         "Запрос на удаление отправлен. Мы обработаем его в ближайшее время.",
       );

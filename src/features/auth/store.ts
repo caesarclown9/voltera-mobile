@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { UnifiedUser } from "./types/unified.types";
-import { unifiedApi } from "@/services/evpowerApi";
+import { unifiedApi } from "@/services/volteraApi";
 
 interface AuthState {
   user: UnifiedUser | null;

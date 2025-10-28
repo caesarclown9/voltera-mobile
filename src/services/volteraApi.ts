@@ -1,5 +1,5 @@
 /**
- * EvPower API v1 Service - ЕДИНСТВЕННЫЙ API клиент для всего приложения
+ * Voltera API v1 Service - ЕДИНСТВЕННЫЙ API клиент для всего приложения
  * Интеграция с бэкендом OCPP сервера
  *
  * ВАЖНО:
@@ -209,7 +209,7 @@ export interface PaymentStatus {
   error?: string;
 }
 
-class EvPowerApiService {
+class VolteraApiService {
   private baseUrl: string;
 
   constructor() {
@@ -240,7 +240,7 @@ class EvPowerApiService {
     schema: import("zod").ZodType<T>,
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
-    logger.debug(`[EvPowerAPI] ${options.method || "GET"} ${url}`);
+    logger.debug(`[VolteraAPI] ${options.method || "GET"} ${url}`);
     // Добавляем Authorization: Bearer <Supabase JWT> если доступен
     const {
       data: { session },
@@ -349,9 +349,9 @@ class EvPowerApiService {
       );
 
       // DEBUG в dev: логирование ответа от API
-      logger.debug("[EvPowerAPI] API response for /locations:");
+      logger.debug("[VolteraAPI] API response for /locations:");
       logger.debug(
-        `[EvPowerAPI] Locations count from API: ${response.locations?.length || 0}`,
+        `[VolteraAPI] Locations count from API: ${response.locations?.length || 0}`,
       );
 
       return response.locations as Location[];
@@ -363,15 +363,15 @@ class EvPowerApiService {
         throw error;
       }
       logger.warn(
-        "[EvPowerAPI] API unavailable, using Supabase fallback",
+        "[VolteraAPI] API unavailable, using Supabase fallback",
         error,
       );
 
       // Fallback: прямой запрос к Supabase
-      logger.debug(`[EvPowerAPI] includeStations: ${includeStations}`);
+      logger.debug(`[VolteraAPI] includeStations: ${includeStations}`);
 
       if (includeStations) {
-        logger.debug("[EvPowerAPI] Starting Supabase query via REST...");
+        logger.debug("[VolteraAPI] Starting Supabase query via REST...");
 
         // Use direct REST API instead of Supabase client to avoid auth issues
         const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -392,13 +392,13 @@ class EvPowerApiService {
           );
 
           logger.debug(
-            `[EvPowerAPI] Supabase REST response status: ${response.status}`,
+            `[VolteraAPI] Supabase REST response status: ${response.status}`,
           );
 
           if (!response.ok) {
             const errorText = await response.text();
             logger.error(
-              "[EvPowerAPI] Supabase REST error",
+              "[VolteraAPI] Supabase REST error",
               new Error(errorText),
             );
             throw new Error(
@@ -408,11 +408,11 @@ class EvPowerApiService {
 
           locations = await response.json();
           logger.debug(
-            `[EvPowerAPI] Supabase REST returned locations: ${locations?.length || 0}`,
+            `[VolteraAPI] Supabase REST returned locations: ${locations?.length || 0}`,
           );
         } catch (err) {
           logger.error(
-            "[EvPowerAPI] Supabase REST THREW exception",
+            "[VolteraAPI] Supabase REST THREW exception",
             err as Error,
           );
           throw err;
@@ -420,14 +420,14 @@ class EvPowerApiService {
 
         // DEBUG: временное логирование
         logger.debug(
-          `[EvPowerAPI] Supabase fallback returned locations: ${locations?.length || 0}`,
+          `[VolteraAPI] Supabase fallback returned locations: ${locations?.length || 0}`,
         );
 
         // Преобразуем к формату API
         const mappedLocations = (locations || []).map((loc: any) => {
           const mappedStatus = this.mapLocationStatus(loc.stations || []);
           logger.debug(
-            `[EvPowerAPI] Location ${loc.id}: DB status="${loc.status}" -> mapped status="${mappedStatus}"`,
+            `[VolteraAPI] Location ${loc.id}: DB status="${loc.status}" -> mapped status="${mappedStatus}"`,
           );
 
           return {
@@ -473,7 +473,7 @@ class EvPowerApiService {
         });
 
         logger.debug(
-          `[EvPowerAPI] Returning ${mappedLocations.length} mapped locations`,
+          `[VolteraAPI] Returning ${mappedLocations.length} mapped locations`,
         );
         return mappedLocations;
       } else {
@@ -668,7 +668,7 @@ class EvPowerApiService {
   ): Promise<TopupQRResponse> {
     const client_id = await this.getClientId();
     const requestBody = { client_id, amount, description };
-    console.log("[evpowerApi] topupWithQR request:", requestBody);
+    console.log("[volteraApi] topupWithQR request:", requestBody);
     return this.apiRequest(
       "/balance/topup-qr",
       { method: "POST", body: requestBody },
@@ -986,7 +986,7 @@ class EvPowerApiService {
 }
 
 // Экспортируем singleton
-export const evpowerApi = new EvPowerApiService();
+export const volteraApi = new VolteraApiService();
 
 // ============== ДОПОЛНИТЕЛЬНЫЕ МЕТОДЫ ДЛЯ СОВМЕСТИМОСТИ ==============
 
@@ -1054,8 +1054,8 @@ export function handleApiError(error: any): string {
 /**
  * Singleton для обратной совместимости
  */
-export const apiClient = evpowerApi;
-export const unifiedApi = evpowerApi;
+export const apiClient = volteraApi;
+export const unifiedApi = volteraApi;
 
 // Типы уже экспортированы выше через export interface
 

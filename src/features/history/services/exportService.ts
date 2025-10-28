@@ -44,7 +44,7 @@ export class ExportService {
 
     // Добавляем заголовок
     doc.setFontSize(20);
-    doc.text("История зарядок EvPower", 14, 20);
+    doc.text("История зарядок Voltera", 14, 20);
 
     // Добавляем дату генерации
     doc.setFontSize(10);
@@ -217,7 +217,7 @@ export class ExportService {
 
     // Заголовок
     doc.setFontSize(20);
-    doc.text("История транзакций EvPower", 14, 20);
+    doc.text("История транзакций Voltera", 14, 20);
 
     // Дата генерации
     doc.setFontSize(10);

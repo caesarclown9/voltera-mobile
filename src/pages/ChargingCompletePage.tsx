@@ -10,7 +10,7 @@ import {
   Home,
   Receipt,
 } from "lucide-react";
-import { apiClient } from "../services/evpowerApi";
+import { apiClient } from "../services/volteraApi";
 
 interface ChargingCompleteData {
   sessionId: string;
@@ -170,7 +170,7 @@ export const ChargingCompletePage = () => {
           Зарядка успешно завершена!
         </h2>
         <p className="text-gray-600 text-center mb-6">
-          Спасибо за использование EvPower
+          Спасибо за использование Voltera
         </p>
 
         {/* Session Details Card */}

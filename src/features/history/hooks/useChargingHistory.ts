@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { unifiedApi } from "@/services/evpowerApi";
+import { unifiedApi } from "@/services/volteraApi";
 import type {
   ChargingHistoryItem,
   TransactionHistoryItem,
@@ -12,7 +12,7 @@ export const useChargingHistory = (limit: number = 50) => {
     queryKey: ["charging-history", limit],
     queryFn: async (): Promise<ChargingHistoryItem[]> => {
       try {
-        // Получаем историю напрямую через evpowerApi
+        // Получаем историю напрямую через volteraApi
         const data = await unifiedApi.getChargingHistory(limit);
 
         if (!data || data.length === 0) {
@@ -74,7 +74,7 @@ export const useTransactionHistory = (limit: number = 50) => {
     queryKey: ["transaction-history", limit],
     queryFn: async (): Promise<TransactionHistoryItem[]> => {
       try {
-        // Получаем историю транзакций напрямую через evpowerApi
+        // Получаем историю транзакций напрямую через volteraApi
         const data = await unifiedApi.getTransactionHistory(limit);
 
         if (!data || data.length === 0) {

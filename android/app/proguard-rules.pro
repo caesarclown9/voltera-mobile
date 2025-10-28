@@ -1,4 +1,4 @@
-# ProGuard configuration for EvPower Mobile App
+# ProGuard configuration for Voltera Mobile App
 
 # Keep line number information for debugging stack traces
 -keepattributes SourceFile,LineNumberTable
@@ -36,8 +36,8 @@
 -keep class * implements com.google.gson.JsonDeserializer
 
 # Keep data models
--keep class kg.evpower.app.models.** { *; }
--keep class kg.evpower.app.data.** { *; }
+-keep class kg.voltera.app.models.** { *; }
+-keep class kg.voltera.app.data.** { *; }
 
 # ML Kit for QR scanning
 -keep class com.google.mlkit.** { *; }

@@ -1,4 +1,4 @@
-import { evpowerApi } from "@/services/evpowerApi";
+import { volteraApi } from "@/services/volteraApi";
 
 export const chargingService = {
   async startCharging(params: {
@@ -7,16 +7,16 @@ export const chargingService = {
     amount_som?: number;
     energy_kwh?: number;
   }) {
-    return evpowerApi.startCharging(params.stationId, params.connectorId, {
+    return volteraApi.startCharging(params.stationId, params.connectorId, {
       amount_som: params.amount_som ?? undefined,
       energy_kwh: params.energy_kwh ?? undefined,
     });
   },
   async stopCharging(sessionId: string) {
-    return evpowerApi.stopCharging(sessionId);
+    return volteraApi.stopCharging(sessionId);
   },
   async getActiveSession(sessionId: string) {
-    const status = await evpowerApi.getChargingStatus(sessionId);
+    const status = await volteraApi.getChargingStatus(sessionId);
     if (!status.success || !status.session) return null;
     const s = status.session;
     return {

@@ -1,6 +1,6 @@
 # Changelog
 
-Все значимые изменения в проекте EvPower Mobile будут документироваться в этом файле.
+Все значимые изменения в проекте Voltera Mobile будут документироваться в этом файле.
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 и проект следует [Semantic Versioning](https://semver.org/lang/ru/).
@@ -119,7 +119,7 @@
   - `pricingService.ts` - добавлены @ts-expect-error для будущего кода
   - `StationMap.tsx` и `MapHome.tsx` - удалены неиспользуемые пропсы
   - `LazyLoad.tsx` и `offline.ts` - исправлены неиспользуемые переменные
-  - `evpowerApi.ts` - добавлены type assertions
+  - `volteraApi.ts` - добавлены type assertions
 
 ### Документация
 
@@ -336,9 +336,9 @@
 
 ## Ссылки
 
-- **Repository:** https://github.com/caesarclown9/evpower-mobile-app
-- **Backend API:** https://ocpp.evpower.kg
-- **Support:** support@evpower.kg
+- **Repository:** https://github.com/caesarclown9/voltera-mobile-app
+- **Backend API:** https://ocpp.voltera.kg
+- **Support:** support@voltera.kg
 
 ---
 

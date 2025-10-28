@@ -116,14 +116,14 @@ if (-not $sdkFound) {
 Write-Host "`n[6/7] Checking Gradle..." -ForegroundColor Yellow
 
 # Check Gradle wrapper in project
-$gradlewPath = "D:\Projects\Evpower-mobile\android\gradlew.bat"
+$gradlewPath = "D:\Projects\Voltera-mobile\android\gradlew.bat"
 if (Test-Path $gradlewPath) {
     Write-Host "  [OK] Gradle wrapper found in project" -ForegroundColor Green
     Write-Host "    Path: $gradlewPath" -ForegroundColor Gray
 
     # Try to get Gradle version
     try {
-        Push-Location "D:\Projects\Evpower-mobile\android"
+        Push-Location "D:\Projects\Voltera-mobile\android"
         $gradleVersion = .\gradlew.bat --version 2>&1 | Select-String "Gradle" | Select-Object -First 1
         if ($gradleVersion) {
             Write-Host "  [OK] $gradleVersion" -ForegroundColor Green
@@ -196,6 +196,6 @@ ANDROID_HOME: $env:ANDROID_HOME
 Gradle wrapper: $(if (Test-Path $gradlewPath) { "Found" } else { "Not found" })
 
 ========================================
-"@ | Out-File -FilePath "D:\Projects\Evpower-mobile\environment-check.txt" -Encoding UTF8
+"@ | Out-File -FilePath "D:\Projects\Voltera-mobile\environment-check.txt" -Encoding UTF8
 
 Write-Host "[OK] Info saved to environment-check.txt`n" -ForegroundColor Green

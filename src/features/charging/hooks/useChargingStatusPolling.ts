@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import { apiClient } from "@/services/evpowerApi";
+import { apiClient } from "@/services/volteraApi";
 
 // Состояния процесса зарядки (соответствуют статусам БД)
 export const ChargingStates = {

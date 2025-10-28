@@ -1,7 +1,7 @@
 # 🎯 Google Play Store Compliance - Summary of Fixes
 
 **Date**: 2025-10-21
-**App**: EvPower Mobile v1.0.1 (Build 37)
+**App**: Voltera Mobile v1.0.1 (Build 37)
 **Status**: ✅ **85% Ready** (3 pending manual actions)
 
 ---
@@ -64,7 +64,7 @@ const isValid =
 **Changes**:
 - Primary hash: `oZb2ItbSoJl3Kamv2sgIeC345I3lhH5V7HblBOPDPUs=`
 - Backup hash: `SbqmW+BAJEQrrUnIU4uVF0v8P+uz0K3GpCQu2cl/AUo=`
-- Removed unused `api.evpower.kg` section
+- Removed unused `api.voltera.kg` section
 
 **Before**:
 ```xml
@@ -74,7 +74,7 @@ const isValid =
 
 **After**:
 ```xml
-<!-- Current certificate hash for ocpp.evpower.kg -->
+<!-- Current certificate hash for ocpp.voltera.kg -->
 <!-- Generated: 2025-10-21 -->
 <pin digest="SHA-256">oZb2ItbSoJl3Kamv2sgIeC345I3lhH5V7HblBOPDPUs=</pin>
 <!-- Backup pin: Let's Encrypt R12 issuer -->
@@ -233,10 +233,10 @@ chmod +x scripts/update-certificate-pins.sh
 **Options**:
 - **GitHub Pages** (Recommended, Free)
   - Create repo → Upload privacy.html → Enable Pages
-  - URL: `https://YOUR_USERNAME.github.io/evpower-legal/privacy.html`
+  - URL: `https://YOUR_USERNAME.github.io/voltera-legal/privacy.html`
 
 - **Own Domain**
-  - Upload to: `https://evpower.kg/legal/privacy.html`
+  - Upload to: `https://voltera.kg/legal/privacy.html`
 
 - **Netlify/Vercel**
   - Deploy with: `netlify deploy --prod`
@@ -305,7 +305,7 @@ chmod +x scripts/update-certificate-pins.sh
 1. **Deploy Privacy Policy** (~15 min)
    ```bash
    # See PRIVACY_POLICY_DEPLOYMENT.md
-   # Choose: GitHub Pages, evpower.kg, or Netlify
+   # Choose: GitHub Pages, voltera.kg, or Netlify
    ```
 
 2. **Fill Data Safety Form** (~30 min)
@@ -337,7 +337,7 @@ chmod +x scripts/update-certificate-pins.sh
 ### Before Submission:
 
 - [ ] Test age gate: Try registering without checking box
-- [ ] Test HTTPS: Verify connections to ocpp.evpower.kg work
+- [ ] Test HTTPS: Verify connections to ocpp.voltera.kg work
 - [ ] Test account deletion: Create test account → Delete → Verify anonymization
 - [ ] Test privacy links: Click links in app, verify they open
 - [ ] Test on real Android device (not just emulator)
@@ -360,7 +360,7 @@ chmod +x scripts/update-certificate-pins.sh
 - **Database Issues**: Check Supabase Dashboard → Database → Migrations
 
 **Contact**:
-- Email: support@evpower.kg
+- Email: support@voltera.kg
 - Documentation: All files in project root
 
 ---

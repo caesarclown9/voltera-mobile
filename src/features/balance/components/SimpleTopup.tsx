@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useQRTopup } from "../hooks/useBalance";
-import { evpowerApi } from "@/services/evpowerApi";
+import { volteraApi } from "@/services/volteraApi";
 import { useQueryClient } from "@tanstack/react-query";
 import { safeParseInt } from "../../../shared/utils/parsers";
 
@@ -35,7 +35,7 @@ export function SimpleTopup({ onClose }: SimpleTopupProps) {
       // Poll every 3 seconds
       pollIntervalRef.current = setInterval(async () => {
         try {
-          const status = await evpowerApi.getPaymentStatus(invoiceId);
+          const status = await volteraApi.getPaymentStatus(invoiceId);
 
           // Log the status to understand what we're getting
           console.log("Payment status response:", {

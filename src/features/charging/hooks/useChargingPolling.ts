@@ -2,7 +2,7 @@ import { useEffect, useCallback, useState, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { NotificationService } from "@/shared/utils/notifications";
 import { logger } from "@/shared/utils/logger";
-import { apiClient } from "@/services/evpowerApi";
+import { apiClient } from "@/services/volteraApi";
 import type { ChargingStatus } from "@/api/types";
 
 interface ChargingSession {
@@ -41,7 +41,7 @@ export const useChargingPolling = (sessionId: string) => {
       try {
         logger.info("Polling charging status for session:", sessionId);
 
-        // Используем evpowerApi для получения статуса зарядки
+        // Используем volteraApi для получения статуса зарядки
         const status = await apiClient.getChargingStatus(sessionId);
 
         logger.info("Charging status received:", status);

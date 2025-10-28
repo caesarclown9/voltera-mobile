@@ -11,7 +11,7 @@ import { type ChargingLimits } from "../features/charging/components/ChargingLim
 import { pricingService } from "../features/pricing/pricingService";
 import { useAuthStatus } from "@/features/auth/hooks/useAuth";
 import { useFavorites } from "@/features/favorites/hooks/useFavorites";
-import { handleApiError } from "@/services/evpowerApi";
+import { handleApiError } from "@/services/volteraApi";
 
 export const ChargingPage = () => {
   const navigate = useNavigate();

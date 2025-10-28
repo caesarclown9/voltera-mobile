@@ -30,7 +30,7 @@ export const supabase = createClient(url, key, {
     persistSession: true,
     autoRefreshToken: true,
     storage: typeof window !== 'undefined' ? window.localStorage : undefined,
-    storageKey: 'evpower-auth-token',
+    storageKey: 'voltera-auth-token',
     detectSessionInUrl: false, // Отключаем автоматическую обработку токенов в URL
   },
   global: {

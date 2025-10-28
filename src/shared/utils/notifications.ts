@@ -112,7 +112,7 @@ export class NotificationService {
       // image: options?.image, // Не поддерживается в стандартном API
       // vibrate: [200, 100, 200], // Не поддерживается в стандартном Notification API
       requireInteraction: false,
-      tag: 'evpower-notification',
+      tag: 'voltera-notification',
       ...options,
     };
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================================
-# EvPower Mobile App - Main Build Script
+# Voltera Mobile App - Main Build Script
 # ============================================================================
 # Wrapper script to call specific build scripts
 
@@ -9,7 +9,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 show_help() {
-    echo "EvPower Mobile - Build Script"
+    echo "Voltera Mobile - Build Script"
     echo ""
     echo "Usage: ./build.sh [command]"
     echo ""

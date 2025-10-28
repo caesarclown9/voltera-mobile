@@ -5,7 +5,7 @@ export const securityHeaders = {
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https: blob:",
     "font-src 'self' data:",
-    "connect-src 'self' https://ocpp.evpower.kg https://api.dengi.o.kg https://fsoffzrngojgsigrmlui.supabase.co wss://fsoffzrngojgsigrmlui.supabase.co",
+    "connect-src 'self' https://ocpp.voltera.kg https://api.dengi.o.kg https://fsoffzrngojgsigrmlui.supabase.co wss://fsoffzrngojgsigrmlui.supabase.co",
     "frame-src 'none'",
     "object-src 'none'",
     "base-uri 'self'",

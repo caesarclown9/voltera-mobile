@@ -5,13 +5,13 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState, useCallback, useEffect } from 'react'
-import { unifiedApi } from '@/services/evpowerApi'
+import { unifiedApi } from '@/services/volteraApi'
 import { supabase } from '../../../shared/config/supabase'
 import type { UnifiedTransaction } from '../../auth/types/unified.types'
 
 /**
  * Хук для получения баланса
- * Синхронизирует данные между Supabase и EvPower API
+ * Синхронизирует данные между Supabase и Voltera API
  */
 export const useBalance = () => {
   const [user, setUser] = useState<any>(null)

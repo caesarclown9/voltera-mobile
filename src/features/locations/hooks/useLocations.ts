@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { evpowerApi } from "@/services/evpowerApi";
+import { volteraApi } from "@/services/volteraApi";
 // WebSocket для локаций отключён, используем только HTTP + Supabase там, где нужно
 import { calculateDistance } from "@/shared/utils/geo";
 import { logger } from "@/shared/utils/logger";
@@ -66,7 +66,7 @@ export function useLocations(requestGeolocation: boolean = false) {
     queryFn: async () => {
       if (import.meta.env.DEV)
         logger.debug("[useLocations] Query function called!");
-      const locations = await evpowerApi.getLocations(true);
+      const locations = await volteraApi.getLocations(true);
 
       // DEBUG: временное логирование
       if (import.meta.env.DEV)
@@ -115,7 +115,7 @@ export function useLocation(
   return useQuery({
     queryKey: ["location", locationId, includeStations],
     queryFn: async () => {
-      const locations = await evpowerApi.getLocations(includeStations);
+      const locations = await volteraApi.getLocations(includeStations);
       return locations.find((loc) => loc.id === locationId);
     },
     enabled: !!locationId,
@@ -142,7 +142,7 @@ export function useStationStatus(stationId: string) {
   return useQuery({
     queryKey: ["station-status", stationId],
     queryFn: async (): Promise<StationStatusResponse> => {
-      return await evpowerApi.getStationStatus(stationId);
+      return await volteraApi.getStationStatus(stationId);
     },
     enabled: !!stationId,
     staleTime: 0, // Always fresh
@@ -217,7 +217,7 @@ export function useStations(requestGeolocation: boolean = false) {
         "../../stations/types"
       );
       // Получаем все локации со станциями
-      const locations = await evpowerApi.getLocations(true);
+      const locations = await volteraApi.getLocations(true);
       // Извлекаем и обогащаем станции
       return extractStationsFromLocations(locations, userLocation || undefined);
     },

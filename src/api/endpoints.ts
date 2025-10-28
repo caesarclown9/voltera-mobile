@@ -21,7 +21,7 @@ export const API_ENDPOINTS = {
   locations: {
     all: '/api/v1/locations',
     detail: (id: string) => `/api/v1/locations/${id}`,
-    ws: 'wss://ocpp.evpower.kg/api/v1/locations/ws/locations',
+    ws: 'wss://ocpp.voltera.kg/api/v1/locations/ws/locations',
   },
   
   // Balance endpoints

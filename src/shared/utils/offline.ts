@@ -63,7 +63,7 @@ export class OfflineManager {
 
 // Offline storage manager
 export class OfflineStorage {
-  private static readonly OFFLINE_KEY = "evpower_offline_data";
+  private static readonly OFFLINE_KEY = "voltera_offline_data";
   private static readonly MAX_ITEMS = 100;
 
   static save(key: string, data: any, expiry?: number): void {
@@ -178,7 +178,7 @@ interface QueueItem {
 
 // Offline queue для отложенных запросов
 export class OfflineQueue {
-  private static readonly QUEUE_KEY = "evpower_offline_queue";
+  private static readonly QUEUE_KEY = "voltera_offline_queue";
   private static readonly MAX_QUEUE_SIZE = 50;
 
   static add(item: Omit<QueueItem, "id" | "timestamp" | "retryCount">): void {

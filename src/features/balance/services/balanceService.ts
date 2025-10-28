@@ -1,13 +1,13 @@
-import { evpowerApi } from "@/services/evpowerApi";
+import { volteraApi } from "@/services/volteraApi";
 
 export const balanceService = {
   async getBalance(_userId: string) {
-    const balance = await evpowerApi.getBalance();
+    const balance = await volteraApi.getBalance();
     return { balance, currency: "KGS" };
   },
 
   async generateTopUpQR(amount: number) {
-    const res = await evpowerApi.topupWithQR(amount);
+    const res = await volteraApi.topupWithQR(amount);
     // Возвращаем полный ответ + трансформированные поля для обратной совместимости
     // Backend может вернуть дополнительные поля помимо типизированного интерфейса
     const apiRes = res as unknown as Record<string, unknown>;
@@ -40,7 +40,7 @@ export const balanceService = {
     createdAt?: string;
     completedAt?: string;
   }> {
-    const res = await evpowerApi.getPaymentStatus(invoiceId);
+    const res = await volteraApi.getPaymentStatus(invoiceId);
     if (res.status_text === "approved" || res.can_start_charging) {
       return {
         status: "success",

@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
-  appId: "kg.evpower.app",
-  appName: "EvPower",
+  appId: "kg.voltera.app",
+  appName: "Voltera",
   webDir: "dist",
   server: {
     // Для безопасности используем https схему на Android

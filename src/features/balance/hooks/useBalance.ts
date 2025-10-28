@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useCallback } from "react";
-import { evpowerApi, handleApiError } from "@/services/evpowerApi";
-import type { PaymentStatus } from "@/services/evpowerApi";
+import { volteraApi, handleApiError } from "@/services/volteraApi";
+import type { PaymentStatus } from "@/services/volteraApi";
 import { useAuthStore } from "@/features/auth/store";
 import { balanceService } from "../services/balanceService";
 
@@ -101,7 +101,7 @@ export function usePaymentMonitoring() {
 
       const checkStatus = async () => {
         try {
-          const status = await evpowerApi.getPaymentStatus(invoiceId);
+          const status = await volteraApi.getPaymentStatus(invoiceId);
           setPaymentStatus(status);
 
           // Payment successful

@@ -1,6 +1,6 @@
-# 🍎 iOS Deployment Guide для EvPower Mobile
+# 🍎 iOS Deployment Guide для Voltera Mobile
 
-> **Полное руководство по деплою EvPower Mobile в App Store**
+> **Полное руководство по деплою Voltera Mobile в App Store**
 >
 > Последнее обновление: 2025-10-15
 > Версия проекта: 1.0.1
@@ -74,8 +74,8 @@ fastlane --version
 
 ```bash
 # Клонировать репозиторий
-git clone https://github.com/caesarclown9/evpower-mobile-app.git
-cd evpower-mobile-app
+git clone https://github.com/caesarclown9/voltera-mobile-app.git
+cd voltera-mobile-app
 
 # Установить зависимости
 npm ci
@@ -92,7 +92,7 @@ cd ../..
 
 ```bash
 # .env.production
-VITE_API_URL=https://ocpp.evpower.kg
+VITE_API_URL=https://ocpp.voltera.kg
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your_production_anon_key
 VITE_YANDEX_MAPS_API_KEY=your_yandex_maps_api_key
@@ -124,8 +124,8 @@ npx cap sync ios
 import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
-  appId: "kg.evpower.app", // ✅ Bundle ID
-  appName: "EvPower", // ✅ Название приложения
+  appId: "kg.voltera.app", // ✅ Bundle ID
+  appName: "Voltera", // ✅ Название приложения
   webDir: "dist",
   plugins: {
     SplashScreen: {
@@ -141,7 +141,7 @@ const config: CapacitorConfig = {
 
 ```xml
 <key>CFBundleDisplayName</key>
-<string>EvPower</string>
+<string>Voltera</string>
 
 <key>NSCameraUsageDescription</key>
 <string>Сканирование QR‑кода для начала/оплаты зарядки.</string>
@@ -162,8 +162,8 @@ const config: CapacitorConfig = {
 4. Выберите **App IDs**
 5. Выберите **App** тип
 6. Заполните:
-   - **Description:** EvPower Mobile App
-   - **Bundle ID:** `kg.evpower.app` (Explicit)
+   - **Description:** Voltera Mobile App
+   - **Bundle ID:** `kg.voltera.app` (Explicit)
 7. Включите Capabilities:
    - ✅ Push Notifications
    - ✅ Sign in with Apple (если планируется)
@@ -197,9 +197,9 @@ const config: CapacitorConfig = {
 
 1. **Profiles** → **+**
 2. Выберите **App Store**
-3. Выберите App ID: `kg.evpower.app`
+3. Выберите App ID: `kg.voltera.app`
 4. Выберите Distribution Certificate
-5. Имя: **EvPower App Store Profile**
+5. Имя: **Voltera App Store Profile**
 6. Скачайте и установите
 
 ---
@@ -218,8 +218,8 @@ open ios/App/App.xcworkspace
 #### General Tab
 
 1. Выберите **App** target
-2. **Display Name:** EvPower
-3. **Bundle Identifier:** kg.evpower.app
+2. **Display Name:** Voltera
+3. **Bundle Identifier:** kg.voltera.app
 4. **Version:** 1.0.1 (из package.json)
 5. **Build:** 1 (или увеличивайте при каждом билде)
 
@@ -238,7 +238,7 @@ open ios/App/App.xcworkspace
    - Signing Certificate: Apple Development
 
 4. **Release:**
-   - Provisioning Profile: EvPower App Store Profile
+   - Provisioning Profile: Voltera App Store Profile
    - Signing Certificate: Apple Distribution
 
 5. **Capabilities:**
@@ -252,7 +252,7 @@ open ios/App/App.xcworkspace
 ```
 Code Signing Identity (Release): Apple Distribution
 Code Signing Identity (Debug): Apple Development
-Provisioning Profile (Release): EvPower App Store Profile
+Provisioning Profile (Release): Voltera App Store Profile
 ```
 
 ### 3. Иконки и Assets
@@ -340,7 +340,7 @@ platform :ios do
       use_automatic_signing: false,
       path: "App/App.xcodeproj",
       team_id: ENV["APPLE_TEAM_ID"],
-      profile_name: "match AppStore kg.evpower.app",
+      profile_name: "match AppStore kg.voltera.app",
       code_sign_identity: "iPhone Distribution"
     )
 
@@ -350,7 +350,7 @@ platform :ios do
       scheme: "App",
       export_method: "app-store",
       output_directory: "./build",
-      output_name: "EvPower.ipa"
+      output_name: "Voltera.ipa"
     )
 
     # Upload to TestFlight
@@ -370,7 +370,7 @@ end
 
 1. [App Store Connect](https://appstoreconnect.apple.com/) → **Users and Access**
 2. **Keys** tab → **+** (Request Access если нужно)
-3. **Name:** EvPower Fastlane Key
+3. **Name:** Voltera Fastlane Key
 4. **Access:** Admin или App Manager
 5. Скачайте `.p8` файл (только один раз!)
 6. Сохраните в `~/private_keys/AuthKey_XXXXXXXXXX.p8`
@@ -455,7 +455,7 @@ open ios/App/App.xcworkspace
 ### Шаг 8: App Store Connect
 
 1. Перейдите на [App Store Connect](https://appstoreconnect.apple.com/)
-2. **My Apps** → выберите EvPower
+2. **My Apps** → выберите Voltera
 3. Билд должен появиться в **TestFlight** → **iOS Builds**
 4. Подождите обработки Apple (~10-30 минут)
 
@@ -608,8 +608,8 @@ bundle exec fastlane match appstore --force_for_new_devices
 ### Xcode Configuration
 
 ```
-□ Bundle ID: kg.evpower.app
-□ Display Name: EvPower
+□ Bundle ID: kg.voltera.app
+□ Display Name: Voltera
 □ Version синхронизирован с package.json
 □ Build number увеличен
 □ Signing настроен (Distribution certificate)
@@ -624,7 +624,7 @@ bundle exec fastlane match appstore --force_for_new_devices
 
 ```
 □ App создано в App Store Connect
-□ Bundle ID совпадает (kg.evpower.app)
+□ Bundle ID совпадает (kg.voltera.app)
 □ Metadata заполнена:
   - App Name
   - Subtitle
@@ -706,8 +706,8 @@ bundle exec fastlane match appstore --force_for_new_devices
 
 **Technical Issues:**
 
-- Email: support@evpower.kg
-- GitHub Issues: https://github.com/caesarclown9/evpower-mobile-app/issues
+- Email: support@voltera.kg
+- GitHub Issues: https://github.com/caesarclown9/voltera-mobile-app/issues
 
 **Apple Developer Support:**
 
@@ -727,6 +727,6 @@ bundle exec fastlane match appstore --force_for_new_devices
 ---
 
 **Последнее обновление:** 2025-10-15
-**Автор:** EvPower Development Team
+**Автор:** Voltera Development Team
 
 **Удачи с релизом! 🚀**

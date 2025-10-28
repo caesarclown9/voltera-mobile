@@ -258,7 +258,7 @@ class PushNotificationService {
       } else {
         // Для веба используем Notification API
         if ('Notification' in window && Notification.permission === 'granted') {
-          const webNotification = new Notification(notification.title || 'EvPower', {
+          const webNotification = new Notification(notification.title || 'Voltera', {
             body: notification.body,
             icon: '/icons/icon-192x192.png',
             badge: '/icons/icon-192x192.png',

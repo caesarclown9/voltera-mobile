@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">EvPower</string>
-    <string name="title_activity_main">EvPower</string>
-    <string name="package_name">kg.evpower.app</string>
-    <string name="custom_url_scheme">kg.evpower.app</string>
+    <string name="app_name">Voltera</string>
+    <string name="title_activity_main">Voltera</string>
+    <string name="package_name">kg.voltera.app</string>
+    <string name="custom_url_scheme">kg.voltera.app</string>
 </resources>

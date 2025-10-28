@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { evpowerApi } from "@/services/evpowerApi";
+import { volteraApi } from "@/services/volteraApi";
 import { useAuthStore } from "@/features/auth/store";
 
 export interface PaymentTransaction {
@@ -40,7 +40,7 @@ export const useTransactionHistory = (limit = 20) => {
       if (!user?.id) {
         throw new Error("User not authenticated");
       }
-      return await evpowerApi.getTransactionHistory(limit);
+      return await volteraApi.getTransactionHistory(limit);
     },
     enabled: !!user?.id,
     staleTime: 1000 * 30, // 30 секунд

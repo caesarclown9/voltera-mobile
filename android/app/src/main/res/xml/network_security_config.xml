@@ -4,16 +4,16 @@
 
     <!-- Production API -->
     <domain-config>
-        <domain includeSubdomains="false">ocpp.evpower.kg</domain>
+        <domain includeSubdomains="false">ocpp.voltera.kg</domain>
         <pin-set expiration="2026-01-01">
-            <!-- Current certificate hash for ocpp.evpower.kg -->
+            <!-- Current certificate hash for ocpp.voltera.kg -->
             <!-- Generated: 2025-10-21 -->
             <pin digest="SHA-256">oZb2ItbSoJl3Kamv2sgIeC345I3lhH5V7HblBOPDPUs=</pin>
             <!-- Backup pin: Let's Encrypt R12 issuer -->
             <pin digest="SHA-256">SbqmW+BAJEQrrUnIU4uVF0v8P+uz0K3GpCQu2cl/AUo=</pin>
         </pin-set>
         <trustkit-config>
-            <report-uri>https://api.evpower.kg/security/pinning-report</report-uri>
+            <report-uri>https://api.voltera.kg/security/pinning-report</report-uri>
             <enforce-pinning>true</enforce-pinning>
         </trustkit-config>
     </domain-config>

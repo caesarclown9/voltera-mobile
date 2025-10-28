@@ -14,7 +14,7 @@ interface PinnedCertificate {
 class CertificatePinningService {
   private readonly certificates: PinnedCertificate[] = [
     {
-      host: 'ocpp.evpower.kg',
+      host: 'ocpp.voltera.kg',
       fingerprints: [
         // Production certificate fingerprint (нужно получить реальный)
         'sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=',
@@ -23,7 +23,7 @@ class CertificatePinningService {
       ]
     },
     {
-      host: 'api.evpower.kg',
+      host: 'api.voltera.kg',
       fingerprints: [
         'sha256/CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC='
       ]

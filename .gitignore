@@ -95,8 +95,8 @@ android/*.iml
 *.ipa
 
 # Build output files
-evpower-*.apk
-evpower-*.aab
+voltera-*.apk
+voltera-*.aab
 app-debug.apk
 app-release.apk
 

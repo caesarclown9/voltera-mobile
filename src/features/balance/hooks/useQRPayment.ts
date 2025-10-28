@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { evpowerApi } from "@/services/evpowerApi";
-import type { TopupQRResponse, PaymentStatus } from "@/services/evpowerApi";
+import { volteraApi } from "@/services/volteraApi";
+import type { TopupQRResponse, PaymentStatus } from "@/services/volteraApi";
 
 export const useQRTopup = () => {
   return useMutation<
@@ -9,7 +9,7 @@ export const useQRTopup = () => {
     { client_id: string; amount: number; description?: string }
   >({
     mutationFn: async (data) => {
-      return await evpowerApi.topupWithQR(data.amount, data.description);
+      return await volteraApi.topupWithQR(data.amount, data.description);
     },
   });
 };
@@ -19,7 +19,7 @@ export const usePaymentStatus = (invoiceId: string, enabled = false) => {
   return useQuery<PaymentStatus>({
     queryKey: ["payment-status", invoiceId],
     queryFn: async () => {
-      return await evpowerApi.getPaymentStatus(invoiceId);
+      return await volteraApi.getPaymentStatus(invoiceId);
     },
     enabled,
     refetchInterval: (query) => {

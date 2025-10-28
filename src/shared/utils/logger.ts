@@ -18,7 +18,7 @@ class Logger {
     this.config = {
       enabled: import.meta.env.DEV || import.meta.env.VITE_DEBUG_MODE === 'true',
       level: (import.meta.env.VITE_LOG_LEVEL as LogLevel) || 'info',
-      prefix: '[EvPower]',
+      prefix: '[Voltera]',
       ...config,
     }
   }

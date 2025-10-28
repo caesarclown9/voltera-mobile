@@ -1,8 +1,8 @@
-# EvPower Android Keystore Generator Script
+# Voltera Android Keystore Generator Script
 # Запускать в PowerShell от имени администратора
 
 Write-Host "======================================" -ForegroundColor Cyan
-Write-Host "  EvPower Android Keystore Generator " -ForegroundColor Cyan
+Write-Host "  Voltera Android Keystore Generator " -ForegroundColor Cyan
 Write-Host "======================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -46,7 +46,7 @@ if (-not $keytoolPath) {
 }
 
 # Переходим в папку android/app
-$projectPath = "D:\Projects\Evpower-mobile\android\app"
+$projectPath = "D:\Projects\Voltera-mobile\android\app"
 Write-Host "`nChanging directory to: $projectPath" -ForegroundColor Yellow
 
 if (Test-Path $projectPath) {
@@ -58,30 +58,30 @@ if (Test-Path $projectPath) {
 }
 
 # Проверяем существование keystore
-if (Test-Path "evpower-release.keystore") {
+if (Test-Path "voltera-release.keystore") {
     Write-Host "`n⚠ Keystore already exists!" -ForegroundColor Yellow
     $overwrite = Read-Host "Overwrite existing keystore? (y/n)"
     if ($overwrite -ne 'y') {
         Write-Host "Operation cancelled" -ForegroundColor Yellow
         exit 0
     }
-    Remove-Item "evpower-release.keystore" -Force
+    Remove-Item "voltera-release.keystore" -Force
 }
 
 # Параметры keystore
-$keystoreName = "evpower-release.keystore"
-$alias = "evpower"
-$storePass = "EvPower2024Secure!"
-$keyPass = "EvPower2024Secure!"
+$keystoreName = "voltera-release.keystore"
+$alias = "voltera"
+$storePass = "Voltera2024Secure!"
+$keyPass = "Voltera2024Secure!"
 $validity = 10000
-$dname = "CN=EvPower, OU=Mobile Development, O=EvPower, L=Bishkek, ST=Chui, C=KG"
+$dname = "CN=Voltera, OU=Mobile Development, O=Voltera, L=Bishkek, ST=Chui, C=KG"
 
 Write-Host "`n======================================" -ForegroundColor Cyan
 Write-Host "Creating keystore with parameters:" -ForegroundColor Cyan
 Write-Host "Keystore: $keystoreName" -ForegroundColor White
 Write-Host "Alias: $alias" -ForegroundColor White
 Write-Host "Validity: $validity days" -ForegroundColor White
-Write-Host "Organization: EvPower" -ForegroundColor White
+Write-Host "Organization: Voltera" -ForegroundColor White
 Write-Host "Location: Bishkek, Kyrgyzstan" -ForegroundColor White
 Write-Host "======================================" -ForegroundColor Cyan
 Write-Host ""
@@ -112,7 +112,7 @@ try {
 
 # Создание keystore.properties
 Write-Host "`nCreating keystore.properties..." -ForegroundColor Yellow
-$propertiesPath = "D:\Projects\Evpower-mobile\android\keystore.properties"
+$propertiesPath = "D:\Projects\Voltera-mobile\android\keystore.properties"
 $propertiesContent = @"
 storePassword=$storePass
 keyPassword=$keyPass
@@ -149,18 +149,18 @@ Write-Host "Creating secure backup..." -ForegroundColor Cyan
 Write-Host "======================================" -ForegroundColor Cyan
 
 $date = Get-Date -Format "yyyy-MM-dd_HHmmss"
-$backupDir = "$env:USERPROFILE\Documents\EvPower-Keystore-Backup"
+$backupDir = "$env:USERPROFILE\Documents\Voltera-Keystore-Backup"
 
 if (-not (Test-Path $backupDir)) {
     New-Item -ItemType Directory -Force -Path $backupDir | Out-Null
 }
 
 # Копируем keystore
-Copy-Item $keystoreName "$backupDir\evpower-release-$date.keystore"
+Copy-Item $keystoreName "$backupDir\voltera-release-$date.keystore"
 
 # Сохраняем информацию
 $infoContent = @"
-EVPOWER ANDROID KEYSTORE INFORMATION
+VOLTERA ANDROID KEYSTORE INFORMATION
 =====================================
 Generated: $date
 Keystore: $keystoreName
@@ -194,7 +194,7 @@ Write-Host ""
 Write-Host "Files created:" -ForegroundColor Cyan
 Write-Host "✓ $projectPath\$keystoreName" -ForegroundColor Green
 Write-Host "✓ $propertiesPath" -ForegroundColor Green
-Write-Host "✓ $backupDir\evpower-release-$date.keystore" -ForegroundColor Green
+Write-Host "✓ $backupDir\voltera-release-$date.keystore" -ForegroundColor Green
 Write-Host ""
 Write-Host "Press any key to exit..." -ForegroundColor Gray
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")

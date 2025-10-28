@@ -3,12 +3,12 @@
     "apps": [],
     "details": [
       {
-        "appID": "TEAMID.kg.evpower.app",
+        "appID": "TEAMID.kg.voltera.app",
         "paths": ["*"]
       }
     ]
   },
   "webcredentials": {
-    "apps": ["TEAMID.kg.evpower.app"]
+    "apps": ["TEAMID.kg.voltera.app"]
   }
 }

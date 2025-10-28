@@ -2,7 +2,7 @@ const sharp = require('sharp');
 const fs = require('fs');
 const path = require('path');
 
-const sourceLogo = path.join(__dirname, '../public/icons/evpower-logo-square.png');
+const sourceLogo = path.join(__dirname, '../public/icons/voltera-logo-square.png');
 
 // PWA icon sizes
 const pwaIconSizes = [72, 96, 128, 144, 152, 192, 384, 512];

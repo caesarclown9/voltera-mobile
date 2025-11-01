@@ -1,5 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Offline functionality utilities
+// Note: `any` types used for generic offline queue and storage handling
 import React from "react";
+import { logger } from "./logger";
 
 export class OfflineManager {
   private static instance: OfflineManager;
@@ -21,13 +24,13 @@ export class OfflineManager {
   }
 
   private handleOnline = () => {
-    console.log("🌐 Connection restored");
+    logger.info("🌐 Connection restored");
     this._isOnline = true;
     this.notifyListeners(true);
   };
 
   private handleOffline = () => {
-    console.log("📵 Connection lost");
+    logger.info("📵 Connection lost");
     this._isOnline = false;
     this.notifyListeners(false);
   };
@@ -89,7 +92,7 @@ export class OfflineStorage {
 
       localStorage.setItem(this.OFFLINE_KEY, JSON.stringify(offlineData));
     } catch (error) {
-      console.error("Failed to save offline data:", error);
+      logger.error("Failed to save offline data:", error);
     }
   }
 
@@ -110,7 +113,7 @@ export class OfflineStorage {
 
       return item.data;
     } catch (error) {
-      console.error("Failed to get offline data:", error);
+      logger.error("Failed to get offline data:", error);
       return null;
     }
   }
@@ -121,7 +124,7 @@ export class OfflineStorage {
       delete offlineData[key];
       localStorage.setItem(this.OFFLINE_KEY, JSON.stringify(offlineData));
     } catch (error) {
-      console.error("Failed to remove offline data:", error);
+      logger.error("Failed to remove offline data:", error);
     }
   }
 
@@ -130,7 +133,7 @@ export class OfflineStorage {
       const data = localStorage.getItem(this.OFFLINE_KEY);
       return data ? JSON.parse(data) : {};
     } catch (error) {
-      console.error("Failed to get all offline data:", error);
+      logger.error("Failed to get all offline data:", error);
       return {};
     }
   }
@@ -139,7 +142,7 @@ export class OfflineStorage {
     try {
       localStorage.removeItem(this.OFFLINE_KEY);
     } catch (error) {
-      console.error("Failed to clear offline data:", error);
+      logger.error("Failed to clear offline data:", error);
     }
   }
 
@@ -186,7 +189,7 @@ export class OfflineQueue {
       const queue = this.getQueue();
 
       if (queue.length >= this.MAX_QUEUE_SIZE) {
-        console.warn("Offline queue is full, removing oldest item");
+        logger.warn("Offline queue is full, removing oldest item");
         queue.shift();
       }
 
@@ -200,9 +203,9 @@ export class OfflineQueue {
       queue.push(queueItem);
       localStorage.setItem(this.QUEUE_KEY, JSON.stringify(queue));
 
-      console.log("📤 Added to offline queue:", queueItem);
+      logger.debug("📤 Added to offline queue:", queueItem);
     } catch (error) {
-      console.error("Failed to add to offline queue:", error);
+      logger.error("Failed to add to offline queue:", error);
     }
   }
 
@@ -211,7 +214,7 @@ export class OfflineQueue {
       const data = localStorage.getItem(this.QUEUE_KEY);
       return data ? JSON.parse(data) : [];
     } catch (error) {
-      console.error("Failed to get offline queue:", error);
+      logger.error("Failed to get offline queue:", error);
       return [];
     }
   }
@@ -220,7 +223,7 @@ export class OfflineQueue {
     const queue = this.getQueue();
     if (queue.length === 0) return;
 
-    console.log(`📤 Processing ${queue.length} items from offline queue`);
+    logger.info(`📤 Processing ${queue.length} items from offline queue`);
 
     const failedItems: QueueItem[] = [];
 
@@ -237,9 +240,9 @@ export class OfflineQueue {
           },
         });
 
-        console.log("✅ Successfully processed offline item:", item.id);
+        logger.debug("✅ Successfully processed offline item:", item.id);
       } catch (error) {
-        console.error("❌ Failed to process offline item:", item.id, error);
+        logger.error(`❌ Failed to process offline item: ${item.id}`, error);
 
         item.retryCount++;
 
@@ -247,7 +250,7 @@ export class OfflineQueue {
         if (item.retryCount < 3) {
           failedItems.push(item);
         } else {
-          console.warn("🗑️ Removing failed item after 3 retries:", item.id);
+          logger.warn("🗑️ Removing failed item after 3 retries:", item.id);
         }
       }
     }

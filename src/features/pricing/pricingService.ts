@@ -10,20 +10,18 @@ import {
 } from "../../shared/utils/supabaseHelpers";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { pricingCache } from "./pricingCache";
-import type {
-  PricingResult,
-  TariffRule, // eslint-disable-line @typescript-eslint/no-unused-vars
-  SessionCostBreakdown,
-  CachedPricing, // eslint-disable-line @typescript-eslint/no-unused-vars
-} from "./types";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import {
   DEFAULT_CURRENCY,
   DEFAULT_RATE_PER_KWH,
   CACHE_TTL as _CACHE_TTL,
+  type PricingResult,
+  type TariffRule, // eslint-disable-line @typescript-eslint/no-unused-vars
+  type SessionCostBreakdown,
+  type CachedPricing, // eslint-disable-line @typescript-eslint/no-unused-vars
 } from "./types";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { parsePrice as _parsePrice } from "../../shared/utils/parsers";
+import { logger } from "../../shared/utils/logger";
 
 class PricingService {
   private cache = new Map<string, CachedPricing>();
@@ -33,7 +31,7 @@ class PricingService {
    * Инициализирует сервис и кэш
    * TODO: Будет использоваться когда включим динамические тарифы
    */
-  // @ts-ignore - Reserved for future dynamic pricing feature
+  // @ts-expect-error - Reserved for future dynamic pricing feature
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private async _initialize() {
     if (this.initialized) return;
@@ -152,7 +150,7 @@ class PricingService {
       return this.getDefaultPricing();
 
     } catch (error) {
-      console.error('Error calculating pricing:', error);
+      logger.error('Error calculating pricing:', error);
       return this.getDefaultPricing();
     }
     */
@@ -162,7 +160,7 @@ class PricingService {
    * Получает клиентский тариф если есть
    * TODO: Будет использоваться когда включим динамические тарифы
    */
-  // @ts-ignore - Reserved for future dynamic pricing feature
+  // @ts-expect-error - Reserved for future dynamic pricing feature
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private async _getClientTariff(
     clientId: string,
@@ -181,7 +179,7 @@ class PricingService {
         .maybeSingle();
 
       if (error) {
-        console.error("Error fetching client tariff:", error);
+        logger.error("Error fetching client tariff:", error);
         return null;
       }
 
@@ -221,7 +219,7 @@ class PricingService {
 
       return null;
     } catch (error) {
-      console.error("Error fetching client tariff:", error);
+      logger.error("Error fetching client tariff:", error);
       return null;
     }
   }
@@ -230,7 +228,7 @@ class PricingService {
    * Находит применимое правило тарифа
    * TODO: Будет использоваться когда включим динамические тарифы
    */
-  // @ts-ignore - Reserved for future dynamic pricing feature
+  // @ts-expect-error - Reserved for future dynamic pricing feature
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private async _findApplicableRule(
     tariffPlanId: string,
@@ -252,7 +250,7 @@ class PricingService {
         .order("priority", { ascending: false });
 
       if (error || !rules || rules.length === 0) {
-        console.error("Error fetching tariff rules:", error);
+        logger.error("Error fetching tariff rules:", error);
         return null;
       }
 
@@ -299,7 +297,7 @@ class PricingService {
       // Возвращаем правило с наивысшим приоритетом
       return applicableRules.length > 0 ? applicableRules[0] : null;
     } catch (error) {
-      console.error("Error finding applicable rule:", error);
+      logger.error("Error finding applicable rule:", error);
       return null;
     }
   }
@@ -321,7 +319,7 @@ class PricingService {
    * Создает PricingResult из правила тарифа
    * TODO: Будет использоваться когда включим динамические тарифы
    */
-  // @ts-ignore - Reserved for future dynamic pricing feature
+  // @ts-expect-error - Reserved for future dynamic pricing feature
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private _buildPricingFromRule(
     rule: TariffRule,
@@ -394,7 +392,7 @@ class PricingService {
    * Кэширует результат
    * TODO: Будет использоваться когда включим динамические тарифы
    */
-  // @ts-ignore - Reserved for future dynamic pricing feature
+  // @ts-expect-error - Reserved for future dynamic pricing feature
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private async _cacheResult(key: string, data: PricingResult): Promise<void> {
     // Memory кэш

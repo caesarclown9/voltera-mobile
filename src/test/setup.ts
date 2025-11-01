@@ -1,6 +1,8 @@
-import { expect, afterEach, vi } from 'vitest';
-import { cleanup } from '@testing-library/react';
-import * as matchers from '@testing-library/jest-dom/matchers';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// Note: `any` types used in test setup for mocking and test utilities
+import { expect, afterEach, vi } from "vitest";
+import { cleanup } from "@testing-library/react";
+import * as matchers from "@testing-library/jest-dom/matchers";
 
 // Расширяем expect с matchers из @testing-library/jest-dom
 expect.extend(matchers);
@@ -32,7 +34,7 @@ global.sessionStorage = sessionStorageMock as any;
 global.fetch = vi.fn();
 
 // Мокаем matchMedia
-Object.defineProperty(window, 'matchMedia', {
+Object.defineProperty(window, "matchMedia", {
   writable: true,
   value: vi.fn().mockImplementation((query) => ({
     matches: false,

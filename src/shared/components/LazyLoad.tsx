@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
-import type { ReactNode } from "react";
+import React, { useState, useEffect, useRef, type ReactNode } from "react";
+import { logger } from "../utils/logger";
 
 interface LazyLoadProps {
   children: ReactNode;
@@ -232,7 +232,7 @@ class ErrorBoundary extends React.Component<{
   }
 
   componentDidCatch(error: Error) {
-    console.error("LazyLoad error:", error);
+    logger.error("LazyLoad error:", error);
     if (this.props.onError) {
       this.props.onError();
     }

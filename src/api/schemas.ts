@@ -75,15 +75,15 @@ export const zConnectorStatus = z.object({
 
 export const zStation = z.object({
   id: z.string(),
-  serial_number: z.string(),
-  model: z.string(),
-  manufacturer: z.string(),
+  serial_number: z.string().optional(), // Backend может не возвращать
+  model: z.string().optional(), // Backend может не возвращать
+  manufacturer: z.string().optional(), // Backend может не возвращать
   location_id: z.string().optional(), // Backend может не возвращать
-  power_capacity: z.number(),
+  power_capacity: z.number().optional(), // Backend может не возвращать
   connector_types: z.array(z.string()).optional(), // Backend может не возвращать
-  status: z.enum(["active", "inactive", "maintenance", "offline"]), // Добавили offline
+  status: z.enum(["active", "inactive", "maintenance", "offline"]).optional(), // Backend может не возвращать
   connectors_count: z.number().optional(),
-  // Старые поля - опциональны для обратной совместимости
+  // Старые поля - полностью опциональны для обратной совместимости
   price_per_kwh: z.number().optional(),
   session_fee: z.number().optional(),
   currency: z.literal("KGS").optional(),
@@ -105,6 +105,9 @@ export const zStation = z.object({
     })
     .optional(),
   firmware_version: z.string().optional(),
+  is_available: z.boolean().optional(), // Supabase field
+  last_heartbeat_at: z.string().optional(), // Supabase field
+  connectors: z.array(z.any()).optional(), // Supabase field - сырые данные коннекторов
   ocpp_status: z
     .object({
       is_online: z.boolean(),
@@ -120,16 +123,19 @@ export const zLocation = z.object({
   address: z.string(),
   city: z.string().optional(),
   country: z.string().optional(),
-  latitude: z.number().optional(),
-  longitude: z.number().optional(),
-  status: z.enum([
-    "available",
-    "occupied",
-    "offline",
-    "maintenance",
-    "partial",
-  ]),
-  // Старые поля - опциональны для обратной совместимости
+  latitude: z.number().nullable().optional(), // Может быть null
+  longitude: z.number().nullable().optional(), // Может быть null
+  status: z
+    .enum([
+      "available",
+      "occupied",
+      "offline",
+      "maintenance",
+      "partial",
+      "active", // Supabase может возвращать "active"
+    ])
+    .optional(),
+  // Старые поля - полностью опциональны для обратной совместимости
   stations_count: z.number().optional(),
   connectors_count: z.number().optional(),
   available_connectors: z.number().optional(),

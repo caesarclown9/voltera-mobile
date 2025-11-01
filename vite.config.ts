@@ -134,6 +134,12 @@ export default defineConfig(() => {
                 target: "https://ocpp.evpower.kg",
                 changeOrigin: true,
                 secure: true,
+                // Пробрасываем все заголовки, включая Authorization
+                configure: (proxy, _options) => {
+                  proxy.on("proxyReq", (_proxyReq, _req, _res) => {
+                    // Authorization header прокидывается автоматически
+                  });
+                },
               },
             }
           : undefined,

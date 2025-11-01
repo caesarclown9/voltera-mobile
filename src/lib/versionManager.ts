@@ -9,7 +9,7 @@ import { logger } from "@/shared/utils/logger";
 
 // Текущая версия приложения (синхронизируется с package.json)
 export const APP_VERSION = "1.0.1";
-export const APP_BUILD = 56; // Увеличивается при каждой сборке
+export const APP_BUILD = 57; // Увеличивается при каждой сборке
 
 // Ключи для хранения
 const VERSION_STORAGE_KEY = "evpower_app_version";

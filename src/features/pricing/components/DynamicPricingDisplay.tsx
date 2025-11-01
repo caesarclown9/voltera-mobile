@@ -113,29 +113,23 @@ export function DynamicPricingDisplay({
       )
       .subscribe();
 
-    // Обновляем каждую минуту
+    // Обновляем каждые 5 минут (вместо каждой минуты - снижаем нагрузку)
     const interval = setInterval(() => {
       loadCurrentPricing();
-      updateNextChangeTimer();
-    }, 60000);
+    }, 300000); // 5 минут
 
-    // Обновляем таймер каждую секунду
-    const timerInterval = setInterval(updateNextChangeTimer, 1000);
+    // Обновляем таймер каждую секунду только если есть данные
+    const timerInterval = currentPricing?.next_rate_change
+      ? setInterval(updateNextChangeTimer, 1000)
+      : undefined;
 
     return () => {
       clearInterval(interval);
-      clearInterval(timerInterval);
+      if (timerInterval) clearInterval(timerInterval);
       channel.unsubscribe();
     };
-  }, [
-    stationId,
-    connectorType,
-    user?.id,
-    compact,
-    loadCurrentPricing,
-    loadDaySchedule,
-    updateNextChangeTimer,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stationId, connectorType, compact]);
 
   // Определяем тренд цены
   const getPriceTrend = () => {

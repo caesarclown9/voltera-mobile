@@ -100,7 +100,7 @@ export interface StationStatusResponse {
     status: string;
     available: boolean;
     power_kw?: number;
-    error?: string;
+    error?: string | null;
   }[];
   total_connectors: number;
   available_connectors: number;
@@ -110,7 +110,7 @@ export interface StationStatusResponse {
   session_fee: number;
   currency: string;
   working_hours: string;
-  message?: string;
+  message?: string | null;
 }
 
 // ============== CHARGING ==============
@@ -125,8 +125,8 @@ export interface StartChargingRequest {
 
 export interface StartChargingResponse {
   success: boolean;
-  message?: string;
-  error?: string;
+  message?: string | null;
+  error?: string | null;
   session_id?: string;
   connector_id?: number;
   reserved_amount?: number; // Зарезервировано на балансе
@@ -165,8 +165,8 @@ export interface ChargingStatus {
 
 export interface StopChargingResponse {
   success: boolean;
-  message?: string;
-  error?: string;
+  message?: string | null;
+  error?: string | null;
   final_cost?: number; // Финальная стоимость
   energy_consumed?: number; // Потреблено кВт·ч
   duration_minutes?: number;
@@ -201,7 +201,7 @@ export interface TopupQRResponse {
   invoice_expires_at?: string; // ISO datetime (через 10 минут)
   qr_lifetime_seconds?: number;
   invoice_lifetime_seconds?: number;
-  error?: string;
+  error?: string | null;
 }
 
 export interface TopupCardRequest {
@@ -226,28 +226,25 @@ export interface TopupCardResponse {
   term_url?: string; // Return URL после 3DS
   client_id?: string;
   current_balance?: number;
-  error?: string;
+  error?: string | null;
 }
 
 export interface PaymentStatus {
   success: boolean;
   status?: 0 | 1 | 2 | 3 | 4; // O!Dengi коды
-  status_text?:
-    | "processing"
-    | "approved"
-    | "canceled"
-    | "refunded"
-    | "partial_refund";
+  status_text?: string; // Русский текст для UI, не enum
   amount?: number;
-  paid_amount?: number;
+  paid_amount?: number | null; // Может быть null
   invoice_id?: string;
-  qr_expired?: boolean;
-  invoice_expired?: boolean;
-  qr_expires_at?: string;
-  invoice_expires_at?: string;
   can_proceed?: boolean; // Можно ли использовать для зарядки
   can_start_charging?: boolean; // Платеж успешен
-  error?: string;
+  qr_expired?: boolean;
+  invoice_expired?: boolean;
+  qr_expires_at?: string | null; // ISO datetime
+  invoice_expires_at?: string | null; // ISO datetime
+  last_status_check_at?: string | null; // Время последней проверки
+  needs_callback_check?: boolean; // Требуется проверка через callback
+  error?: string | null;
 }
 
 // ============== WEBSOCKET ==============

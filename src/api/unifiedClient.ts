@@ -82,10 +82,17 @@ export async function fetchJson<T>(
 
     const parsed = schema.safeParse(json);
     if (!parsed.success) {
-      // Упрощенное логирование для production - избегаем тяжелых операций
+      // Детальное логирование ошибок валидации для отладки
       console.error(
         `❌ Validation failed: ${options.method ?? "GET"} ${url} (${parsed.error.errors.length} errors)`,
       );
+      console.error(
+        "Validation errors:",
+        JSON.stringify(parsed.error.errors, null, 2),
+      );
+      if (import.meta.env.DEV) {
+        console.error("Response data:", JSON.stringify(json, null, 2));
+      }
       throw new TransportError("Response validation failed", {
         status: resp.status,
         code: "INVALID_RESPONSE",

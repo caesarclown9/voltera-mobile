@@ -133,9 +133,9 @@ export const ChargingPage = () => {
     setChargingError(null);
 
     // В dev режиме без настроенного API показываем предупреждение
-    if (import.meta.env.DEV && !import.meta.env["VITE_API_BASE_URL"]) {
+    if (import.meta.env.DEV && !import.meta.env["VITE_API_URL"]) {
       setChargingError(
-        "Запуск зарядки недоступен в режиме разработки. Настройте VITE_API_BASE_URL для тестирования.",
+        "Запуск зарядки недоступен в режиме разработки. Настройте VITE_API_URL для тестирования.",
       );
       return;
     }

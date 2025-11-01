@@ -17,7 +17,7 @@ import { logger } from "@/shared/utils/logger";
 import { fetchJson } from "@/api/unifiedClient";
 import { generateIdempotencyKey } from "@/shared/utils/idempotency";
 import {
-  zLocationsEnvelope,
+  zLocationsEnvelopeBackend,
   zStartChargingResponse,
   zChargingStatus,
   zStopChargingResponse,
@@ -44,8 +44,8 @@ export interface StartChargingRequest {
 
 export interface StartChargingResponse {
   success: boolean;
-  message?: string;
-  error?: string;
+  message?: string | null;
+  error?: string | null;
   session_id?: string;
   connector_id?: number;
   reserved_amount?: number; // Зарезервировано на балансе
@@ -84,8 +84,8 @@ export interface ChargingStatus {
 
 export interface StopChargingResponse {
   success: boolean;
-  message?: string;
-  error?: string;
+  message?: string | null;
+  error?: string | null;
   final_cost?: number; // Финальная стоимость
   energy_consumed?: number; // Потреблено кВт·ч
   duration_minutes?: number;
@@ -190,7 +190,7 @@ export interface TopupCardResponse {
   term_url?: string; // Return URL после 3DS
   client_id?: string;
   current_balance?: number;
-  error?: string;
+  error?: string | null;
 }
 
 export interface PaymentStatus {
@@ -252,8 +252,16 @@ class EvPowerApiService {
     } = await supabase.auth.getSession();
     const method = options.method || "GET";
     const headers: Record<string, string> = {};
-    if (session?.access_token)
+    if (session?.access_token) {
       headers["Authorization"] = `Bearer ${session.access_token}`;
+      // Debug: логируем первые и последние символы токена
+      const token = session.access_token;
+      logger.debug(
+        `[EvPowerAPI] Auth token: ${token.substring(0, 20)}...${token.substring(token.length - 20)}`,
+      );
+    } else {
+      logger.warn("[EvPowerAPI] No access token found in session!");
+    }
     // Добавляем Idempotency-Key для критичных операций (предотвращает дубликаты)
     if (method === "POST" || method === "PUT" || method === "DELETE") {
       headers["Idempotency-Key"] = generateIdempotencyKey();
@@ -346,15 +354,18 @@ class EvPowerApiService {
   async getLocations(includeStations = true): Promise<Location[]> {
     try {
       const response = await this.apiRequest<
-        import("zod").infer<typeof zLocationsEnvelope>
+        import("zod").infer<typeof zLocationsEnvelopeBackend>
       >(
         `/locations?include_stations=${includeStations}`,
         { method: "GET" },
-        zLocationsEnvelope,
+        zLocationsEnvelopeBackend,
       );
 
       // DEBUG в dev: логирование ответа от API
       logger.debug("[EvPowerAPI] API response for /locations:");
+      logger.debug(
+        `[EvPowerAPI] Backend API success: ${response.success}, total: ${response.total}`,
+      );
       logger.debug(
         `[EvPowerAPI] Locations count from API: ${response.locations?.length || 0}`,
       );

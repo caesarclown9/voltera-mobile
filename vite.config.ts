@@ -136,8 +136,21 @@ export default defineConfig(() => {
                 secure: true,
                 // Пробрасываем все заголовки, включая Authorization
                 configure: (proxy, _options) => {
-                  proxy.on("proxyReq", (_proxyReq, _req, _res) => {
-                    // Authorization header прокидывается автоматически
+                  proxy.on("proxyReq", (proxyReq, req, _res) => {
+                    // Явно пробрасываем все нужные заголовки
+                    // В Node.js заголовки всегда lowercase
+                    const auth =
+                      req.headers["authorization"] ||
+                      req.headers["Authorization"];
+                    if (auth) {
+                      proxyReq.setHeader("Authorization", auth);
+                    }
+                    const idempKey =
+                      req.headers["idempotency-key"] ||
+                      req.headers["Idempotency-Key"];
+                    if (idempKey) {
+                      proxyReq.setHeader("Idempotency-Key", idempKey);
+                    }
                   });
                 },
               },

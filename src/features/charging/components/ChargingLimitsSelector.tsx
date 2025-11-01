@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Zap, DollarSign, Info } from 'lucide-react';
 
 interface ChargingLimitsSelectorProps {
@@ -41,7 +41,7 @@ export function ChargingLimitsSelector({
   const MAX_ENERGY = 100; // кВт·ч
 
   // Расчёты
-  const calculateEstimates = () => {
+  const calculateEstimates = useCallback(() => {
     let estimates: Partial<ChargingLimits> = {};
 
     if (limitType === 'amount') {
@@ -68,7 +68,7 @@ export function ChargingLimitsSelector({
     }
 
     return estimates;
-  };
+  }, [limitType, selectedAmount, selectedEnergy, pricePerKwh, maxPowerKw]);
 
   // Обновляем лимиты при изменении параметров
   useEffect(() => {
@@ -80,7 +80,7 @@ export function ChargingLimitsSelector({
       ...estimates
     };
     onLimitsChange(limits);
-  }, [limitType, selectedAmount, selectedEnergy, pricePerKwh, maxPowerKw]);
+  }, [limitType, selectedAmount, selectedEnergy, pricePerKwh, maxPowerKw, calculateEstimates, onLimitsChange]);
 
   const handleQuickAmountSelect = (amount: number) => {
     setSelectedAmount(amount);

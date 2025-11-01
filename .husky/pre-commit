@@ -1,4 +1,54 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-npx lint-staged
+echo "🔍 Running pre-commit checks..."
+echo ""
+
+# 1. Lint-staged для быстрых проверок
+echo "📝 Checking code style..."
+npx lint-staged || {
+  echo "❌ Lint-staged failed! Fix formatting issues."
+  exit 1
+}
+
+# 2. TypeScript проверка
+echo "🔷 TypeScript check..."
+npm run typecheck || {
+  echo "❌ TypeScript errors found! Fix them before committing."
+  exit 1
+}
+
+# 3. Проверка что нет секретов в коде
+echo "🔒 Checking for secrets in code..."
+if git diff --cached --name-only | grep -E '\.(ts|tsx|js|jsx)$' | xargs grep -nH -E '(supabase.*anon.*key.*=.*ey|api.*key.*=.*[A-Z0-9]{20,}|secret.*key|password.*=.*["\x27][^"\x27]{8,})' 2>/dev/null; then
+  echo "❌ Potential secrets found in code! Use environment variables instead."
+  echo "💡 Tip: Move secrets to .env file"
+  exit 1
+fi
+
+# 4. Проверка что .env не коммитится
+echo "🔐 Checking for .env files..."
+if git diff --cached --name-only | grep -q "^\\.env$\|^\\.env\\.production$"; then
+  echo "❌ .env or .env.production files should NOT be committed!"
+  echo "💡 These files should be in .gitignore"
+  exit 1
+fi
+
+# 5. Проверка что нет console.log в production коде
+echo "🚫 Checking for console.log..."
+console_logs=$(git diff --cached --name-only | grep -E '\.(ts|tsx)$' | grep -v '\.test\.' | xargs grep -nH 'console\.log' 2>/dev/null | grep -v '// TODO:' | grep -v '// DEBUG:' || true)
+if [ -n "$console_logs" ]; then
+  echo "⚠️  Warning: console.log found in code:"
+  echo "$console_logs"
+  echo "💡 Consider removing console.log or using logger.debug() instead"
+  echo ""
+  echo "Continue anyway? (y/n)"
+  read -r answer
+  if [ "$answer" != "y" ]; then
+    exit 1
+  fi
+fi
+
+echo ""
+echo "✅ All pre-commit checks passed!"
+echo ""

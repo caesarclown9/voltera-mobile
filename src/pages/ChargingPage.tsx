@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { ChevronLeft, Heart, CreditCard, Zap } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useStationStatus } from "@/features/locations/hooks/useLocations";
-import { useLocationUpdates } from "@/features/locations/hooks/useLocations";
+import { useStationStatus, useLocationUpdates } from "@/features/locations/hooks/useLocations";
 import { useCharging } from "../features/charging/hooks/useCharging";
 import { useBalance } from "../features/balance/hooks/useBalance";
 import { SimpleTopup } from "../features/balance/components/SimpleTopup";
@@ -42,31 +41,33 @@ export const ChargingPage = () => {
   // Подключаемся к real-time обновлениям для этой станции
   useLocationUpdates(stationId ? [`station:${stationId}`] : []);
 
-  // Конвертируем stationStatus в формат для UI
-  const station = stationStatus
-    ? {
-        id: stationStatus.serial_number,
-        name: stationStatus.location_name,
-        address: stationStatus.location_address,
-        lat: 0,
-        lng: 0,
-        status: stationStatus.available_for_charging ? "available" : "offline",
-        connectors: stationStatus.connectors.map((connector) => ({
-          id: connector.id.toString(),
-          type: connector.type,
-          power: connector.power_kw,
-          status: connector.available ? "available" : "occupied",
-          price_per_kwh: stationStatus.tariff_rub_kwh,
-        })),
-        power: Math.max(
-          0,
-          ...stationStatus.connectors.map((c) => c.power_kw ?? 0),
-        ),
-        price: stationStatus.tariff_rub_kwh,
-        is_available: stationStatus.available_for_charging,
-        location_id: stationStatus.location_id,
-      }
-    : null;
+  // Конвертируем stationStatus в формат для UI (мемоизируем для избежания лишних ререндеров)
+  const station = useMemo(() => {
+    if (!stationStatus) return null;
+
+    return {
+      id: stationStatus.serial_number,
+      name: stationStatus.location_name,
+      address: stationStatus.location_address,
+      lat: 0,
+      lng: 0,
+      status: stationStatus.available_for_charging ? "available" : "offline",
+      connectors: stationStatus.connectors.map((connector) => ({
+        id: connector.id.toString(),
+        type: connector.type,
+        power: connector.power_kw,
+        status: connector.available ? "available" : "occupied",
+        price_per_kwh: stationStatus.tariff_rub_kwh,
+      })),
+      power: Math.max(
+        0,
+        ...stationStatus.connectors.map((c) => c.power_kw ?? 0),
+      ),
+      price: stationStatus.tariff_rub_kwh,
+      is_available: stationStatus.available_for_charging,
+      location_id: stationStatus.location_id,
+    };
+  }, [stationStatus]);
 
   const loading = isLoading;
 
@@ -128,7 +129,7 @@ export const ChargingPage = () => {
     setChargingError(null);
 
     // В dev режиме без настроенного API показываем предупреждение
-    if (import.meta.env.DEV && !import.meta.env.VITE_API_BASE_URL) {
+    if (import.meta.env.DEV && !import.meta.env['VITE_API_BASE_URL']) {
       setChargingError(
         "Запуск зарядки недоступен в режиме разработки. Настройте VITE_API_BASE_URL для тестирования.",
       );

@@ -4,9 +4,11 @@
 
 **Мобильное приложение для поиска и оплаты зарядки электромобилей в Кыргызстане**
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/caesarclown9/evpower-mobile-app)
+[![Version](https://img.shields.io/badge/version-1.0.1-blue.svg)](https://github.com/caesarclown9/evpower-mobile-app)
+[![Build](https://img.shields.io/badge/build-53-green.svg)](https://github.com/caesarclown9/evpower-mobile-app)
 [![License](https://img.shields.io/badge/license-Proprietary-red.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Android%20%7C%20iOS-lightgrey.svg)](https://capacitorjs.com)
+[![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue.svg)](https://www.typescriptlang.org/)
 
 </div>
 
@@ -209,14 +211,21 @@ evpower-mobile/
 
 ---
 
-## 📄 Документация для App Stores
+## 📄 Документация
 
-Перед публикацией в Google Play и App Store ознакомьтесь с документацией:
+### 📚 Основные документы
 
-- 📋 [Google Play Submission Checklist](./docs/google-play/GOOGLE_PLAY_SUBMISSION_CHECKLIST.md)
-- 🔒 [Google Play Data Safety](./docs/google-play/GOOGLE_PLAY_DATA_SAFETY.md)
-- 📜 [Privacy Policy](./docs/legal/PRIVACY_POLICY.md)
-- 📜 [Terms of Service](./docs/legal/TERMS_OF_SERVICE.md)
+- 📖 **[README.md](./README.md)** - главная документация (этот файл)
+- 📋 **[CHANGELOG.md](./CHANGELOG.md)** - история изменений
+- 📐 **[RULES.md](./RULES.md)** - правила разработки и архитектуры
+- 🎯 **[QUALITY_IMPROVEMENTS_SUMMARY.md](./QUALITY_IMPROVEMENTS_SUMMARY.md)** - отчет по качеству кода
+- 🔗 **[BACKEND_INTEGRATION_REPORT.md](./BACKEND_INTEGRATION_REPORT.md)** - совместимость с бэкендом
+
+### 🚀 Deployment
+
+- 📱 **[IOS_DEPLOYMENT.md](./IOS_DEPLOYMENT.md)** - инструкции для iOS
+- 🤖 **[GOOGLE_PLAY_DEPLOYMENT_CHECKLIST.md](./GOOGLE_PLAY_DEPLOYMENT_CHECKLIST.md)** - чеклист для Google Play
+- 🔐 **[PRIVACY_POLICY_DEPLOYMENT.md](./PRIVACY_POLICY_DEPLOYMENT.md)** - политика конфиденциальности
 
 ---
 
@@ -258,8 +267,10 @@ npm run test             # Запустить тесты
 npm run test:ui          # UI для тестов
 npm run test:coverage    # Coverage отчет
 
-# Линтинг
+# Проверки качества
+npm run typecheck        # TypeScript проверка (strict mode)
 npm run lint             # ESLint проверка
+npm run pre-release      # Полная проверка перед релизом (10 шагов)
 
 # Capacitor
 npx cap sync             # Синхронизация
@@ -337,19 +348,41 @@ npm run test:coverage
 
 ## 📊 Статус проекта
 
-**Версия:** 1.0.1 | **Build:** 37 | **Последнее обновление:** 2025-10-15
+**Версия:** 1.0.1 | **Build:** 53 | **Последнее обновление:** 2025-11-01
 
-### Последние изменения (v1.0.1)
+### ✅ Production Ready!
 
-- ✅ Исправлены все TypeScript strict mode ошибки (27 ошибок)
-- ✅ Удалены неиспользуемые импорты и переменные
-- ✅ Код для будущих динамических тарифов сохранен с правильными комментариями
-- ✅ Все проверки (typecheck, lint, tests) проходят успешно
-
-- ✅ **Android** - готово к релизу, APK собран
+- ✅ **Android** - готово к релизу в Google Play
 - 🚧 **iOS** - подготовлено к деплою (требуется macOS для финального билда)
-- ✅ **Backend Integration** - полностью интегрировано
+- ✅ **Backend Integration** - полная совместимость с бэкендом v1.1.0
 - ✅ **OCPP Backend** - работает (https://ocpp.evpower.kg)
+- ✅ **TypeScript** - 0 ошибок, strict mode включен
+- ✅ **Production Build** - успешно (39s, ~188KB gzip)
+- ✅ **Security** - все уязвимости устранены
+
+### Последние критические исправления (Build 53)
+
+**Интеграция с бэкендом:**
+- ✅ Idempotency-Key для всех критичных операций (UUID v4)
+- ✅ FCM device registration (graceful degradation для 404)
+- ✅ Error codes обработка (39 кодов ошибок с русскими сообщениями)
+- ✅ Offline indicator (Capacitor Network API)
+- ✅ Auto-stop защита зависших сессий (получение корректного статуса)
+
+**Качество кода:**
+- ✅ TypeScript strict mode: 0 ошибок
+- ✅ ESLint: критичные ошибки исправлены
+- ✅ Безопасность: 0 уязвимостей в зависимостях
+- ✅ CI/CD: GitHub Actions настроен
+- ✅ Pre-commit hooks: автоматические проверки
+
+**Безопасность:**
+- ✅ Удален topupWithCard (PCI DSS compliance, только QR топ-ап)
+- ✅ JWT через JWKS (без хранения JWT_SECRET на клиенте)
+- ✅ Все критичные данные через HTTPS
+- ✅ Secure Storage для токенов
+
+📄 **Подробнее:** [BACKEND_INTEGRATION_REPORT.md](./BACKEND_INTEGRATION_REPORT.md)
 
 ---
 

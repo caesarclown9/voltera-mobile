@@ -15,7 +15,7 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
 }
 
 export class NotificationService {
-  private static readonly PUBLIC_VAPID_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || '';
+  private static readonly PUBLIC_VAPID_KEY = import.meta.env['VITE_VAPID_PUBLIC_KEY'] || '';
 
   /**
    * Запрашивает разрешение на уведомления
@@ -89,10 +89,10 @@ export class NotificationService {
    * Отправляет локальное уведомление
    */
   static async showNotification(
-    title: string, 
-    options?: NotificationOptions & { 
+    title: string,
+    options?: NotificationOptions & {
       action?: string;
-      data?: any;
+      data?: unknown;
     }
   ): Promise<void> {
     if (!('Notification' in window)) {

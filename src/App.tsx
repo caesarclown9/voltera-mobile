@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { BrowserRouter, useLocation } from "react-router-dom";
-import { QueryClient } from "@tanstack/react-query";
+import { QueryClient, type Query } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
-import type { Query } from "@tanstack/react-query";
 import { Router } from "./app/Router";
 import { Providers } from "./app/Providers";
 import { ErrorBoundary } from "./shared/components/ErrorBoundary";

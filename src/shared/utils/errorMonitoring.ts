@@ -1,7 +1,7 @@
 interface ErrorInfo {
   message: string
   stack?: string
-  context?: Record<string, any>
+  context?: Record<string, unknown>
   url?: string
   line?: number
   column?: number
@@ -65,7 +65,7 @@ class ErrorMonitor {
     this.queue = []
 
     try {
-      const endpoint = import.meta.env.VITE_ERROR_MONITORING_ENDPOINT
+      const endpoint = import.meta.env['VITE_ERROR_MONITORING_ENDPOINT']
       if (!endpoint) return
 
       await fetch(endpoint, {
@@ -89,7 +89,7 @@ class ErrorMonitor {
 
 export const errorMonitor = new ErrorMonitor()
 
-export function withErrorBoundary<T extends (...args: any[]) => any>(
+export function withErrorBoundary<T extends (...args: never[]) => unknown>(
   fn: T,
   context?: string
 ): T {

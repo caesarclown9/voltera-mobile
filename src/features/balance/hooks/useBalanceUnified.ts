@@ -9,12 +9,19 @@ import { unifiedApi } from '@/services/evpowerApi'
 import { supabase } from '../../../shared/config/supabase'
 import type { UnifiedTransaction } from '../../auth/types/unified.types'
 
+type ClientData = {
+  id: string
+  email?: string
+  balance?: number
+  [key: string]: unknown
+} | null
+
 /**
  * Хук для получения баланса
  * Синхронизирует данные между Supabase и EvPower API
  */
 export const useBalance = () => {
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<ClientData>(null)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -46,7 +53,7 @@ export const useBalance = () => {
  */
 export const useQRTopup = () => {
   const queryClient = useQueryClient()
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<ClientData>(null)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -89,7 +96,7 @@ export const useQRTopup = () => {
  */
 export const usePaymentStatus = (invoiceId: string, enabled = false) => {
   const queryClient = useQueryClient()
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<ClientData>(null)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -144,7 +151,7 @@ export const usePaymentStatus = (invoiceId: string, enabled = false) => {
  * Хук для мониторинга платежа (упрощённая версия)
  */
 export function usePaymentMonitoring() {
-  const [paymentStatus, setPaymentStatus] = useState<any>(null)
+  const [paymentStatus, setPaymentStatus] = useState<unknown>(null)
   const [monitoring, setMonitoring] = useState(false)
   const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null)
 
@@ -190,7 +197,7 @@ export function usePaymentMonitoring() {
         }
 
         return false
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Payment monitoring error:', error)
         return false
       }
@@ -238,7 +245,7 @@ export function usePaymentMonitoring() {
  * Хук для получения истории транзакций
  */
 export const useTransactionHistory = (limit = 50) => {
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<ClientData>(null)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -263,7 +270,7 @@ export const useTransactionHistory = (limit = 50) => {
  * Хук для real-time подписки на изменения баланса
  */
 export const useBalanceSubscription = (onBalanceChange?: (newBalance: number) => void) => {
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<ClientData>(null)
   const queryClient = useQueryClient()
 
   useEffect(() => {
@@ -290,11 +297,11 @@ export const useBalanceSubscription = (onBalanceChange?: (newBalance: number) =>
           filter: `id=eq.${user.id}`
         },
         (payload) => {
-          const newBalance = payload.new.balance
+          const newBalance = payload.new['balance']
           if (typeof newBalance === 'number') {
             // Обновляем кэш
-            queryClient.setQueryData(['balance', user.id], (old: any) => ({
-              ...old,
+            queryClient.setQueryData(['balance', user.id], (old: unknown) => ({
+              ...(old as Record<string, unknown>),
               balance: newBalance
             }))
 

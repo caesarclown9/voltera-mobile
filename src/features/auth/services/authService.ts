@@ -4,6 +4,7 @@ import {
   isSupabaseConfigured,
 } from "../../../shared/utils/supabaseHelpers";
 import type { AuthResponse, Client } from "../types/auth.types";
+import { pushNotificationService } from "@/lib/platform/push";
 
 export class AuthService {
   private static instance: AuthService;
@@ -34,7 +35,9 @@ export class AuthService {
           "Аккаунт деактивирован/в процессе удаления. Восстановите доступ перед регистрацией.",
         );
       }
-    } catch (_) {}
+    } catch {
+      // Ignore error - user may already exist in Supabase
+    }
     // Создаем пользователя через Supabase Auth с телефоном в метаданных
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
@@ -50,14 +53,15 @@ export class AuthService {
 
     if (authError) {
       // Нормализуем сообщение об ошибке для UI
-      const message = /already/i.test((authError as any).message || "")
+      const errorMessage = String((authError as { message?: string }).message || "");
+      const message = /already/i.test(errorMessage)
         ? "Пользователь с таким email уже существует"
-        : /password/i.test((authError as any).message || "")
+        : /password/i.test(errorMessage)
           ? "Некорректный пароль: минимум 6 символов"
-          : (authError as any).message ||
+          : errorMessage ||
             "Не удалось зарегистрировать пользователя";
-      const normalizedError = new Error(message);
-      (normalizedError as any).status = (authError as any).status;
+      const normalizedError = new Error(message) as Error & { status?: number };
+      normalizedError.status = (authError as { status?: number }).status;
       throw normalizedError;
     }
 
@@ -80,7 +84,7 @@ export class AuthService {
         .single();
 
       if (!clientError && client) {
-        if ((client as any).status && (client as any).status !== "active") {
+        if ((client as { status?: string }).status && (client as { status?: string }).status !== "active") {
           // Сессию не убиваем — она нужна для восстановления через RPC
           throw new Error(
             "Аккаунт деактивирован/в процессе удаления. Обратитесь в поддержку.",
@@ -144,7 +148,7 @@ export class AuthService {
             session: authData.session,
           };
         }
-      } catch (error) {
+      } catch {
         // Если не удалось через Supabase Auth, продолжаем
       }
     }
@@ -165,8 +169,8 @@ export class AuthService {
     // В режиме разработки используем mock данные только если явно не указано использовать реальный API
     if (
       import.meta.env.DEV &&
-      !import.meta.env.VITE_USE_REAL_API &&
-      !import.meta.env.VITE_SUPABASE_ANON_KEY
+      !import.meta.env['VITE_USE_REAL_API'] &&
+      !import.meta.env['VITE_SUPABASE_ANON_KEY']
     ) {
       return {
         success: true,
@@ -232,7 +236,7 @@ export class AuthService {
     }
 
     // Блокируем вход если аккаунт помечен как неактивный/удаляемый/удалённый
-    if ((clientData as any).status && (clientData as any).status !== "active") {
+    if ((clientData as { status?: string }).status && (clientData as { status?: string }).status !== "active") {
       // Оставляем сессию активной для RPC восстановления
       throw new Error("Аккаунт деактивирован или в процессе удаления");
     }
@@ -252,7 +256,7 @@ export class AuthService {
     try {
       const result = await this.signInWithEmail(email, password);
       return result;
-    } catch (signInError: any) {
+    } catch (signInError: unknown) {
       console.log("Sign in error:", signInError);
 
       // Проверяем сначала - может пользователь уже существует в auth.users
@@ -271,7 +275,7 @@ export class AuthService {
       console.log("User not found, creating new account...");
       try {
         return await this.signUpWithEmail(email, password);
-      } catch (signUpError: any) {
+      } catch {
         // Если регистрация не удалась, возвращаем оригинальную ошибку входа
         throw new Error("Неверный email или пароль");
       }
@@ -285,8 +289,10 @@ export class AuthService {
       if (isSupabaseConfigured()) {
         // 1) Мгновенно чистим локальную сессию (без сети)
         try {
-          await supabase.auth.signOut({ scope: "local" as any });
-        } catch {}
+          await supabase.auth.signOut({ scope: "local" as "local" | "global" | "others" });
+        } catch {
+          // Ignore error - local signOut is best effort
+        }
 
         // 2) Дополнительно подчистим возможные ключи supabase в localStorage
         try {
@@ -298,13 +304,23 @@ export class AuthService {
             }
           }
           keysToRemove.forEach((k) => localStorage.removeItem(k));
-        } catch {}
+        } catch {
+          // Ignore error - localStorage cleanup is best effort
+        }
 
         // 3) Пытаемся отозвать токен на сервере (не критично)
         await supabaseWithTimeout(() => supabase.auth.signOut(), 2000, {
           error: null,
-        } as unknown as any);
+        });
       }
+
+      // 4) Удаляем FCM токен с бэкенда (при выходе из аккаунта)
+      try {
+        await pushNotificationService.unregister();
+      } catch {
+        // Ignore error - push unregister is best effort
+      }
+
       if (!import.meta.env.PROD)
         console.log("[AuthService] Sign out successful");
     } catch (error) {
@@ -331,7 +347,7 @@ export class AuthService {
       const { data, error: authGetError } = await supabaseWithTimeout(
         () => supabase.auth.getUser(),
         5000, // Увеличен timeout до 5 секунд
-        { data: { user: undefined as unknown as any }, error: null },
+        { data: { user: null }, error: null },
       );
 
       if (!import.meta.env.PROD) {
@@ -366,7 +382,7 @@ export class AuthService {
             hasClientData: !!clientData,
             clientId: clientData?.id,
             clientEmail: clientData?.email,
-            clientStatus: (clientData as any)?.status,
+            clientStatus: (clientData as { status?: string })?.status,
             balance: clientData?.balance,
             error: error?.message,
           });
@@ -374,8 +390,8 @@ export class AuthService {
 
         if (!error && clientData) {
           if (
-            (clientData as any).status &&
-            (clientData as any).status !== "active"
+            (clientData as { status?: string }).status &&
+            (clientData as { status?: string }).status !== "active"
           ) {
             // Для UI — считаем как неавторизованного
             return null;
@@ -416,7 +432,7 @@ export class AuthService {
     }
   }
 
-  onAuthStateChange(callback: (event: string, session: any) => void) {
+  onAuthStateChange(callback: (event: string, session: unknown) => void) {
     return supabase.auth.onAuthStateChange(callback);
   }
 }

@@ -1,14 +1,14 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+const supabaseUrl = import.meta.env['VITE_SUPABASE_URL']
+const supabaseAnonKey = import.meta.env['VITE_SUPABASE_ANON_KEY']
 
 let url: string
 let key: string
 
 // In production, Supabase config is required
 if (!supabaseUrl || !supabaseAnonKey) {
-  if (import.meta.env.PROD || import.meta.env.VITE_USE_REAL_API === 'true') {
+  if (import.meta.env.PROD || import.meta.env['VITE_USE_REAL_API'] === 'true') {
     console.error('Missing Supabase configuration:', {
       hasUrl: !!supabaseUrl,
       hasKey: !!supabaseAnonKey

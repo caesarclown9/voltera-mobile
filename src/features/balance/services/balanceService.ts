@@ -15,9 +15,9 @@ export const balanceService = {
       ...res,
       qrCode:
         res.qr_code_url ||
-        (apiRes.qr_url as string) ||
+        (apiRes['qr_url'] as string) ||
         res.qr_code ||
-        (apiRes.qr as string) ||
+        (apiRes['qr'] as string) ||
         "",
       paymentId: res.invoice_id || res.order_id || "",
       expiresAt:
@@ -26,8 +26,8 @@ export const balanceService = {
         new Date(Date.now() + 5 * 60 * 1000).toISOString(),
       // Для удобства также мапим app_link
       payment_url:
-        (apiRes.payment_url as string) ||
-        (apiRes.link_app as string) ||
+        (apiRes['payment_url'] as string) ||
+        (apiRes['link_app'] as string) ||
         res.app_link ||
         "",
     };

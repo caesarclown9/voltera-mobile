@@ -76,7 +76,7 @@ describe("useCharging hooks", () => {
             station_id: "station-1",
             connector_id: 1,
           });
-        } catch (e) {
+        } catch {
           /* ignore */
         }
       });

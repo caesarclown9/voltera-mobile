@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import type { ReactNode } from 'react';
+import React, { useState, useEffect, useRef, useCallback, type ReactNode } from 'react';
 
 interface VirtualizedListProps<T> {
   items: T[];

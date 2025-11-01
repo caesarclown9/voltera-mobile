@@ -16,8 +16,8 @@ class Logger {
 
   constructor(config?: Partial<LoggerConfig>) {
     this.config = {
-      enabled: import.meta.env.DEV || import.meta.env.VITE_DEBUG_MODE === 'true',
-      level: (import.meta.env.VITE_LOG_LEVEL as LogLevel) || 'info',
+      enabled: import.meta.env.DEV || import.meta.env['VITE_DEBUG_MODE'] === 'true',
+      level: (import.meta.env['VITE_LOG_LEVEL'] as LogLevel) || 'info',
       prefix: '[EvPower]',
       ...config,
     }
@@ -105,8 +105,8 @@ class Logger {
   private reportError(error: Error, context?: Record<string, unknown>): void {
     // Здесь будет интеграция с Sentry или другой системой мониторинга
     // Пока просто заглушка
-    if (typeof window !== 'undefined' && (window as any).Sentry) {
-      (window as any).Sentry.captureException(error, { extra: context })
+    if (typeof window !== 'undefined' && (window as { Sentry?: { captureException: (error: Error, options?: { extra?: Record<string, unknown> }) => void } }).Sentry) {
+      (window as { Sentry?: { captureException: (error: Error, options?: { extra?: Record<string, unknown> }) => void } }).Sentry?.captureException(error, { extra: context })
     }
   }
 

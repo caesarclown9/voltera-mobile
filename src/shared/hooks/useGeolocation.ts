@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { geolocationService } from '@/lib/platform'
-import type { Coordinates } from '@/lib/platform'
+import { geolocationService, type Coordinates } from '@/lib/platform'
 
 interface GeolocationState {
   loading: boolean
@@ -111,6 +110,7 @@ export const useGeolocation = (options: UseGeolocationOptions = {}) => {
         } catch (error) {
           if (!mounted) return
 
+          console.error('[Geolocation] Failed to watch position:', error)
           setState(prevState => ({
             ...prevState,
             loading: false,

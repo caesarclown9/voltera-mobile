@@ -1,6 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * EvPower API v1 Service - ЕДИНСТВЕННЫЙ API клиент для всего приложения
  * Интеграция с бэкендом OCPP сервера
+ *
+ * Note: `any` types used temporarily for external API responses lacking proper type definitions
  *
  * ВАЖНО:
  * - НЕ использует JWT токены
@@ -12,6 +15,7 @@
 import { supabase } from "../shared/config/supabase";
 import { logger } from "@/shared/utils/logger";
 import { fetchJson } from "@/api/unifiedClient";
+import { generateIdempotencyKey } from "@/shared/utils/idempotency";
 import {
   zLocationsEnvelope,
   zStartChargingResponse,
@@ -22,6 +26,7 @@ import {
   zPaymentStatus,
   zStationStatusResponse,
 } from "@/api/schemas";
+import { z } from 'zod';
 
 const API_VERSION = "/api/v1";
 // В dev принудительно используем относительный путь через proxy; в prod — берем из VITE_API_URL
@@ -249,9 +254,9 @@ class EvPowerApiService {
     const headers: Record<string, string> = {};
     if (session?.access_token)
       headers["Authorization"] = `Bearer ${session.access_token}`;
+    // Добавляем Idempotency-Key для критичных операций (предотвращает дубликаты)
     if (method === "POST" || method === "PUT" || method === "DELETE") {
-      headers["Idempotency-Key"] =
-        globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`;
+      headers["Idempotency-Key"] = generateIdempotencyKey();
     }
     return await fetchJson<T>(
       url,
@@ -358,7 +363,7 @@ class EvPowerApiService {
     } catch (error) {
       if (
         import.meta.env.PROD &&
-        import.meta.env.VITE_ENABLE_SUPABASE_FALLBACK !== "true"
+        import.meta.env['VITE_ENABLE_SUPABASE_FALLBACK'] !== "true"
       ) {
         throw error;
       }
@@ -568,13 +573,13 @@ class EvPowerApiService {
     } catch (error) {
       if (
         import.meta.env.PROD &&
-        import.meta.env.VITE_ENABLE_SUPABASE_FALLBACK !== "true"
+        import.meta.env['VITE_ENABLE_SUPABASE_FALLBACK'] !== "true"
       ) {
         throw error;
       }
       // DEV fallback (или явно разрешённый флагом) через Supabase REST
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      const supabaseUrl = import.meta.env['VITE_SUPABASE_URL'];
+      const supabaseKey = import.meta.env['VITE_SUPABASE_ANON_KEY'];
       const stationResponse = await fetch(
         `${supabaseUrl}/rest/v1/stations?id=eq.${stationId}&select=id,serial_number,model,manufacturer,status,is_available,location_id,locations(id,name,address),connectors(id,connector_number,connector_type,power_kw,status,error_code)`,
         {
@@ -656,7 +661,7 @@ class EvPowerApiService {
       throw error;
     }
 
-    return typeof data?.balance === "number" ? data.balance : 0;
+    return typeof data?.['balance'] === "number" ? data['balance'] : 0;
   }
 
   /**
@@ -677,6 +682,10 @@ class EvPowerApiService {
   }
 
   /**
+   * @deprecated НЕ ИСПОЛЬЗУЕТСЯ. Приложение использует только QR топ-ап (topupWithQR).
+   * Card data НЕ должны обрабатываться на клиенте (PCI DSS compliance).
+   * Метод сохранен для обратной совместимости, но не вызывается нигде в коде.
+   *
    * Пополнить баланс картой (OBank)
    */
   async topupWithCard(
@@ -818,7 +827,7 @@ class EvPowerApiService {
             filter: `id=eq.${user.id}`,
           },
           (payload) => {
-            callback(payload.new.balance);
+            callback(payload.new['balance']);
           },
         )
         .subscribe();
@@ -982,6 +991,84 @@ class EvPowerApiService {
     params: StopChargingParams,
   ): Promise<StopChargingResponse> {
     return this.stopCharging(params.session_id);
+  }
+
+  // ============== DEVICES (FCM PUSH NOTIFICATIONS) ==============
+
+  /**
+   * Регистрация FCM токена устройства для push уведомлений
+   *
+   * @param fcmToken - FCM токен от Firebase
+   * @param platform - Платформа устройства
+   * @param appVersion - Версия приложения
+   * @returns Успешность регистрации
+   */
+  async registerDevice(
+    fcmToken: string,
+    platform: 'android' | 'ios' | 'web',
+    appVersion: string
+  ): Promise<{ success: boolean; message?: string }> {
+    try {
+      const response = await this.apiRequest<{ success: boolean; message?: string }>(
+        '/devices/register',
+        {
+          method: 'POST',
+          body: {
+            fcm_token: fcmToken,
+            platform,
+            app_version: appVersion
+          }
+        },
+        z.object({
+          success: z.boolean(),
+          message: z.string().optional()
+        })
+      );
+
+      logger.info('[EvPowerAPI] FCM token registered successfully');
+      return response;
+    } catch (error) {
+      // Проверяем если это 404 (endpoint не реализован на бэкенде)
+      const is404 = error instanceof Error && error.message.includes('404');
+      if (is404) {
+        logger.warn('[EvPowerAPI] FCM endpoints not implemented yet (404) - feature planned for v1.2.0');
+      } else {
+        logger.error('[EvPowerAPI] Failed to register FCM token:', error as Error);
+      }
+      // Не бросаем ошибку, чтобы не блокировать работу приложения
+      return { success: false, message: 'Failed to register device' };
+    }
+  }
+
+  /**
+   * Удаление FCM токена устройства (при выходе из аккаунта)
+   *
+   * @param fcmToken - FCM токен для удаления
+   * @returns Успешность удаления
+   */
+  async unregisterDevice(fcmToken: string): Promise<{ success: boolean }> {
+    try {
+      const response = await this.apiRequest<{ success: boolean }>(
+        '/devices/unregister',
+        {
+          method: 'POST',
+          body: { fcm_token: fcmToken }
+        },
+        z.object({ success: z.boolean() })
+      );
+
+      logger.info('[EvPowerAPI] FCM token unregistered successfully');
+      return response;
+    } catch (error) {
+      // Проверяем если это 404 (endpoint не реализован на бэкенде)
+      const is404 = error instanceof Error && error.message.includes('404');
+      if (is404) {
+        logger.warn('[EvPowerAPI] FCM endpoints not implemented yet (404) - feature planned for v1.2.0');
+      } else {
+        logger.error('[EvPowerAPI] Failed to unregister FCM token:', error as Error);
+      }
+      return { success: false };
+    }
   }
 }
 

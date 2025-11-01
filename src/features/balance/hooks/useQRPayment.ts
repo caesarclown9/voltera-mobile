@@ -1,6 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { evpowerApi } from "@/services/evpowerApi";
-import type { TopupQRResponse, PaymentStatus } from "@/services/evpowerApi";
+import { evpowerApi, type TopupQRResponse, type PaymentStatus } from "@/services/evpowerApi";
 
 export const useQRTopup = () => {
   return useMutation<

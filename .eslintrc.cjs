@@ -24,12 +24,24 @@ module.exports = {
     react: { version: 'detect' }
   },
   rules: {
-    // Отключаем warnings для быстрого коммита (TODO: включить позже)
-    'no-console': 'off',
-    '@typescript-eslint/no-explicit-any': 'warn', // Понижаем до warn временно
-    'no-empty': 'warn',
-    'no-async-promise-executor': 'warn',
-    // Disabled type-checking rules that require parserOptions.project
+    // ⚠️ Console logs (warn для постепенного исправления)
+    'no-console': ['warn', { allow: ['warn', 'error'] }],
+
+    // 🔒 TypeScript Strict Rules
+    '@typescript-eslint/no-explicit-any': 'error', // ✅ УСИЛЕНО: Запрещаем any
+    '@typescript-eslint/no-unused-vars': ['error', {
+      argsIgnorePattern: '^_',
+      varsIgnorePattern: '^_',
+      ignoreRestSiblings: true
+    }],
+
+    // ⚠️ Code Quality
+    'no-empty': 'error',
+    'no-async-promise-executor': 'error',
+    'no-debugger': 'error',
+    'no-duplicate-imports': 'error',
+
+    // 🚫 Disabled type-checking rules (require parserOptions.project)
     '@typescript-eslint/no-unsafe-assignment': 'off',
     '@typescript-eslint/no-unsafe-argument': 'off',
     '@typescript-eslint/no-unsafe-return': 'off',
@@ -37,14 +49,16 @@ module.exports = {
     '@typescript-eslint/no-floating-promises': 'off',
     '@typescript-eslint/consistent-type-imports': 'off',
     '@typescript-eslint/no-require-imports': 'off',
-    'react/react-in-jsx-scope': 'off',
-    'react/display-name': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',
-    '@typescript-eslint/no-unused-vars': 'off', // Отключаем временно
+
+    // ⚛️ React Rules
+    'react/react-in-jsx-scope': 'off', // React 18+
+    'react/display-name': 'off',
     'react-refresh/only-export-components': 'off',
-    'react-hooks/exhaustive-deps': 'warn' // Понижаем до warn
+    'react-hooks/exhaustive-deps': 'error', // ✅ УСИЛЕНО
+    'react-hooks/rules-of-hooks': 'error'
   },
-  ignorePatterns: ['dist/', 'android/', 'ios/'],
+  ignorePatterns: ['dist/', 'android/', 'ios/', 'scripts/'],
   overrides: [
     {
       files: ['**/*.tsx'],

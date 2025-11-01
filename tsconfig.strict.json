@@ -4,6 +4,11 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitReturns": true,
+    "noPropertyAccessFromIndexSignature": true
+    // exactOptionalPropertyTypes: Отключено - требует значительных изменений типов
+    // TODO: Включить после рефакторинга типов с явным | undefined
   }
 }

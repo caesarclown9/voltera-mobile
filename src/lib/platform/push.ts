@@ -9,8 +9,10 @@ import {
   type Token,
   type ActionPerformed
 } from '@capacitor/push-notifications';
-import { isNativePlatform } from './env';
+import { isNativePlatform, getPlatform } from './env';
 import { logger } from '@/shared/utils/logger';
+import { evpowerApi } from '@/services/evpowerApi';
+import { APP_VERSION } from '@/lib/versionManager';
 
 /**
  * Интерфейс для push-уведомления
@@ -19,7 +21,7 @@ export interface PushNotification {
   id?: string;
   title?: string;
   body?: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
   badge?: number;
 }
 
@@ -74,14 +76,33 @@ class PushNotificationService {
    */
   private async initializeNative(): Promise<void> {
     // Слушатель регистрации (получение токена)
-    await PushNotifications.addListener('registration', (token: Token) => {
+    await PushNotifications.addListener('registration', async (token: Token) => {
       logger.info('Push: device registered with token');
       this.currentToken = token.value;
+
+      // Регистрируем токен на бэкенде
+      try {
+        const platform = getPlatform();
+        const result = await evpowerApi.registerDevice(
+          token.value,
+          platform,
+          APP_VERSION
+        );
+
+        if (result.success) {
+          logger.info('Push: token registered on backend');
+        } else {
+          logger.warn('Push: failed to register token on backend', result.message);
+        }
+      } catch (error) {
+        logger.error('Push: error registering token on backend', error);
+      }
+
       this.notifyTokenCallbacks(token.value);
     });
 
     // Слушатель ошибок регистрации
-    await PushNotifications.addListener('registrationError', (error: any) => {
+    await PushNotifications.addListener('registrationError', (error: unknown) => {
       logger.error('Push: registration error', error);
     });
 
@@ -209,6 +230,33 @@ class PushNotificationService {
    */
   getToken(): string | null {
     return this.currentToken;
+  }
+
+  /**
+   * Отменяет регистрацию устройства (при выходе из аккаунта)
+   */
+  async unregister(): Promise<boolean> {
+    try {
+      if (!this.currentToken) {
+        logger.warn('Push: no token to unregister');
+        return false;
+      }
+
+      // Удаляем токен с бэкенда
+      const result = await evpowerApi.unregisterDevice(this.currentToken);
+
+      if (result.success) {
+        logger.info('Push: token unregistered from backend');
+        this.currentToken = null;
+        return true;
+      } else {
+        logger.warn('Push: failed to unregister token from backend');
+        return false;
+      }
+    } catch (error) {
+      logger.error('Push: error unregistering token', error);
+      return false;
+    }
   }
 
   /**

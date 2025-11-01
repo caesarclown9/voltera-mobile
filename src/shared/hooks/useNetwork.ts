@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-import { networkService } from '@/lib/platform'
-import type { NetworkStatus } from '@/lib/platform'
+import { networkService, type NetworkStatus } from '@/lib/platform'
 
 /**
  * Hook для работы с сетевым состоянием

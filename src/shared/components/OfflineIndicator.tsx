@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { useOnlineStatus, OfflineQueue } from '../utils/offline'
+import { OfflineQueue } from '../utils/offline'
+import { useOnlineStatus } from '../hooks/useNetwork'
 
 export function OfflineIndicator() {
   const isOnline = useOnlineStatus()

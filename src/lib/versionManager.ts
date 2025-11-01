@@ -6,8 +6,8 @@
  */
 
 // Текущая версия приложения (синхронизируется с package.json)
-export const APP_VERSION = '1.0.0';
-export const APP_BUILD = 48; // Увеличивается при каждой сборке
+export const APP_VERSION = '1.0.1';
+export const APP_BUILD = 55; // Увеличивается при каждой сборке
 
 // Ключи для хранения
 const VERSION_STORAGE_KEY = "evpower_app_version";

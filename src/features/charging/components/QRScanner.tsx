@@ -86,7 +86,7 @@ export function QRScanner({ onScan, onError, onCancel }: QRScannerProps) {
           onError?.(errorMsg);
         }
       }
-    } catch (error) {
+    } catch {
       const errorMsg = "Произошла ошибка при сканировании";
       setScanError(errorMsg);
       onError?.(errorMsg);

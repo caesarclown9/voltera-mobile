@@ -156,7 +156,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return () => {
       subscription.unsubscribe();
     };
-  }, [login, logout]);
+  }, [login, logout, setInitialized]);
 
   return <>{children}</>;
 }

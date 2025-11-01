@@ -108,7 +108,7 @@ describe("useBalance hooks", () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      const initialBalance = result.current.data?.balance;
+      const _initialBalance = result.current.data?.balance;
 
       await result.current.refetch?.();
 

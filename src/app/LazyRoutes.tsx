@@ -3,8 +3,7 @@
  * с поддержкой prefetch и error boundaries
  */
 
-import { lazy } from "react";
-import type { ComponentType } from "react";
+import { lazy, type ComponentType } from "react";
 
 // Тип для lazy компонента с prefetch
 interface LazyRoute {

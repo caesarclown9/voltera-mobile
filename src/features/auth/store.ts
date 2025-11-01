@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { UnifiedUser } from "./types/unified.types";
 import { unifiedApi } from "@/services/evpowerApi";
+import { logger } from "@/shared/utils/logger";
 
 interface AuthState {
   user: UnifiedUser | null;
@@ -32,7 +33,7 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: () => {
-        console.log("[AuthStore] Logout called, clearing state...");
+        logger.debug("[AuthStore] Logout called, clearing state...");
 
         // Очищаем состояние
         set({
@@ -44,7 +45,7 @@ export const useAuthStore = create<AuthState>()(
         // Явно удаляем флаг пропуска авторизации, чтобы показать модалку входа
         localStorage.removeItem("skipped_auth");
 
-        console.log(
+        logger.debug(
           "[AuthStore] State cleared, auth removed from localStorage",
         );
       },

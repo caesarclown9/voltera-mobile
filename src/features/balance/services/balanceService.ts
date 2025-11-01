@@ -1,4 +1,13 @@
-import { evpowerApi } from "@/services/evpowerApi";
+import { evpowerApi, type TopupQRResponse } from "@/services/evpowerApi";
+
+// Normalized response type for client usage
+export interface NormalizedTopupQRResponse extends TopupQRResponse {
+  qrCode: string;
+  paymentId: string;
+  expiresAt: string;
+  payment_url?: string;
+  link_app?: string;
+}
 
 export const balanceService = {
   async getBalance(_userId: string) {
@@ -6,7 +15,7 @@ export const balanceService = {
     return { balance, currency: "KGS" };
   },
 
-  async generateTopUpQR(amount: number) {
+  async generateTopUpQR(amount: number): Promise<NormalizedTopupQRResponse> {
     const res = await evpowerApi.topupWithQR(amount);
     // Возвращаем полный ответ + трансформированные поля для обратной совместимости
     // Backend может вернуть дополнительные поля помимо типизированного интерфейса
@@ -15,9 +24,9 @@ export const balanceService = {
       ...res,
       qrCode:
         res.qr_code_url ||
-        (apiRes['qr_url'] as string) ||
+        (apiRes["qr_url"] as string) ||
         res.qr_code ||
-        (apiRes['qr'] as string) ||
+        (apiRes["qr"] as string) ||
         "",
       paymentId: res.invoice_id || res.order_id || "",
       expiresAt:
@@ -26,8 +35,13 @@ export const balanceService = {
         new Date(Date.now() + 5 * 60 * 1000).toISOString(),
       // Для удобства также мапим app_link
       payment_url:
-        (apiRes['payment_url'] as string) ||
-        (apiRes['link_app'] as string) ||
+        (apiRes["payment_url"] as string) ||
+        (apiRes["link_app"] as string) ||
+        res.app_link ||
+        "",
+      link_app:
+        (apiRes["link_app"] as string) ||
+        (apiRes["payment_url"] as string) ||
         res.app_link ||
         "",
     };

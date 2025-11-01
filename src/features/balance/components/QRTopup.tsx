@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useQRTopup, usePaymentMonitoring } from "../hooks/useBalance";
 import { safeParseInt } from "../../../shared/utils/parsers";
+import { logger } from "@/shared/utils/logger";
+import type { NormalizedTopupQRResponse } from "../services/balanceService";
 
 interface QRTopupProps {
   onClose: () => void;
@@ -13,7 +15,7 @@ export function QRTopup({ onClose, onSuccess }: QRTopupProps) {
   const [step, setStep] = useState<"amount" | "qr" | "success">("amount");
   const [amount, setAmount] = useState(100);
   const [customAmount, setCustomAmount] = useState("");
-  const [qrData, setQrData] = useState<any>(null);
+  const [qrData, setQrData] = useState<NormalizedTopupQRResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -55,7 +57,7 @@ export function QRTopup({ onClose, onSuccess }: QRTopupProps) {
         description: "Пополнение баланса",
       });
 
-      console.log("QR Topup API Response:", result); // Debug log
+      logger.debug("QR Topup API Response:", result);
 
       if (result) {
         setQrData(result);
@@ -76,9 +78,9 @@ export function QRTopup({ onClose, onSuccess }: QRTopupProps) {
         );
       }
     } catch (error) {
-      console.error("QR Topup error:", error);
+      logger.error("QR Topup error:", error);
       const errorMessage =
-        (error as any)?.message || "Не удалось создать QR код";
+        error instanceof Error ? error.message : "Не удалось создать QR код";
       setError(errorMessage);
     } finally {
       setLoading(false);

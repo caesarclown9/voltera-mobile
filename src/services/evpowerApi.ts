@@ -26,7 +26,7 @@ import {
   zPaymentStatus,
   zStationStatusResponse,
 } from "@/api/schemas";
-import { z } from 'zod';
+import { z } from "zod";
 
 const API_VERSION = "/api/v1";
 // В dev принудительно используем относительный путь через proxy; в prod — берем из VITE_API_URL
@@ -363,7 +363,7 @@ class EvPowerApiService {
     } catch (error) {
       if (
         import.meta.env.PROD &&
-        import.meta.env['VITE_ENABLE_SUPABASE_FALLBACK'] !== "true"
+        import.meta.env["VITE_ENABLE_SUPABASE_FALLBACK"] !== "true"
       ) {
         throw error;
       }
@@ -573,13 +573,13 @@ class EvPowerApiService {
     } catch (error) {
       if (
         import.meta.env.PROD &&
-        import.meta.env['VITE_ENABLE_SUPABASE_FALLBACK'] !== "true"
+        import.meta.env["VITE_ENABLE_SUPABASE_FALLBACK"] !== "true"
       ) {
         throw error;
       }
       // DEV fallback (или явно разрешённый флагом) через Supabase REST
-      const supabaseUrl = import.meta.env['VITE_SUPABASE_URL'];
-      const supabaseKey = import.meta.env['VITE_SUPABASE_ANON_KEY'];
+      const supabaseUrl = import.meta.env["VITE_SUPABASE_URL"];
+      const supabaseKey = import.meta.env["VITE_SUPABASE_ANON_KEY"];
       const stationResponse = await fetch(
         `${supabaseUrl}/rest/v1/stations?id=eq.${stationId}&select=id,serial_number,model,manufacturer,status,is_available,location_id,locations(id,name,address),connectors(id,connector_number,connector_type,power_kw,status,error_code)`,
         {
@@ -661,7 +661,7 @@ class EvPowerApiService {
       throw error;
     }
 
-    return typeof data?.['balance'] === "number" ? data['balance'] : 0;
+    return typeof data?.["balance"] === "number" ? data["balance"] : 0;
   }
 
   /**
@@ -673,7 +673,7 @@ class EvPowerApiService {
   ): Promise<TopupQRResponse> {
     const client_id = await this.getClientId();
     const requestBody = { client_id, amount, description };
-    console.log("[evpowerApi] topupWithQR request:", requestBody);
+    logger.debug("[evpowerApi] topupWithQR request:", requestBody);
     return this.apiRequest(
       "/balance/topup-qr",
       { method: "POST", body: requestBody },
@@ -827,7 +827,7 @@ class EvPowerApiService {
             filter: `id=eq.${user.id}`,
           },
           (payload) => {
-            callback(payload.new['balance']);
+            callback(payload.new["balance"]);
           },
         )
         .subscribe();
@@ -1005,38 +1005,46 @@ class EvPowerApiService {
    */
   async registerDevice(
     fcmToken: string,
-    platform: 'android' | 'ios' | 'web',
-    appVersion: string
+    platform: "android" | "ios" | "web",
+    appVersion: string,
   ): Promise<{ success: boolean; message?: string }> {
     try {
-      const response = await this.apiRequest<{ success: boolean; message?: string }>(
-        '/devices/register',
+      const response = await this.apiRequest<{
+        success: boolean;
+        message?: string;
+      }>(
+        "/devices/register",
         {
-          method: 'POST',
+          method: "POST",
           body: {
             fcm_token: fcmToken,
             platform,
-            app_version: appVersion
-          }
+            app_version: appVersion,
+          },
         },
         z.object({
           success: z.boolean(),
-          message: z.string().optional()
-        })
+          message: z.string().optional(),
+        }),
       );
 
-      logger.info('[EvPowerAPI] FCM token registered successfully');
+      logger.info("[EvPowerAPI] FCM token registered successfully");
       return response;
     } catch (error) {
       // Проверяем если это 404 (endpoint не реализован на бэкенде)
-      const is404 = error instanceof Error && error.message.includes('404');
+      const is404 = error instanceof Error && error.message.includes("404");
       if (is404) {
-        logger.warn('[EvPowerAPI] FCM endpoints not implemented yet (404) - feature planned for v1.2.0');
+        logger.warn(
+          "[EvPowerAPI] FCM endpoints not implemented yet (404) - feature planned for v1.2.0",
+        );
       } else {
-        logger.error('[EvPowerAPI] Failed to register FCM token:', error as Error);
+        logger.error(
+          "[EvPowerAPI] Failed to register FCM token:",
+          error as Error,
+        );
       }
       // Не бросаем ошибку, чтобы не блокировать работу приложения
-      return { success: false, message: 'Failed to register device' };
+      return { success: false, message: "Failed to register device" };
     }
   }
 
@@ -1049,23 +1057,28 @@ class EvPowerApiService {
   async unregisterDevice(fcmToken: string): Promise<{ success: boolean }> {
     try {
       const response = await this.apiRequest<{ success: boolean }>(
-        '/devices/unregister',
+        "/devices/unregister",
         {
-          method: 'POST',
-          body: { fcm_token: fcmToken }
+          method: "POST",
+          body: { fcm_token: fcmToken },
         },
-        z.object({ success: z.boolean() })
+        z.object({ success: z.boolean() }),
       );
 
-      logger.info('[EvPowerAPI] FCM token unregistered successfully');
+      logger.info("[EvPowerAPI] FCM token unregistered successfully");
       return response;
     } catch (error) {
       // Проверяем если это 404 (endpoint не реализован на бэкенде)
-      const is404 = error instanceof Error && error.message.includes('404');
+      const is404 = error instanceof Error && error.message.includes("404");
       if (is404) {
-        logger.warn('[EvPowerAPI] FCM endpoints not implemented yet (404) - feature planned for v1.2.0');
+        logger.warn(
+          "[EvPowerAPI] FCM endpoints not implemented yet (404) - feature planned for v1.2.0",
+        );
       } else {
-        logger.error('[EvPowerAPI] Failed to unregister FCM token:', error as Error);
+        logger.error(
+          "[EvPowerAPI] Failed to unregister FCM token:",
+          error as Error,
+        );
       }
       return { success: false };
     }

@@ -68,12 +68,15 @@ export async function fetchJson<T>(
     const json = (await resp.json()) as unknown;
     if (!resp.ok) {
       const errorObj = json as Record<string, unknown>;
-      const message = errorObj?.["error"] || errorObj?.["message"] || `HTTP ${resp.status}`;
+      const message =
+        errorObj?.["error"] || errorObj?.["message"] || `HTTP ${resp.status}`;
       // Бэкенд возвращает "error" вместо "error_code", используем fallback
-      const errorCode = (errorObj?.["error_code"] || errorObj?.["error"]) as string | undefined;
+      const errorCode = (errorObj?.["error_code"] || errorObj?.["error"]) as
+        | string
+        | undefined;
       throw new TransportError(String(message), {
         status: resp.status,
-        code: errorCode
+        code: errorCode,
       });
     }
 
@@ -222,7 +225,8 @@ export function handleApiError(error: unknown): string {
             ? (data["message"] as string)
             : undefined;
         // Приоритет: error_code > error > message
-        if (errorCode) return ERROR_MESSAGES[errorCode] ?? message ?? "Ошибка сервера";
+        if (errorCode)
+          return ERROR_MESSAGES[errorCode] ?? message ?? "Ошибка сервера";
         if (code) return ERROR_MESSAGES[code] ?? message ?? "Ошибка сервера";
         if (message) return message;
       }
@@ -242,7 +246,8 @@ export function handleApiError(error: unknown): string {
         ? (error["message"] as string)
         : undefined;
     // Приоритет: error_code > error > message
-    if (errorCode) return ERROR_MESSAGES[errorCode] ?? message ?? "Неизвестная ошибка";
+    if (errorCode)
+      return ERROR_MESSAGES[errorCode] ?? message ?? "Неизвестная ошибка";
     if (code) return ERROR_MESSAGES[code] ?? message ?? "Неизвестная ошибка";
     if (message) return message;
   }

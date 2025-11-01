@@ -3,6 +3,8 @@ import { useQRTopup } from "../hooks/useBalance";
 import { evpowerApi } from "@/services/evpowerApi";
 import { useQueryClient } from "@tanstack/react-query";
 import { safeParseInt } from "../../../shared/utils/parsers";
+import { logger } from "@/shared/utils/logger";
+import type { NormalizedTopupQRResponse } from "../services/balanceService";
 
 interface SimpleTopupProps {
   onClose: () => void;
@@ -11,7 +13,7 @@ interface SimpleTopupProps {
 export function SimpleTopup({ onClose }: SimpleTopupProps) {
   const [amount, setAmount] = useState("");
   const [step, setStep] = useState<"amount" | "qr" | "success">("amount");
-  const [qrData, setQrData] = useState<any>(null);
+  const [qrData, setQrData] = useState<NormalizedTopupQRResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [checkingPayment, setCheckingPayment] = useState(false);
@@ -38,7 +40,7 @@ export function SimpleTopup({ onClose }: SimpleTopupProps) {
           const status = await evpowerApi.getPaymentStatus(invoiceId);
 
           // Log the status to understand what we're getting
-          console.log("Payment status response:", {
+          logger.debug("Payment status response:", {
             status: status.status,
             success: status.success,
             invoice_expired: status.invoice_expired,
@@ -51,7 +53,7 @@ export function SimpleTopup({ onClose }: SimpleTopupProps) {
           // NOTE: Backend иногда не возвращает paid_amount, поэтому проверяем только status
           if (status.status === 1 && status.success === true) {
             // Payment successful - confirmed paid
-            console.log(
+            logger.info(
               "Payment confirmed! Paid amount:",
               status.paid_amount || status.amount,
             );
@@ -69,15 +71,15 @@ export function SimpleTopup({ onClose }: SimpleTopupProps) {
             }, 3000);
           } else if (status.status === 2 || status.invoice_expired === true) {
             // Payment failed (status 2 = failed) or invoice expired
-            console.log("Payment failed or expired");
+            logger.warn("Payment failed or expired");
             stopPolling();
             setError("Платеж не прошел или срок действия QR кода истек.");
           } else {
             // Status 0 or other - payment is still pending
-            console.log("Payment still pending...");
+            logger.debug("Payment still pending...");
           }
         } catch (error) {
-          console.error("Error checking payment status:", error);
+          logger.error("Error checking payment status:", error);
         }
       }, 3000);
 
@@ -131,9 +133,14 @@ export function SimpleTopup({ onClose }: SimpleTopupProps) {
         // Start automatic polling for payment status
         startPaymentStatusPolling(result.paymentId);
       }
-    } catch (error: any) {
-      console.error("QR Generation Error:", error);
-      setError(error.response?.data?.message || "Не удалось создать QR код");
+    } catch (error: unknown) {
+      logger.error("QR Generation Error:", error);
+      const message =
+        error && typeof error === "object" && "response" in error
+          ? (error as { response?: { data?: { message?: string } } }).response
+              ?.data?.message
+          : undefined;
+      setError(message || "Не удалось создать QR код");
     } finally {
       setLoading(false);
     }
@@ -216,20 +223,13 @@ export function SimpleTopup({ onClose }: SimpleTopupProps) {
           ) : step === "qr" ? (
             <div className="space-y-4">
               <div className="text-center">
-                {/* Backend может вернуть qr_code_url или qr_url */}
-                {qrData?.qr_code_url || qrData?.qr_url ? (
-                  <img
-                    src={qrData.qr_code_url || qrData.qr_url}
-                    alt="QR код"
-                    className="w-48 h-48 mx-auto border-2 border-gray-200 rounded-lg p-2"
-                  />
-                ) : qrData?.qr_code || qrData?.qr ? (
-                  // Backend может вернуть qr_code или qr - проверяем URL или base64
+                {/* Backend возвращает qrCode через normalized response */}
+                {qrData?.qrCode ? (
                   <img
                     src={
-                      (qrData.qr_code || qrData.qr).startsWith("http")
-                        ? qrData.qr_code || qrData.qr
-                        : `data:image/png;base64,${qrData.qr_code || qrData.qr}`
+                      qrData.qrCode.startsWith("http")
+                        ? qrData.qrCode
+                        : `data:image/png;base64,${qrData.qrCode}`
                     }
                     alt="QR код"
                     className="w-48 h-48 mx-auto border-2 border-gray-200 rounded-lg p-2"

@@ -7,7 +7,7 @@ export interface PricingResult {
   parking_fee_per_minute: number;
   currency: string;
   active_rule: string;
-  rule_details: any;
+  rule_details: Record<string, unknown>;
   time_based: boolean;
   next_rate_change: Date | null;
   tariff_plan_id?: string;
@@ -76,7 +76,7 @@ export interface PricingHistory {
   parking_fee_per_minute: number;
   currency: string;
   rule_name?: string;
-  rule_details?: any;
+  rule_details?: Record<string, unknown>;
 }
 
 export interface SessionCostBreakdown {

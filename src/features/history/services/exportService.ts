@@ -11,7 +11,18 @@ import type { ChargingHistoryItem, TransactionHistoryItem } from "../types";
 // Расширяем интерфейс jsPDF для автотаблицы
 declare module "jspdf" {
   interface jsPDF {
-    autoTable: any;
+    autoTable: (options: {
+      startY?: number;
+      head?: unknown[][];
+      body?: unknown[][];
+      theme?: string;
+      styles?: Record<string, unknown>;
+      headStyles?: Record<string, unknown>;
+      columnStyles?: Record<string | number, Record<string, unknown>>;
+    }) => void;
+    lastAutoTable?: {
+      finalY?: number;
+    };
   }
 }
 
@@ -39,7 +50,8 @@ export class ExportService {
 
     // Создаем новый PDF документ
     const jsPDF = (jsPDFLazy ??= await import("jspdf"));
-    const autoTable = (autoTableLazy ??= await import("jspdf-autotable"));
+    // Загружаем autotable для side effects (расширяет jsPDF.prototype)
+    autoTableLazy ??= await import("jspdf-autotable");
     const doc = new jsPDF.jsPDF();
 
     // Добавляем заголовок
@@ -77,8 +89,8 @@ export class ExportService {
       `${item.totalCost.toFixed(2)} сом`,
     ]);
 
-    // Создаем таблицу
-    (autoTable as any).default(doc as any, {
+    // Создаем таблицу - используем метод из doc, расширенный через декларацию
+    doc.autoTable({
       startY: 45,
       head: [
         [
@@ -116,7 +128,7 @@ export class ExportService {
 
     // Добавляем статистику, если нужно
     if (includeStats && data.length > 0) {
-      const finalY = (doc as any).lastAutoTable.finalY || 45;
+      const finalY = doc.lastAutoTable?.finalY || 45;
 
       const totalEnergy = data.reduce(
         (sum, item) => sum + item.energyConsumed,
@@ -212,7 +224,8 @@ export class ExportService {
     } = options;
 
     const jsPDF = (jsPDFLazy ??= await import("jspdf"));
-    const autoTable = (autoTableLazy ??= await import("jspdf-autotable"));
+    // Загружаем autotable для side effects (расширяет jsPDF.prototype)
+    autoTableLazy ??= await import("jspdf-autotable");
     const doc = new jsPDF.jsPDF();
 
     // Заголовок
@@ -261,8 +274,8 @@ export class ExportService {
       ];
     });
 
-    // Создаем таблицу
-    (autoTable as any).default(doc as any, {
+    // Создаем таблицу - используем метод из doc, расширенный через декларацию
+    doc.autoTable({
       startY: 40,
       head: [
         ["Дата", "Время", "Тип", "Описание", "Сумма (сом)", "Баланс", "Статус"],
@@ -291,7 +304,7 @@ export class ExportService {
     });
 
     // Добавляем итоговую информацию
-    const finalY = (doc as any).lastAutoTable.finalY || 40;
+    const finalY = doc.lastAutoTable?.finalY || 40;
 
     const totalTopup = data
       .filter((t) => t.type === "topup" && t.status === "success")

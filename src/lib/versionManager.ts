@@ -5,9 +5,11 @@
  * при обновлении приложения
  */
 
+import { logger } from "@/shared/utils/logger";
+
 // Текущая версия приложения (синхронизируется с package.json)
-export const APP_VERSION = '1.0.1';
-export const APP_BUILD = 55; // Увеличивается при каждой сборке
+export const APP_VERSION = "1.0.1";
+export const APP_BUILD = 56; // Увеличивается при каждой сборке
 
 // Ключи для хранения
 const VERSION_STORAGE_KEY = "evpower_app_version";
@@ -45,22 +47,18 @@ class VersionManager {
       const previousVersion = this.getPreviousVersion();
       const previousBuild = this.getPreviousBuild();
 
-      console.log(
-        "[VersionManager] Current:",
-        this.currentVersion,
-        "Build:",
-        this.currentBuild,
-      );
-      console.log(
-        "[VersionManager] Previous:",
-        previousVersion,
-        "Build:",
-        previousBuild,
-      );
+      logger.debug("[VersionManager] Current:", {
+        version: this.currentVersion,
+        build: this.currentBuild,
+      });
+      logger.debug("[VersionManager] Previous:", {
+        version: previousVersion,
+        build: previousBuild,
+      });
 
       // Первая установка
       if (!previousVersion || !previousBuild) {
-        console.log("[VersionManager] First installation");
+        logger.debug("[VersionManager] First installation");
         await this.saveCurrentVersion();
         return result;
       }
@@ -69,7 +67,7 @@ class VersionManager {
       const isUpdated = this.isAppUpdated(previousVersion, previousBuild);
 
       if (isUpdated) {
-        console.log("[VersionManager] App updated! Running migrations...");
+        logger.debug("[VersionManager] App updated! Running migrations...");
 
         // Запускаем миграции
         const migrationResult = await this.runMigrations(
@@ -83,14 +81,14 @@ class VersionManager {
         // Сохраняем новую версию
         await this.saveCurrentVersion();
 
-        console.log("[VersionManager] Migration complete:", result);
+        logger.debug("[VersionManager] Migration complete:", result);
       } else {
-        console.log("[VersionManager] No update detected");
+        logger.debug("[VersionManager] No update detected");
       }
 
       return result;
     } catch (error) {
-      console.error("[VersionManager] Initialization error:", error);
+      logger.error("[VersionManager] Initialization error:", error);
       result.success = false;
       result.errors.push(
         error instanceof Error ? error.message : "Unknown error",
@@ -177,7 +175,7 @@ class VersionManager {
         result.errors.push(`Pricing cache clear failed: ${error}`);
       }
     } catch (error) {
-      console.error("[VersionManager] Migration error:", error);
+      logger.error("[VersionManager] Migration error:", error);
       result.errors.push(
         error instanceof Error ? error.message : "Unknown migration error",
       );
@@ -192,7 +190,7 @@ class VersionManager {
    */
   private async clearServiceWorkerCache(): Promise<void> {
     if ("serviceWorker" in navigator && "caches" in window) {
-      console.log("[VersionManager] Clearing Service Worker caches...");
+      logger.debug("[VersionManager] Clearing Service Worker caches...");
 
       // Получаем все кеши
       const cacheNames = await caches.keys();
@@ -200,7 +198,7 @@ class VersionManager {
       // Удаляем все кеши
       await Promise.all(
         cacheNames.map((cacheName) => {
-          console.log("[VersionManager] Deleting cache:", cacheName);
+          logger.debug("[VersionManager] Deleting cache:", cacheName);
           return caches.delete(cacheName);
         }),
       );
@@ -209,7 +207,7 @@ class VersionManager {
       const registration = await navigator.serviceWorker.getRegistration();
       if (registration) {
         await registration.update();
-        console.log("[VersionManager] Service Worker updated");
+        logger.debug("[VersionManager] Service Worker updated");
       }
     }
   }
@@ -218,7 +216,7 @@ class VersionManager {
    * Очищает React Query кеш в IndexedDB
    */
   private async clearReactQueryCache(): Promise<void> {
-    console.log("[VersionManager] Clearing React Query cache...");
+    logger.debug("[VersionManager] Clearing React Query cache...");
 
     try {
       // React Query Persist использует idb-keyval
@@ -228,19 +226,19 @@ class VersionManager {
       await new Promise<void>((resolve, reject) => {
         const deleteRequest = indexedDB.deleteDatabase(dbName);
         deleteRequest.onsuccess = () => {
-          console.log("[VersionManager] React Query cache cleared");
+          logger.debug("[VersionManager] React Query cache cleared");
           resolve();
         };
         deleteRequest.onerror = () => reject(deleteRequest.error);
         deleteRequest.onblocked = () => {
-          console.warn(
+          logger.warn(
             "[VersionManager] IndexedDB delete blocked, will be deleted when possible",
           );
           resolve(); // Не блокируем миграцию
         };
       });
     } catch (error) {
-      console.error(
+      logger.error(
         "[VersionManager] Failed to clear React Query cache:",
         error,
       );
@@ -253,7 +251,7 @@ class VersionManager {
    */
   private async validateSupabaseSession(): Promise<void> {
     if (!import.meta.env.PROD) {
-      console.log("[VersionManager] Validating Supabase session...");
+      logger.debug("[VersionManager] Validating Supabase session...");
     }
 
     // Не парсим и не логируем содержимое токена. Безопасно очищаем некорректные/устаревшие ключи.
@@ -278,7 +276,7 @@ class VersionManager {
       }
     } catch (error) {
       if (!import.meta.env.PROD) {
-        console.error("[VersionManager] Session validation error:", error);
+        logger.error("[VersionManager] Session validation error:", error);
       }
     }
   }
@@ -287,7 +285,7 @@ class VersionManager {
    * Очищает Zustand persist кеш
    */
   private async clearZustandCache(): Promise<void> {
-    console.log("[VersionManager] Clearing Zustand cache...");
+    logger.debug("[VersionManager] Clearing Zustand cache...");
 
     // Список всех Zustand storage ключей
     const zustandKeys = [
@@ -298,7 +296,7 @@ class VersionManager {
 
     zustandKeys.forEach((key) => {
       if (localStorage.getItem(key)) {
-        console.log("[VersionManager] Removing Zustand key:", key);
+        logger.debug("[VersionManager] Removing Zustand key:", key);
         localStorage.removeItem(key);
       }
     });
@@ -308,7 +306,7 @@ class VersionManager {
    * Очищает pricing кеш
    */
   private async clearPricingCache(): Promise<void> {
-    console.log("[VersionManager] Clearing pricing cache...");
+    logger.debug("[VersionManager] Clearing pricing cache...");
 
     try {
       // Очищаем pricing cache в IndexedDB
@@ -321,7 +319,7 @@ class VersionManager {
         deleteRequest.onblocked = () => resolve(); // Не критично
       });
     } catch (error) {
-      console.warn("[VersionManager] Failed to clear pricing cache:", error);
+      logger.warn("[VersionManager] Failed to clear pricing cache:", error);
       // Не критично
     }
   }
@@ -414,7 +412,7 @@ class VersionManager {
    * Принудительная очистка всех кешей (для дебага)
    */
   async clearAllCaches(): Promise<void> {
-    console.log("[VersionManager] Force clearing all caches...");
+    logger.debug("[VersionManager] Force clearing all caches...");
 
     await Promise.all([
       this.clearServiceWorkerCache(),
@@ -431,7 +429,7 @@ class VersionManager {
       }
     });
 
-    console.log("[VersionManager] All caches cleared");
+    logger.debug("[VersionManager] All caches cleared");
   }
 }
 

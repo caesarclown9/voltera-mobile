@@ -177,11 +177,12 @@ export const useCharging = () => {
         sessionId: result.session_id || "",
         message: result.message || "Зарядка запущена успешно",
       };
-    } catch (error: any) {
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error("Unknown error");
       return {
         success: false,
         sessionId: "",
-        message: error.message || "Сетевая ошибка запуска зарядки",
+        message: err.message || "Сетевая ошибка запуска зарядки",
       };
     }
   };
@@ -201,11 +202,12 @@ export const useCharging = () => {
         message: result.message || "Зарядка остановлена",
         data: result, // Возвращаем полный ответ с информацией о возврате
       };
-    } catch (error: any) {
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error("Unknown error");
       return {
         success: false,
-        message: error.message || "Ошибка остановки зарядки",
-        error: error.message,
+        message: err.message || "Ошибка остановки зарядки",
+        error: err.message,
       };
     }
   };

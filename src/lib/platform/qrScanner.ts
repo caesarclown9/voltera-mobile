@@ -196,13 +196,15 @@ class QRScannerService {
    * Сканирует QR код в вебе
    */
   private async scanWeb(options: QRScanOptions): Promise<QRScanResult> {
-    return new Promise(async (resolve) => {
-      // Создаем контейнер для сканера если его нет
-      let scannerContainer = document.getElementById("qr-scanner-container");
-      if (!scannerContainer) {
-        scannerContainer = document.createElement("div");
-        scannerContainer.id = "qr-scanner-container";
-        scannerContainer.style.cssText = `
+    return new Promise((resolve) => {
+      // Wrap async logic in IIFE to avoid async executor
+      (async () => {
+        // Создаем контейнер для сканера если его нет
+        let scannerContainer = document.getElementById("qr-scanner-container");
+        if (!scannerContainer) {
+          scannerContainer = document.createElement("div");
+          scannerContainer.id = "qr-scanner-container";
+          scannerContainer.style.cssText = `
           position: fixed;
           top: 0;
           left: 0;
@@ -215,13 +217,13 @@ class QRScannerService {
           align-items: center;
           justify-content: center;
         `;
-        document.body.appendChild(scannerContainer);
-      }
+          document.body.appendChild(scannerContainer);
+        }
 
-      // Добавляем область для видео
-      const videoContainer = document.createElement("div");
-      videoContainer.id = "qr-video-container";
-      videoContainer.style.cssText = `
+        // Добавляем область для видео
+        const videoContainer = document.createElement("div");
+        videoContainer.id = "qr-video-container";
+        videoContainer.style.cssText = `
         width: 100%;
         max-width: 500px;
         background: white;
@@ -229,10 +231,10 @@ class QRScannerService {
         padding: 20px;
       `;
 
-      // Добавляем кнопку закрытия
-      const closeButton = document.createElement("button");
-      closeButton.textContent = "✕ Закрыть";
-      closeButton.style.cssText = `
+        // Добавляем кнопку закрытия
+        const closeButton = document.createElement("button");
+        closeButton.textContent = "✕ Закрыть";
+        closeButton.style.cssText = `
         position: absolute;
         top: 20px;
         right: 20px;
@@ -243,76 +245,85 @@ class QRScannerService {
         font-size: 16px;
         cursor: pointer;
       `;
-      closeButton.onclick = () => {
-        this.stopWebScanner();
-        resolve({
-          success: false,
-          error: "Сканирование отменено пользователем",
-        });
-      };
-
-      scannerContainer.appendChild(closeButton);
-      scannerContainer.appendChild(videoContainer);
-
-      // Инициализируем html5-qrcode лениво
-      if (!Html5QrcodeLazy) {
-        const mod = await import("html5-qrcode");
-        Html5QrcodeLazy = mod.Html5Qrcode;
-      }
-      this.html5QrCode = new (Html5QrcodeLazy as any)("qr-video-container");
-      this.isScanning = true;
-
-      // Настройки сканера
-      const qrCodeSuccessCallback = (decodedText: string) => {
-        logger.info("QRScanner: successfully scanned QR code");
-        this.stopWebScanner();
-        resolve({
-          success: true,
-          data: decodedText,
-        });
-      };
-
-      const qrCodeErrorCallback = (errorMessage: string) => {
-        // Игнорируем постоянные ошибки "QR code not found"
-        if (!errorMessage.includes("NotFoundException")) {
-          logger.debug("QRScanner: scan attempt", errorMessage);
-        }
-      };
-
-      // Запускаем сканер
-      const qrInstance = this.html5QrCode;
-      (qrInstance as any)
-        .start(
-          { facingMode: "environment" }, // Используем заднюю камеру
-          {
-            fps: 10,
-            qrbox: { width: 250, height: 250 },
-            aspectRatio: 1.0,
-          },
-          qrCodeSuccessCallback,
-          qrCodeErrorCallback,
-        )
-        .catch((err: Error) => {
-          logger.error("QRScanner: failed to start web scanner", err);
+        closeButton.onclick = () => {
           this.stopWebScanner();
           resolve({
             success: false,
-            error: "Не удалось запустить камеру",
+            error: "Сканирование отменено пользователем",
           });
-        });
+        };
 
-      // Таймаут сканирования
-      if (options.timeout) {
-        setTimeout(() => {
-          if (this.isScanning) {
+        scannerContainer.appendChild(closeButton);
+        scannerContainer.appendChild(videoContainer);
+
+        // Инициализируем html5-qrcode лениво
+        if (!Html5QrcodeLazy) {
+          const mod = await import("html5-qrcode");
+          Html5QrcodeLazy = mod.Html5Qrcode;
+        }
+        this.html5QrCode = new Html5QrcodeLazy("qr-video-container");
+        this.isScanning = true;
+
+        // Настройки сканера
+        const qrCodeSuccessCallback = (decodedText: string) => {
+          logger.info("QRScanner: successfully scanned QR code");
+          this.stopWebScanner();
+          resolve({
+            success: true,
+            data: decodedText,
+          });
+        };
+
+        const qrCodeErrorCallback = (errorMessage: string) => {
+          // Игнорируем постоянные ошибки "QR code not found"
+          if (!errorMessage.includes("NotFoundException")) {
+            logger.debug("QRScanner: scan attempt", errorMessage);
+          }
+        };
+
+        // Запускаем сканер
+        const qrInstance = this.html5QrCode;
+        if (!qrInstance) {
+          this.stopWebScanner();
+          resolve({
+            success: false,
+            error: "Не удалось инициализировать сканер",
+          });
+          return;
+        }
+        qrInstance
+          .start(
+            { facingMode: "environment" }, // Используем заднюю камеру
+            {
+              fps: 10,
+              qrbox: { width: 250, height: 250 },
+              aspectRatio: 1.0,
+            },
+            qrCodeSuccessCallback,
+            qrCodeErrorCallback,
+          )
+          .catch((err: Error) => {
+            logger.error("QRScanner: failed to start web scanner", err);
             this.stopWebScanner();
             resolve({
               success: false,
-              error: "Время сканирования истекло",
+              error: "Не удалось запустить камеру",
             });
-          }
-        }, options.timeout);
-      }
+          });
+
+        // Таймаут сканирования
+        if (options.timeout) {
+          setTimeout(() => {
+            if (this.isScanning) {
+              this.stopWebScanner();
+              resolve({
+                success: false,
+                error: "Время сканирования истекло",
+              });
+            }
+          }, options.timeout);
+        }
+      })(); // End of IIFE
     });
   }
 

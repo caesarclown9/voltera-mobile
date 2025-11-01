@@ -3,8 +3,9 @@
  * Only works on native platforms (iOS/Android)
  */
 
-import { Capacitor } from '@capacitor/core';
-import { Http } from '@capacitor-community/http';
+import { Capacitor } from "@capacitor/core";
+import { Http } from "@capacitor-community/http";
+import { logger } from "@/shared/utils/logger";
 
 interface PinnedCertificate {
   host: string;
@@ -14,20 +15,18 @@ interface PinnedCertificate {
 class CertificatePinningService {
   private readonly certificates: PinnedCertificate[] = [
     {
-      host: 'ocpp.evpower.kg',
+      host: "ocpp.evpower.kg",
       fingerprints: [
         // Production certificate fingerprint (нужно получить реальный)
-        'sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=',
+        "sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
         // Backup certificate fingerprint
-        'sha256/BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB='
-      ]
+        "sha256/BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=",
+      ],
     },
     {
-      host: 'api.evpower.kg',
-      fingerprints: [
-        'sha256/CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC='
-      ]
-    }
+      host: "api.evpower.kg",
+      fingerprints: ["sha256/CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC="],
+    },
   ];
 
   private isNativePlatform(): boolean {
@@ -39,7 +38,7 @@ class CertificatePinningService {
    */
   async initialize(): Promise<void> {
     if (!this.isNativePlatform()) {
-      console.log('Certificate pinning is only available on native platforms');
+      logger.info("Certificate pinning is only available on native platforms");
       return;
     }
 
@@ -48,9 +47,9 @@ class CertificatePinningService {
       for (const cert of this.certificates) {
         await this.configurePinning(cert);
       }
-      console.log('Certificate pinning initialized successfully');
+      logger.info("Certificate pinning initialized successfully");
     } catch (error) {
-      console.error('Failed to initialize certificate pinning:', error);
+      logger.error("Failed to initialize certificate pinning:", error);
       // В production можно решить - блокировать ли работу приложения
       // throw new Error('Security configuration failed');
     }
@@ -60,10 +59,10 @@ class CertificatePinningService {
    * Configure pinning for a specific host
    */
   private async configurePinning(cert: PinnedCertificate): Promise<void> {
-    if (Capacitor.getPlatform() === 'ios') {
+    if (Capacitor.getPlatform() === "ios") {
       // iOS specific configuration
       await this.configureIOSPinning(cert);
-    } else if (Capacitor.getPlatform() === 'android') {
+    } else if (Capacitor.getPlatform() === "android") {
       // Android specific configuration
       await this.configureAndroidPinning(cert);
     }
@@ -76,22 +75,27 @@ class CertificatePinningService {
     // iOS использует TrustKit framework
     // Конфигурация должна быть в Info.plist
     // Здесь мы можем только валидировать
-    console.log(`iOS pinning configured for ${cert.host}`);
+    logger.debug(`iOS pinning configured for ${cert.host}`);
   }
 
   /**
    * Android certificate pinning configuration
    */
-  private async configureAndroidPinning(cert: PinnedCertificate): Promise<void> {
+  private async configureAndroidPinning(
+    cert: PinnedCertificate,
+  ): Promise<void> {
     // Android использует Network Security Config
     // Конфигурация в network_security_config.xml
-    console.log(`Android pinning configured for ${cert.host}`);
+    logger.debug(`Android pinning configured for ${cert.host}`);
   }
 
   /**
    * Make a secure request with certificate validation
    */
-  async secureRequest(url: string, options: any = {}): Promise<any> {
+  async secureRequest(
+    url: string,
+    options: RequestInit = {},
+  ): Promise<Response> {
     if (!this.isNativePlatform()) {
       // Fallback to regular fetch on web
       return fetch(url, options);
@@ -101,23 +105,27 @@ class CertificatePinningService {
       // Use Capacitor HTTP plugin which respects certificate pinning
       const response = await Http.request({
         url,
-        method: options.method || 'GET',
-        headers: options.headers || {},
-        data: options.body || options.data,
+        method: (options.method as string) || "GET",
+        headers: (options.headers as Record<string, string>) || {},
+        data: options.body,
         connectTimeout: 10000,
-        readTimeout: 10000
+        readTimeout: 10000,
       });
 
       return {
         ok: response.status >= 200 && response.status < 300,
         status: response.status,
         json: async () => response.data,
-        text: async () => JSON.stringify(response.data)
-      };
-    } catch (error: any) {
-      if (error.message?.includes('SSL') || error.message?.includes('certificate')) {
-        console.error('Certificate validation failed:', error);
-        throw new Error('Ошибка безопасности: невалидный сертификат сервера');
+        text: async () => JSON.stringify(response.data),
+      } as Response;
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error("Unknown error");
+      if (
+        err.message?.includes("SSL") ||
+        err.message?.includes("certificate")
+      ) {
+        logger.error("Certificate validation failed:", error);
+        throw new Error("Ошибка безопасности: невалидный сертификат сервера");
       }
       throw error;
     }
@@ -134,10 +142,10 @@ class CertificatePinningService {
     try {
       // This would need a native plugin implementation
       // For now, return null
-      console.log(`Getting certificate fingerprint for ${host}`);
+      logger.debug(`Getting certificate fingerprint for ${host}`);
       return null;
     } catch (error) {
-      console.error('Failed to get certificate fingerprint:', error);
+      logger.error("Failed to get certificate fingerprint:", error);
       return null;
     }
   }

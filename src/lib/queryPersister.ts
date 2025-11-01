@@ -24,7 +24,9 @@ export function createIDBPersister(idbValidKey: string = IDB_KEY): Persister {
       if (!client) return undefined;
 
       // Check cache version
-      if ((client.clientState as any)?.version !== CACHE_VERSION) {
+      if (
+        (client.clientState as { version?: number })?.version !== CACHE_VERSION
+      ) {
         await del(idbValidKey);
         return undefined;
       }

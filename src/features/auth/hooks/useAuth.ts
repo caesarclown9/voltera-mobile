@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useAuthStore } from "../store";
 import { authService } from "../services/authService";
 import { useNavigate } from "react-router-dom";
+import { logger } from "@/shared/utils/logger";
 
 interface SignInRequest {
   email?: string;
@@ -106,15 +107,15 @@ export const useLogout = () => {
 
   return useMutation({
     mutationFn: async () => {
-      if (!import.meta.env.PROD) console.log("[useLogout] Starting logout...");
+      if (!import.meta.env.PROD) logger.debug("[useLogout] Starting logout...");
       await authService.signOut();
       if (!import.meta.env.PROD)
-        console.log("[useLogout] AuthService signOut completed");
+        logger.debug("[useLogout] AuthService signOut completed");
       return Promise.resolve();
     },
     onSuccess: () => {
       if (!import.meta.env.PROD)
-        console.log(
+        logger.debug(
           "[useLogout] onSuccess called, clearing store and navigating...",
         );
       logout();
@@ -128,7 +129,7 @@ export const useLogout = () => {
     },
     onError: (error) => {
       if (!import.meta.env.PROD)
-        console.error("[useLogout] Error during logout:", error);
+        logger.error("[useLogout] Error during logout:", error);
     },
   });
 };

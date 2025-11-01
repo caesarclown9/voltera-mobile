@@ -8,6 +8,7 @@ import {
   supabaseWithTimeout,
   isSupabaseConfigured,
 } from "../../../shared/utils/supabaseHelpers";
+import { logger } from "@/shared/utils/logger";
 
 type WebSocketUpdateHandler = (
   data: WebSocketLocationUpdate | WebSocketStationUpdate,
@@ -44,13 +45,21 @@ export class WebSocketManager {
 
     try {
       // Получаем текущего пользователя из Supabase с timeout
-      const { data, error } = await supabaseWithTimeout(
-        () => supabase.auth.getUser(),
+      const result = await supabaseWithTimeout<{
+        data: { user: { id: string } | null };
+        error: unknown;
+      }>(
+        () =>
+          supabase.auth.getUser() as Promise<{
+            data: { user: { id: string } | null };
+            error: unknown;
+          }>,
         2000,
-        { data: { user: undefined as any }, error: null },
+        { data: { user: null }, error: null },
       );
 
-      const user = data?.user ?? null;
+      const user = result?.data?.user ?? null;
+      const error = result?.error ?? null;
       if (error || !user?.id) {
         // WebSocket требует авторизации - пропускаем подключение
         return null;
@@ -59,8 +68,8 @@ export class WebSocketManager {
       this.clientId = user.id;
 
       // В dev — используем proxy от текущего origin; в prod — VITE_WS_URL или VITE_API_URL (http->ws)
-      const wsEnv: string | undefined = (import.meta as any).env?.VITE_WS_URL;
-      const apiEnv: string | undefined = (import.meta as any).env?.VITE_API_URL;
+      const wsEnv = import.meta.env?.["VITE_WS_URL"] as string | undefined;
+      const apiEnv = import.meta.env?.["VITE_API_URL"] as string | undefined;
       const wsBase = import.meta.env.PROD
         ? wsEnv ||
           (apiEnv
@@ -73,6 +82,7 @@ export class WebSocketManager {
       const finalUrl = `${baseUrl}?client_id=${this.clientId}`;
       return finalUrl;
     } catch (error) {
+      logger.error("[WebSocketManager] Failed to build WebSocket URL:", error);
       return null;
     }
   }
@@ -98,7 +108,7 @@ export class WebSocketManager {
       this.ws = new WebSocket(wsUrl);
 
       this.ws.onopen = () => {
-        console.log("[WebSocket] Connected");
+        logger.debug("[WebSocket] Connected");
         this.reconnectAttempts = 0;
 
         // Восстанавливаем подписки после переподключения
@@ -112,12 +122,12 @@ export class WebSocketManager {
           const data = JSON.parse(event.data);
           this.handleMessage(data);
         } catch (error) {
-          console.error("[WebSocket] Parse error:", error);
+          logger.error("[WebSocket] Parse error:", error);
         }
       };
 
       this.ws.onclose = (event) => {
-        console.log("[WebSocket] Disconnected:", event.code);
+        logger.debug("[WebSocket] Disconnected:", event.code);
         this.handleDisconnect();
       };
 
@@ -125,7 +135,7 @@ export class WebSocketManager {
         // Ошибка уже залогирована в onclose, не дублируем
       };
     } catch (error) {
-      console.error("Ошибка создания WebSocket подключения:", error);
+      logger.error("Ошибка создания WebSocket подключения:", error);
       this.handleDisconnect();
     }
   }
@@ -145,7 +155,7 @@ export class WebSocketManager {
     }
 
     this.subscriptions.clear();
-    console.log("WebSocket отключен пользователем");
+    logger.debug("WebSocket отключен пользователем");
   }
 
   /**
@@ -211,11 +221,13 @@ export class WebSocketManager {
     try {
       this.ws.send(JSON.stringify(message));
     } catch (error) {
-      console.error(`[WebSocket] Send error for channel ${channel}:`, error);
+      logger.error(`[WebSocket] Send error for channel ${channel}:`, error);
     }
   }
 
-  private handleMessage(data: any): void {
+  private handleMessage(
+    data: WebSocketLocationUpdate | WebSocketStationUpdate,
+  ): void {
     // Обрабатываем обновления локаций и станций
     if (
       data.type === "location_status_update" ||
@@ -225,7 +237,7 @@ export class WebSocketManager {
         try {
           handler(data);
         } catch (error) {
-          console.error("Ошибка в обработчике WebSocket сообщения:", error);
+          logger.error("Ошибка в обработчике WebSocket сообщения:", error);
         }
       });
     }
@@ -240,7 +252,7 @@ export class WebSocketManager {
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000); // Exponential backoff с максимумом 30 сек
 
-      console.log(
+      logger.debug(
         `[WebSocket] Reconnecting in ${delay / 1000}s (attempt ${this.reconnectAttempts + 1}/${this.maxReconnectAttempts})`,
       );
 
@@ -249,7 +261,7 @@ export class WebSocketManager {
         this.connect();
       }, delay);
     } else {
-      console.log("[WebSocket] Max reconnection attempts reached");
+      logger.warn("[WebSocket] Max reconnection attempts reached");
     }
   }
 }

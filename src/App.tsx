@@ -10,6 +10,7 @@ import { ToastContainer } from "./shared/hooks/useToast";
 import { createIDBPersister, shouldPersistQuery } from "./lib/queryPersister";
 import { versionManager } from "./lib/versionManager";
 import { LoadingScreen } from "./shared/components/LoadingScreen";
+import { logger } from "./shared/utils/logger";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -44,22 +45,22 @@ function App() {
     const initializeVersion = async () => {
       try {
         if (!import.meta.env.PROD)
-          console.log("[App] Starting version check...");
+          logger.debug("[App] Starting version check...");
         const result = await versionManager.initialize();
 
         if (!result.success) {
           if (!import.meta.env.PROD)
-            console.error("[App] Version migration errors:", result.errors);
+            logger.error("[App] Version migration errors:", result.errors);
           // Даже при ошибках продолжаем работу - миграции не критичны
         }
 
         if (result.migrationsRun.length > 0) {
           if (!import.meta.env.PROD)
-            console.log("[App] Migrations completed:", result.migrationsRun);
+            logger.info("[App] Migrations completed:", result.migrationsRun);
           // Показываем пользователю что приложение обновилось
           if (import.meta.env.PROD) {
             // В production можно показать toast или уведомление
-            console.log(
+            logger.info(
               "[App] App updated to version:",
               versionManager.getVersionInfo().version,
             );
@@ -69,7 +70,7 @@ function App() {
         setIsVersionCheckComplete(true);
       } catch (error) {
         if (!import.meta.env.PROD)
-          console.error("[App] Version check failed:", error);
+          logger.error("[App] Version check failed:", error);
         // Продолжаем работу даже при ошибке
         setIsVersionCheckComplete(true);
       }

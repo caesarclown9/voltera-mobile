@@ -8,6 +8,40 @@ import {
 import { useState, useRef } from "react";
 import { StationSelectionModal } from "@/shared/components/StationSelectionModal";
 import type { Location } from "@/api/types";
+import { logger } from "@/shared/utils/logger";
+
+// Yandex Maps types
+interface YMapsApi {
+  templateLayoutFactory: {
+    createClass: (template: string) => unknown;
+  };
+}
+
+interface ClusterEvent {
+  get: (key: string) => Cluster;
+}
+
+interface Cluster {
+  getGeoObjects?: () => GeoObject[];
+  getBounds: () => number[][];
+}
+
+interface GeoObject {
+  geometry?: {
+    getCoordinates: () => number[];
+  };
+}
+
+interface MapInstance {
+  setBounds: (
+    bounds: number[][],
+    options?: {
+      checkZoomRange?: boolean;
+      duration?: number;
+      margin?: number[];
+    },
+  ) => void;
+}
 
 interface StationMapProps {
   locations: Location[];
@@ -31,8 +65,8 @@ export function StationMap({
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(
     null,
   );
-  const mapRef = useRef<any>(null);
-  const clustererRef = useRef<any>(null);
+  const mapRef = useRef<MapInstance | null>(null);
+  const clustererRef = useRef<Cluster | null>(null);
 
   // Центр карты - используем focusLocation если есть, иначе текущую локацию или Бишкек
   const mapCenter: [number, number] = focusLocation
@@ -119,7 +153,7 @@ export function StationMap({
   /**
    * Создаем кастомный макет для кластеров
    */
-  const createClusterLayout = (ymaps: any) => {
+  const createClusterLayout = (ymaps: YMapsApi) => {
     if (!ymaps) return null;
 
     const ClusterIconLayout = ymaps.templateLayoutFactory.createClass(
@@ -140,10 +174,10 @@ export function StationMap({
   );
 
   // DEBUG: временное логирование для отладки
-  console.log("[StationMap] Received locations:", locations.length);
-  console.log("[StationMap] Valid locations:", validLocations.length);
+  logger.debug("[StationMap] Received locations:", locations.length);
+  logger.debug("[StationMap] Valid locations:", validLocations.length);
   if (validLocations.length > 0) {
-    console.log("[StationMap] First location:", validLocations[0]);
+    logger.debug("[StationMap] First location:", validLocations[0]);
   }
 
   return (
@@ -158,7 +192,9 @@ export function StationMap({
         }}
       >
         <Map
-          instanceRef={mapRef}
+          instanceRef={(ref) => {
+            mapRef.current = ref as MapInstance;
+          }}
           defaultState={{
             center: mapCenter,
             zoom: mapZoom,
@@ -171,11 +207,18 @@ export function StationMap({
             yandexMapDisablePoiInteractivity: true,
           }}
           modules={["templateLayoutFactory"]}
-          onLoad={(ymaps: any) => {
+          onLoad={(ymaps: YMapsApi) => {
             // Создаем кастомный макет для кластеров после загрузки карты
             const clusterLayout = createClusterLayout(ymaps);
-            if (clustererRef.current && clusterLayout) {
-              clustererRef.current.options.set({
+            if (
+              clustererRef.current &&
+              clusterLayout &&
+              "options" in clustererRef.current
+            ) {
+              const cluster = clustererRef.current as unknown as {
+                options: { set: (opts: Record<string, unknown>) => void };
+              };
+              cluster.options.set({
                 clusterIconContentLayout: clusterLayout,
               });
             }
@@ -184,11 +227,18 @@ export function StationMap({
           <ZoomControl />
 
           <Clusterer
-            instanceRef={(ref: any) => {
+            instanceRef={(ref: Cluster) => {
               clustererRef.current = ref;
               // Настраиваем обработчик клика кластера
-              if (ref && ref.events) {
-                ref.events.add("click", (e: any) => {
+              if (ref && "events" in ref && ref.events) {
+                (
+                  ref.events as {
+                    add: (
+                      event: string,
+                      handler: (e: ClusterEvent) => void,
+                    ) => void;
+                  }
+                ).add("click", (e: ClusterEvent) => {
                   const cluster = e.get("target");
                   const geoObjects = cluster.getGeoObjects
                     ? cluster.getGeoObjects()

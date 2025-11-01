@@ -5,6 +5,7 @@ import {
 } from "../../../shared/utils/supabaseHelpers";
 import type { AuthResponse, Client } from "../types/auth.types";
 import { pushNotificationService } from "@/lib/platform/push";
+import { logger } from "@/shared/utils/logger";
 
 export class AuthService {
   private static instance: AuthService;
@@ -53,13 +54,14 @@ export class AuthService {
 
     if (authError) {
       // Нормализуем сообщение об ошибке для UI
-      const errorMessage = String((authError as { message?: string }).message || "");
+      const errorMessage = String(
+        (authError as { message?: string }).message || "",
+      );
       const message = /already/i.test(errorMessage)
         ? "Пользователь с таким email уже существует"
         : /password/i.test(errorMessage)
           ? "Некорректный пароль: минимум 6 символов"
-          : errorMessage ||
-            "Не удалось зарегистрировать пользователя";
+          : errorMessage || "Не удалось зарегистрировать пользователя";
       const normalizedError = new Error(message) as Error & { status?: number };
       normalizedError.status = (authError as { status?: number }).status;
       throw normalizedError;
@@ -84,7 +86,10 @@ export class AuthService {
         .single();
 
       if (!clientError && client) {
-        if ((client as { status?: string }).status && (client as { status?: string }).status !== "active") {
+        if (
+          (client as { status?: string }).status &&
+          (client as { status?: string }).status !== "active"
+        ) {
           // Сессию не убиваем — она нужна для восстановления через RPC
           throw new Error(
             "Аккаунт деактивирован/в процессе удаления. Обратитесь в поддержку.",
@@ -92,7 +97,7 @@ export class AuthService {
         }
         clientData = client as Client;
       } else {
-        console.warn(
+        logger.warn(
           "Client not found after registration, trigger may be delayed",
         );
       }
@@ -101,7 +106,7 @@ export class AuthService {
     return {
       success: true,
       client: clientData || undefined,
-      session: authData.session,
+      session: authData.session || undefined,
     };
   }
 
@@ -145,7 +150,7 @@ export class AuthService {
           return {
             success: true,
             client: clientData || undefined,
-            session: authData.session,
+            session: authData.session || undefined,
           };
         }
       } catch {
@@ -158,7 +163,7 @@ export class AuthService {
     return {
       success: true,
       client: clientData || undefined,
-      session: null,
+      session: undefined,
     };
   }
 
@@ -169,8 +174,8 @@ export class AuthService {
     // В режиме разработки используем mock данные только если явно не указано использовать реальный API
     if (
       import.meta.env.DEV &&
-      !import.meta.env['VITE_USE_REAL_API'] &&
-      !import.meta.env['VITE_SUPABASE_ANON_KEY']
+      !import.meta.env["VITE_USE_REAL_API"] &&
+      !import.meta.env["VITE_SUPABASE_ANON_KEY"]
     ) {
       return {
         success: true,
@@ -183,7 +188,7 @@ export class AuthService {
           balance: 250.75,
           status: "active",
         },
-        session: null,
+        session: undefined,
       };
     }
 
@@ -224,19 +229,22 @@ export class AuthService {
         .single();
 
       if (createError) {
-        console.error("Error creating client on signin:", createError);
+        logger.error("Error creating client on signin:", createError);
         throw new Error("Failed to get user data: " + createError.message);
       }
 
       return {
         success: true,
         client: newClient,
-        session: authData.session,
+        session: authData.session || undefined,
       };
     }
 
     // Блокируем вход если аккаунт помечен как неактивный/удаляемый/удалённый
-    if ((clientData as { status?: string }).status && (clientData as { status?: string }).status !== "active") {
+    if (
+      (clientData as { status?: string }).status &&
+      (clientData as { status?: string }).status !== "active"
+    ) {
       // Оставляем сессию активной для RPC восстановления
       throw new Error("Аккаунт деактивирован или в процессе удаления");
     }
@@ -244,7 +252,7 @@ export class AuthService {
     return {
       success: true,
       client: clientData || undefined,
-      session: authData.session,
+      session: authData.session || undefined,
     };
   }
 
@@ -257,7 +265,7 @@ export class AuthService {
       const result = await this.signInWithEmail(email, password);
       return result;
     } catch (signInError: unknown) {
-      console.log("Sign in error:", signInError);
+      logger.debug("Sign in error:", signInError);
 
       // Проверяем сначала - может пользователь уже существует в auth.users
       const { data: existingUser } = await supabase
@@ -272,7 +280,7 @@ export class AuthService {
       }
 
       // Пользователь не существует - создаем нового
-      console.log("User not found, creating new account...");
+      logger.debug("User not found, creating new account...");
       try {
         return await this.signUpWithEmail(email, password);
       } catch {
@@ -284,12 +292,14 @@ export class AuthService {
 
   async signOut(): Promise<void> {
     if (!import.meta.env.PROD)
-      console.log("[AuthService] Attempting sign out...");
+      logger.debug("[AuthService] Attempting sign out...");
     try {
       if (isSupabaseConfigured()) {
         // 1) Мгновенно чистим локальную сессию (без сети)
         try {
-          await supabase.auth.signOut({ scope: "local" as "local" | "global" | "others" });
+          await supabase.auth.signOut({
+            scope: "local" as "local" | "global" | "others",
+          });
         } catch {
           // Ignore error - local signOut is best effort
         }
@@ -322,22 +332,22 @@ export class AuthService {
       }
 
       if (!import.meta.env.PROD)
-        console.log("[AuthService] Sign out successful");
+        logger.debug("[AuthService] Sign out successful");
     } catch (error) {
       if (!import.meta.env.PROD)
-        console.error("[AuthService] Sign out error:", error);
+        logger.error("[AuthService] Sign out error:", error);
     }
   }
 
   async getCurrentUser(): Promise<Client | null> {
     try {
       if (!import.meta.env.PROD)
-        console.log("[AuthService] getCurrentUser: Getting auth user...");
+        logger.debug("[AuthService] getCurrentUser: Getting auth user...");
 
       // Если Supabase не сконфигурирован, возвращаем null
       if (!isSupabaseConfigured()) {
         if (!import.meta.env.PROD)
-          console.log(
+          logger.debug(
             "[AuthService] getCurrentUser: Supabase not configured, returning null",
           );
         return null;
@@ -351,7 +361,7 @@ export class AuthService {
       );
 
       if (!import.meta.env.PROD) {
-        console.log("[AuthService] getCurrentUser: getUser response:", {
+        logger.debug("[AuthService] getCurrentUser: getUser response:", {
           hasData: !!data,
           hasUser: !!data?.user,
           userId: data?.user?.id,
@@ -361,13 +371,13 @@ export class AuthService {
 
       const user = data?.user ?? null;
       if (!import.meta.env.PROD)
-        console.log(
+        logger.debug(
           "[AuthService] getCurrentUser: Auth user:",
           user ? user.id : "null",
         );
       if (user) {
         if (!import.meta.env.PROD)
-          console.log(
+          logger.debug(
             "[AuthService] getCurrentUser: Fetching client data for",
             user.id,
           );
@@ -378,7 +388,7 @@ export class AuthService {
           .single();
 
         if (!import.meta.env.PROD) {
-          console.log("[AuthService] getCurrentUser: Client query result:", {
+          logger.debug("[AuthService] getCurrentUser: Client query result:", {
             hasClientData: !!clientData,
             clientId: clientData?.id,
             clientEmail: clientData?.email,
@@ -401,11 +411,11 @@ export class AuthService {
       }
 
       if (!import.meta.env.PROD)
-        console.log("[AuthService] getCurrentUser: Returning null");
+        logger.debug("[AuthService] getCurrentUser: Returning null");
       return null;
     } catch (error) {
       if (!import.meta.env.PROD)
-        console.error("[AuthService] getCurrentUser error:", error);
+        logger.error("[AuthService] getCurrentUser error:", error);
       return null;
     }
   }
@@ -432,7 +442,12 @@ export class AuthService {
     }
   }
 
-  onAuthStateChange(callback: (event: string, session: { user?: { id?: string; [key: string]: unknown } } | null) => void) {
+  onAuthStateChange(
+    callback: (
+      event: string,
+      session: { user?: { id?: string; [key: string]: unknown } } | null,
+    ) => void,
+  ) {
     return supabase.auth.onAuthStateChange(callback as never);
   }
 }

@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { apiClient } from "@/services/evpowerApi";
+import { logger } from "@/shared/utils/logger";
 
 // Состояния процесса зарядки (соответствуют статусам БД)
 export const ChargingStates = {
@@ -153,14 +154,19 @@ export const useChargingStatusPolling = (
           // Backend вернул success: false
           throw new Error("Failed to get charging status");
         }
-      } catch (err: any) {
-        const error = err as Error;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error("Unknown error");
         const timeSinceStart = Date.now() - sessionStartTimeRef.current;
         const isInitialPeriod = timeSinceStart < 10000; // Первые 10 секунд
 
         // Если это 500 ошибка в первые 10 секунд - это нормально (OCPP еще не связан)
-        if (err?.response?.status === 500 && isInitialPeriod) {
-          console.log("Ожидание связывания OCPP транзакции с сессией...");
+        const isAxiosError =
+          err && typeof err === "object" && "response" in err;
+        const responseStatus = isAxiosError
+          ? (err as { response?: { status?: number } }).response?.status
+          : undefined;
+        if (responseStatus === 500 && isInitialPeriod) {
+          logger.debug("Ожидание связывания OCPP транзакции с сессией...");
 
           // Показываем состояние "Подготовка" без ошибки
           if (!lastValidDataRef.current) {
@@ -181,7 +187,7 @@ export const useChargingStatusPolling = (
           setError(null); // Не показываем ошибку пользователю
         } else {
           // Для других ошибок или после 10 секунд - обычная обработка
-          console.error("Charging status fetch error:", error);
+          logger.error("Charging status fetch error:", error);
           setError(error);
           // Не вызываем onError callback для предотвращения лишних логов
           // callbacksRef.current.onError?.(error);
@@ -312,7 +318,7 @@ export const useChargingStatusPolling = (
       }
     } catch (err) {
       const error = err as Error;
-      console.error("Charging status fetch error:", error);
+      logger.error("Charging status fetch error:", error);
       setError(error);
       callbacksRef.current.onError?.(error);
 

@@ -6,6 +6,52 @@ import type {
   UsageStatistics,
 } from "../types";
 
+interface ChargingSessionData {
+  id: string;
+  station_id: string;
+  start_time: string;
+  stop_time: string | null;
+  status: string;
+  energy: number;
+  amount: number;
+  limit_type?: string;
+  limit_value?: number;
+  stations?: {
+    locations?: {
+      name?: string;
+      address?: string;
+    };
+  };
+}
+
+interface TransactionData {
+  id: number;
+  transaction_type: string;
+  amount: string | number;
+  balance_before: string | number;
+  balance_after: string | number;
+  created_at: string;
+  description?: string;
+  charging_session_id?: string;
+}
+
+interface StationCounts {
+  [stationId: string]: {
+    id: string;
+    name: string;
+    count: number;
+  };
+}
+
+interface MonthlyGroups {
+  [monthKey: string]: {
+    month: string;
+    sessions: number;
+    energy: number;
+    cost: number;
+  };
+}
+
 // Хук для получения истории зарядок
 export const useChargingHistory = (limit: number = 50) => {
   return useQuery({
@@ -20,7 +66,7 @@ export const useChargingHistory = (limit: number = 50) => {
         }
 
         // Преобразуем данные в ChargingHistoryItem
-        return data.map((session: any): ChargingHistoryItem => {
+        return data.map((session: ChargingSessionData): ChargingHistoryItem => {
           // Вычисляем duration из start_time и stop_time
           const duration =
             session.start_time && session.stop_time
@@ -37,6 +83,19 @@ export const useChargingHistory = (limit: number = 50) => {
           const averagePower =
             durationHours > 0 ? energyKwh / durationHours : 0;
 
+          // Нормализуем статус
+          let normalizedStatus: "completed" | "stopped" | "failed";
+          if (session.status === "stopped" || session.status === "completed") {
+            normalizedStatus = "completed";
+          } else if (
+            session.status === "error" ||
+            session.status === "failed"
+          ) {
+            normalizedStatus = "failed";
+          } else {
+            normalizedStatus = "stopped";
+          }
+
           return {
             id: session.id,
             sessionId: session.id,
@@ -46,14 +105,19 @@ export const useChargingHistory = (limit: number = 50) => {
             connectorId: 1, // TODO: добавить поле connector_id в charging_sessions
             connectorType: "Type 2", // TODO: получать из данных коннектора
             startTime: session.start_time,
-            endTime: session.stop_time,
+            endTime: session.stop_time || "",
             duration,
             energyConsumed: energyKwh,
             totalCost: session.amount || 0,
             averagePower,
             maxPower: averagePower, // TODO: хранить max_power в БД
-            status: session.status === "stopped" ? "completed" : session.status,
-            limitType: session.limit_type,
+            status: normalizedStatus,
+            stopReason: undefined,
+            limitType: session.limit_type as
+              | "energy"
+              | "amount"
+              | "none"
+              | undefined,
             limitValue: session.limit_value,
           };
         });
@@ -82,7 +146,7 @@ export const useTransactionHistory = (limit: number = 50) => {
         }
 
         // Преобразуем данные в TransactionHistoryItem
-        return data.map((tx: any): TransactionHistoryItem => {
+        return data.map((tx: TransactionData): TransactionHistoryItem => {
           // Определяем тип и статус транзакции на основе transaction_type
           let type: "topup" | "charge" | "refund" = "charge";
           let status: "success" | "pending" | "failed" = "success";
@@ -97,9 +161,12 @@ export const useTransactionHistory = (limit: number = 50) => {
           }
 
           // Безопасный парсинг числовых значений
-          const parseAmount = (value: any): number => {
+          const parseAmount = (
+            value: string | number | null | undefined,
+          ): number => {
             if (value === null || value === undefined || value === "") return 0;
-            const parsed = parseFloat(value);
+            const parsed =
+              typeof value === "number" ? value : parseFloat(value);
             return isNaN(parsed) ? 0 : parsed;
           };
 
@@ -151,17 +218,19 @@ export const useUsageStatistics = () => {
 
         // Вычисляем статистику из реальных данных
         const totalEnergy = chargingHistory.reduce(
-          (sum: number, session: any) => sum + (session.energy || 0),
+          (sum: number, session: ChargingSessionData) =>
+            sum + (session.energy || 0),
           0,
         );
         const totalCost = chargingHistory.reduce(
-          (sum: number, session: any) => sum + (session.amount || 0),
+          (sum: number, session: ChargingSessionData) =>
+            sum + (session.amount || 0),
           0,
         );
 
         // Вычисляем общую длительность в минутах
         const totalDuration = chargingHistory.reduce(
-          (sum: number, session: any) => {
+          (sum: number, session: ChargingSessionData) => {
             if (session.start_time && session.stop_time) {
               const duration =
                 (new Date(session.stop_time).getTime() -
@@ -177,7 +246,7 @@ export const useUsageStatistics = () => {
 
         // Находим любимую станцию
         const stationCounts = chargingHistory.reduce(
-          (acc: Record<string, any>, session: any) => {
+          (acc: StationCounts, session: ChargingSessionData) => {
             const stationId = session.station_id;
             if (!acc[stationId]) {
               acc[stationId] = {
@@ -192,15 +261,25 @@ export const useUsageStatistics = () => {
           {},
         );
 
-        const favoriteStation = Object.values(stationCounts).reduce(
-          (max: any, station: any) =>
-            station.count > (max?.count || 0) ? station : max,
-          null,
-        ) as { id: string; name: string; count: number } | null;
+        const stationValues = Object.values(stationCounts) as Array<{
+          id: string;
+          name: string;
+          count: number;
+        }>;
+        const favoriteStation: {
+          id: string;
+          name: string;
+          count: number;
+        } | null =
+          stationValues.length > 0
+            ? stationValues.reduce((max, station) =>
+                station.count > max.count ? station : max,
+              )
+            : null;
 
         // Группируем по месяцам
         const monthlyGroups = chargingHistory.reduce(
-          (acc: Record<string, any>, session: any) => {
+          (acc: MonthlyGroups, session: ChargingSessionData) => {
             const date = new Date(session.start_time);
             const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
             const monthName = date.toLocaleDateString("ru-RU", {

@@ -13,6 +13,7 @@ import { useAuthStatus, useLogout } from "../features/auth/hooks/useAuth";
 import { useBalance } from "../features/balance/hooks/useBalance";
 import { useEffect, useState } from "react";
 import { evpowerApi } from "@/services/evpowerApi";
+import { logger } from "@/shared/utils/logger";
 
 export const ProfilePage = () => {
   const navigate = useNavigate();
@@ -45,12 +46,12 @@ export const ProfilePage = () => {
   const logoutMutation = useLogout();
 
   const handleLogout = async () => {
-    console.log("[ProfilePage] Logout button clicked");
+    logger.debug("[ProfilePage] Logout button clicked");
     try {
       await logoutMutation.mutateAsync();
-      console.log("[ProfilePage] Logout mutation completed successfully");
+      logger.debug("[ProfilePage] Logout mutation completed successfully");
     } catch (error) {
-      console.error("[ProfilePage] Logout mutation failed:", error);
+      logger.error("[ProfilePage] Logout mutation failed:", error);
     }
   };
 
@@ -65,7 +66,7 @@ export const ProfilePage = () => {
       await handleLogout();
     } catch (e) {
       alert("Не удалось запросить удаление. Попробуйте позже.");
-      console.error(e);
+      logger.error("Failed to delete account:", e);
     }
   };
 

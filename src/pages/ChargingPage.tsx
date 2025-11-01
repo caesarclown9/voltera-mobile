@@ -1,7 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
 import { ChevronLeft, Heart, CreditCard, Zap } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useStationStatus, useLocationUpdates } from "@/features/locations/hooks/useLocations";
+import {
+  useStationStatus,
+  useLocationUpdates,
+} from "@/features/locations/hooks/useLocations";
 import { useCharging } from "../features/charging/hooks/useCharging";
 import { useBalance } from "../features/balance/hooks/useBalance";
 import { SimpleTopup } from "../features/balance/components/SimpleTopup";
@@ -11,6 +14,7 @@ import { pricingService } from "../features/pricing/pricingService";
 import { useAuthStatus } from "@/features/auth/hooks/useAuth";
 import { useFavorites } from "@/features/favorites/hooks/useFavorites";
 import { handleApiError } from "@/services/evpowerApi";
+import { logger } from "@/shared/utils/logger";
 
 export const ChargingPage = () => {
   const navigate = useNavigate();
@@ -109,7 +113,7 @@ export const ChargingPage = () => {
           setCurrentPrice(prices[selectedConnector]);
         }
       } catch (error) {
-        console.error("[ChargingPage] Error loading prices:", error);
+        logger.error("[ChargingPage] Error loading prices:", error);
       }
     };
 
@@ -129,7 +133,7 @@ export const ChargingPage = () => {
     setChargingError(null);
 
     // В dev режиме без настроенного API показываем предупреждение
-    if (import.meta.env.DEV && !import.meta.env['VITE_API_BASE_URL']) {
+    if (import.meta.env.DEV && !import.meta.env["VITE_API_BASE_URL"]) {
       setChargingError(
         "Запуск зарядки недоступен в режиме разработки. Настройте VITE_API_BASE_URL для тестирования.",
       );
@@ -255,7 +259,7 @@ export const ChargingPage = () => {
                 return;
               }
               if (station && station.location_id) {
-                console.log(
+                logger.debug(
                   "Toggling favorite for location:",
                   station.location_id,
                 );

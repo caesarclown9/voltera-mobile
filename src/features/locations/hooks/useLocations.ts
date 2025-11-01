@@ -50,7 +50,7 @@ export function useLocations(requestGeolocation: boolean = false) {
           });
         },
         (error) => {
-          console.log("Геолокация недоступна:", error);
+          logger.debug("Геолокация недоступна:", error);
         },
       );
     }
@@ -178,7 +178,7 @@ export function useLocationUpdates(channels: string[] = ["all"]) {
  * @deprecated Use features/stations/hooks/useStations instead
  */
 export function useStations(requestGeolocation: boolean = false) {
-  console.warn(
+  logger.warn(
     "useStations from useLocations is deprecated. Use features/stations/hooks/useStations instead",
   );
 
@@ -198,7 +198,7 @@ export function useStations(requestGeolocation: boolean = false) {
           });
         },
         (error) => {
-          console.log("Геолокация недоступна:", error);
+          logger.debug("Геолокация недоступна:", error);
         },
       );
     }

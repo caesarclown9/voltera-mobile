@@ -1,8 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useCallback } from "react";
-import { evpowerApi, handleApiError, type PaymentStatus } from "@/services/evpowerApi";
+import {
+  evpowerApi,
+  handleApiError,
+  type PaymentStatus,
+} from "@/services/evpowerApi";
 import { useAuthStore } from "@/features/auth/store";
-import { balanceService } from "../services/balanceService";
+import {
+  balanceService,
+  type NormalizedTopupQRResponse,
+} from "../services/balanceService";
 
 // Get balance query - берем из БД Supabase
 export const useBalance = () => {
@@ -28,7 +35,7 @@ export const useQRTopup = () => {
   const { user } = useAuthStore();
 
   return useMutation<
-    { qrCode: string; paymentId: string; expiresAt: string },
+    NormalizedTopupQRResponse,
     Error,
     { amount: number; description?: string }
   >({

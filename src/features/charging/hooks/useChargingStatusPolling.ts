@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import { apiClient } from "@/services/evpowerApi";
+import { evpowerApi } from "@/services/evpowerApi";
 import { logger } from "@/shared/utils/logger";
 
 // Состояния процесса зарядки (соответствуют статусам БД)
@@ -96,7 +96,7 @@ export const useChargingStatusPolling = (
     // Создаем стабильную функцию для интервала
     const pollFunction = async () => {
       try {
-        const response = await apiClient.getChargingStatus(sessionId);
+        const response = await evpowerApi.getChargingStatus(sessionId);
 
         if (response.success && response.session) {
           const newData: ChargingData = {
@@ -261,7 +261,7 @@ export const useChargingStatusPolling = (
     if (!sessionId) return;
 
     try {
-      const response = await apiClient.getChargingStatus(sessionId);
+      const response = await evpowerApi.getChargingStatus(sessionId);
 
       if (response.success && response.session) {
         const newData: ChargingData = {

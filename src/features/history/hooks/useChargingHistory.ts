@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { unifiedApi } from "@/services/evpowerApi";
+import { evpowerApi } from "@/services/evpowerApi";
 import type {
   ChargingHistoryItem,
   TransactionHistoryItem,
@@ -59,7 +59,7 @@ export const useChargingHistory = (limit: number = 50) => {
     queryFn: async (): Promise<ChargingHistoryItem[]> => {
       try {
         // Получаем историю напрямую через evpowerApi
-        const data = await unifiedApi.getChargingHistory(limit);
+        const data = await evpowerApi.getChargingHistory(limit);
 
         if (!data || data.length === 0) {
           return [];
@@ -139,7 +139,7 @@ export const useTransactionHistory = (limit: number = 50) => {
     queryFn: async (): Promise<TransactionHistoryItem[]> => {
       try {
         // Получаем историю транзакций напрямую через evpowerApi
-        const data = await unifiedApi.getTransactionHistory(limit);
+        const data = await evpowerApi.getTransactionHistory(limit);
 
         if (!data || data.length === 0) {
           return [];
@@ -201,7 +201,7 @@ export const useUsageStatistics = () => {
     queryFn: async (): Promise<UsageStatistics> => {
       try {
         // Получаем историю зарядок для расчета статистики
-        const chargingHistory = await unifiedApi.getChargingHistory(100);
+        const chargingHistory = await evpowerApi.getChargingHistory(100);
 
         if (!chargingHistory || chargingHistory.length === 0) {
           return {

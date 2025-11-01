@@ -10,7 +10,7 @@ import {
   Home,
   Receipt,
 } from "lucide-react";
-import { apiClient } from "../services/evpowerApi";
+import { evpowerApi } from "../services/evpowerApi";
 
 interface ChargingCompleteData {
   sessionId: string;
@@ -56,7 +56,7 @@ export const ChargingCompletePage = () => {
           sessionStorage.removeItem("lastChargingData");
         } else {
           // Если нет сохраненных данных, получаем с сервера
-          const response = await apiClient.getChargingStatus(sessionId);
+          const response = await evpowerApi.getChargingStatus(sessionId);
 
           if (response.success && response.session) {
             setSessionData({

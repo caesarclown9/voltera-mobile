@@ -1162,12 +1162,6 @@ export function handleApiError(error: any): string {
   return error?.message || "Неизвестная ошибка";
 }
 
-/**
- * Singleton для обратной совместимости
- */
-export const apiClient = evpowerApi;
-export const unifiedApi = evpowerApi;
-
 // Типы уже экспортированы выше через export interface
 
 // Алиасы для совместимости

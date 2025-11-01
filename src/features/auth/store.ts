@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { UnifiedUser } from "./types/unified.types";
-import { unifiedApi } from "@/services/evpowerApi";
+import { evpowerApi } from "@/services/evpowerApi";
 import { logger } from "@/shared/utils/logger";
 
 interface AuthState {
@@ -55,8 +55,8 @@ export const useAuthStore = create<AuthState>()(
       },
 
       refreshUser: async () => {
-        await unifiedApi.refreshUserData();
-        const user = await unifiedApi.getCurrentUser();
+        await evpowerApi.refreshUserData();
+        const user = await evpowerApi.getCurrentUser();
         if (user) {
           set({ user, isAuthenticated: true });
         } else {

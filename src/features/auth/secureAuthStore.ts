@@ -52,9 +52,9 @@ export const useSecureAuthStore = create<SecureAuthState>((set, get) => ({
       phone: user.phone ? XSSDetector.sanitize(user.phone) : null,
     };
 
-    // Сохраняем токен безопасно
+    // Сохраняем токен безопасно (теперь async)
     if (token) {
-      SecureTokenStorage.setToken(token);
+      await SecureTokenStorage.setToken(token);
     }
 
     SecurityMonitor.reset(); // Сбрасываем счетчик при успешном входе
@@ -68,8 +68,8 @@ export const useSecureAuthStore = create<SecureAuthState>((set, get) => ({
   },
 
   logout: async () => {
-    // Очищаем токен
-    SecureTokenStorage.clearToken();
+    // Очищаем токен (теперь async)
+    await SecureTokenStorage.clearToken();
 
     // Выходим из Supabase
     try {
@@ -88,8 +88,8 @@ export const useSecureAuthStore = create<SecureAuthState>((set, get) => ({
 
   checkAuth: async () => {
     try {
-      // Проверяем наличие и валидность токена
-      const token = SecureTokenStorage.getToken();
+      // Проверяем наличие и валидность токена (теперь async)
+      const token = await SecureTokenStorage.getToken();
 
       if (!token || SecureTokenStorage.isTokenExpired()) {
         await get().logout();
@@ -161,9 +161,9 @@ export const useSecureAuthStore = create<SecureAuthState>((set, get) => ({
         return;
       }
 
-      // Сохраняем новый токен
+      // Сохраняем новый токен (теперь async)
       if (session.access_token) {
-        SecureTokenStorage.setToken(session.access_token);
+        await SecureTokenStorage.setToken(session.access_token);
       }
 
       // Обновляем данные пользователя
@@ -193,12 +193,12 @@ export const useTokenAutoRefresh = () => {
 
   // Проверяем auth при монтировании
   useEffect(() => {
-    checkAuth();
+    void checkAuth();
 
     // Проверяем токен каждую минуту
     const interval = setInterval(() => {
       if (SecureTokenStorage.isTokenExpired()) {
-        refreshToken();
+        void refreshToken();
       } else {
         // Обновляем время жизни при активности
         SecureTokenStorage.refreshTokenExpiry();

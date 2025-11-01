@@ -1,80 +1,32 @@
 /**
  * Утилиты для улучшения безопасности токенов
- * Временное решение до миграции на HttpOnly cookies
+ * Использует правильное безопасное хранилище вместо XOR обфускации
  */
 
-// Простая обфускация для усложнения чтения токенов
-export class TokenObfuscator {
-  private static readonly KEY = 'ev-power-2025-mobile';
-
-  /**
-   * Обфусцирует токен перед сохранением
-   */
-  static obfuscate(token: string): string {
-    if (!token) return '';
-
-    try {
-      // Простое XOR шифрование с ключом
-      let result = '';
-      for (let i = 0; i < token.length; i++) {
-        const tokenChar = token.charCodeAt(i);
-        const keyChar = this.KEY.charCodeAt(i % this.KEY.length);
-        result += String.fromCharCode(tokenChar ^ keyChar);
-      }
-      // Кодируем в base64 для безопасного хранения
-      return btoa(result);
-    } catch (error) {
-      console.error('Token obfuscation failed:', error);
-      return token; // Fallback to plain token
-    }
-  }
-
-  /**
-   * Деобфусцирует токен после чтения
-   */
-  static deobfuscate(obfuscatedToken: string): string {
-    if (!obfuscatedToken) return '';
-
-    try {
-      // Декодируем из base64
-      const decoded = atob(obfuscatedToken);
-
-      // Применяем XOR для восстановления
-      let result = '';
-      for (let i = 0; i < decoded.length; i++) {
-        const decodedChar = decoded.charCodeAt(i);
-        const keyChar = this.KEY.charCodeAt(i % this.KEY.length);
-        result += String.fromCharCode(decodedChar ^ keyChar);
-      }
-
-      return result;
-    } catch (error) {
-      console.error('Token deobfuscation failed:', error);
-      return obfuscatedToken; // Fallback to return as-is
-    }
-  }
-}
+import { authStorage } from '@/lib/platform/secureStorage';
 
 /**
  * Менеджер безопасного хранения токенов
+ * Использует Secure Storage Plugin для native и sessionStorage для web
  */
 export class SecureTokenStorage {
-  private static readonly TOKEN_KEY = 'auth_token_secure';
   private static readonly EXPIRY_KEY = 'auth_token_expiry';
   private static readonly TOKEN_LIFETIME = 15 * 60 * 1000; // 15 минут
 
   /**
-   * Сохраняет токен с обфускацией и временем жизни
+   * Сохраняет токен с временем жизни
+   * Использует правильное безопасное хранилище (Capacitor Secure Storage для native)
    */
-  static setToken(token: string): void {
+  static async setToken(token: string): Promise<void> {
     if (!token) return;
 
     try {
-      const obfuscated = TokenObfuscator.obfuscate(token);
       const expiry = Date.now() + this.TOKEN_LIFETIME;
 
-      // Используем sessionStorage для автоочистки при закрытии вкладки
-      sessionStorage.setItem(this.TOKEN_KEY, obfuscated);
+      // Используем правильный authStorage (Secure Storage для native, sessionStorage для web)
+      await authStorage.setAuthToken(token);
+
+      // Время жизни сохраняем отдельно для быстрого доступа
       sessionStorage.setItem(this.EXPIRY_KEY, expiry.toString());
     } catch (error) {
       console.error('Failed to store token securely:', error);
@@ -84,20 +36,19 @@ export class SecureTokenStorage {
   /**
    * Получает токен с проверкой срока действия
    */
-  static getToken(): string | null {
+  static async getToken(): Promise<string | null> {
     try {
-      const obfuscated = sessionStorage.getItem(this.TOKEN_KEY);
       const expiry = sessionStorage.getItem(this.EXPIRY_KEY);
 
-      if (!obfuscated || !expiry) return null;
-
       // Проверяем срок действия
-      if (Date.now() > parseInt(expiry)) {
-        this.clearToken();
+      if (!expiry || Date.now() > parseInt(expiry)) {
+        await this.clearToken();
         return null;
       }
 
-      return TokenObfuscator.deobfuscate(obfuscated);
+      // Получаем токен из безопасного хранилища
+      const token = await authStorage.getAuthToken();
+      return token;
     } catch (error) {
       console.error('Failed to retrieve token:', error);
       return null;
@@ -107,8 +58,8 @@ export class SecureTokenStorage {
   /**
    * Очищает токен
    */
-  static clearToken(): void {
-    sessionStorage.removeItem(this.TOKEN_KEY);
+  static async clearToken(): Promise<void> {
+    await authStorage.removeAuthToken();
     sessionStorage.removeItem(this.EXPIRY_KEY);
   }
 
@@ -125,8 +76,8 @@ export class SecureTokenStorage {
    * Обновляет время жизни токена (при активности пользователя)
    */
   static refreshTokenExpiry(): void {
-    const token = this.getToken();
-    if (token) {
+    const expiry = sessionStorage.getItem(this.EXPIRY_KEY);
+    if (expiry && !this.isTokenExpired()) {
       const newExpiry = Date.now() + this.TOKEN_LIFETIME;
       sessionStorage.setItem(this.EXPIRY_KEY, newExpiry.toString());
     }

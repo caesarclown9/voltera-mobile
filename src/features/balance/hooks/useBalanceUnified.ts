@@ -122,7 +122,7 @@ export const usePaymentStatus = (invoiceId: string, enabled = false) => {
           supabase.from('transactions')
             .update({
               status: 'success',
-              balance_after: user.balance + (data.amount || 0)
+              balance_after: (user.balance ?? 0) + (data.amount || 0)
             })
             .eq('invoice_id', invoiceId)
             .then(() => {

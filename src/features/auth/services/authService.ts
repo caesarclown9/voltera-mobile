@@ -347,7 +347,7 @@ export class AuthService {
       const { data, error: authGetError } = await supabaseWithTimeout(
         () => supabase.auth.getUser(),
         5000, // Увеличен timeout до 5 секунд
-        { data: { user: null }, error: null },
+        { data: { user: null as never }, error: null },
       );
 
       if (!import.meta.env.PROD) {
@@ -432,8 +432,8 @@ export class AuthService {
     }
   }
 
-  onAuthStateChange(callback: (event: string, session: unknown) => void) {
-    return supabase.auth.onAuthStateChange(callback);
+  onAuthStateChange(callback: (event: string, session: { user?: { id?: string; [key: string]: unknown } } | null) => void) {
+    return supabase.auth.onAuthStateChange(callback as never);
   }
 }
 

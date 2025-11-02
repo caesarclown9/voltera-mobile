@@ -57,16 +57,16 @@ export async function fetchJson<T>(
     if (isNative) {
       // Native platform: use @capacitor-community/http
       try {
+        const timeoutSeconds = Math.ceil(
+          (options.timeoutMs ?? defaultOptions.timeoutMs) / 1000,
+        );
         const response = await Http.request({
           url,
           method: options.method ?? "GET",
-          headers: {
-            "Content-Type": "application/json",
-            ...(options.headers ?? {}),
-          },
+          headers: options.headers ?? {},
           data: options.body,
-          connectTimeout: options.timeoutMs ?? defaultOptions.timeoutMs,
-          readTimeout: options.timeoutMs ?? defaultOptions.timeoutMs,
+          connectTimeout: timeoutSeconds,
+          readTimeout: timeoutSeconds,
         });
 
         status = response.status;

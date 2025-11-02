@@ -184,10 +184,11 @@ export const ChargingProcessPage = () => {
   }
 
   const progress = calculateProgress();
-  // Показываем кнопку остановки только при статусе 'started'
+  // Показываем кнопку остановки для всех статусов КРОМЕ финальных
   const isCharging =
-    chargingData?.status === ChargingStates.STARTED ||
-    chargingData?.status === ChargingStates.CHARGING;
+    chargingData?.status !== ChargingStates.STOPPED &&
+    chargingData?.status !== ChargingStates.COMPLETED &&
+    chargingData?.status !== ChargingStates.ERROR;
 
   return (
     <div

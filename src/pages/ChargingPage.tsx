@@ -1,5 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
-import { ChevronLeft, Heart, CreditCard, Zap } from "lucide-react";
+import {
+  ChevronLeft,
+  Heart,
+  CreditCard,
+  Zap,
+  BatteryCharging,
+} from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   useStationStatus,
@@ -32,6 +38,7 @@ export const ChargingPage = () => {
     type: "amount",
     amount_som: 100,
   });
+  const [activeSession, setActiveSession] = useState<string | null>(null);
 
   const { user } = useAuthStatus();
   const { data: balance } = useBalance();
@@ -44,6 +51,14 @@ export const ChargingPage = () => {
 
   // Подключаемся к real-time обновлениям для этой станции
   useLocationUpdates(stationId ? [`station:${stationId}`] : []);
+
+  // Проверяем наличие активной сессии зарядки
+  useEffect(() => {
+    const savedSessionId = localStorage.getItem("activeChargingSession");
+    if (savedSessionId) {
+      setActiveSession(savedSessionId);
+    }
+  }, []);
 
   // Конвертируем stationStatus в формат для UI (мемоизируем для избежания лишних ререндеров)
   const station = useMemo(() => {
@@ -176,13 +191,25 @@ export const ChargingPage = () => {
 
       const result = await startCharging(chargingParams);
 
+      // Обрабатываем результат
       if (result && result.success) {
+        // Успех - переходим на страницу процесса зарядки
         navigate(`/charging-process/${result.sessionId}`, {
           state: {
             stationId: station.id,
             chargingLimits: chargingLimits,
           },
         });
+      } else if (result) {
+        // Неудача - показываем сообщение об ошибке
+        setChargingError(
+          result.message || "Не удалось запустить зарядку. Попробуйте снова.",
+        );
+      } else {
+        // Неожиданный случай - result undefined
+        setChargingError(
+          "Произошла ошибка при запуске зарядки. Попробуйте снова.",
+        );
       }
     } catch (error) {
       const errorMessage = handleApiError(error);
@@ -240,6 +267,33 @@ export const ChargingPage = () => {
         </div>
       </div>
 
+      {/* Active Charging Session Banner */}
+      {activeSession && (
+        <div className="bg-gradient-to-r from-green-500 to-emerald-600 px-4 py-3 shadow-md">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                <BatteryCharging className="w-6 h-6 text-white animate-pulse" />
+              </div>
+              <div className="text-white">
+                <p className="font-semibold">Зарядка в процессе</p>
+                <p className="text-sm text-white/90">
+                  У вас есть активная сессия зарядки
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                navigate(`/charging-process/${activeSession}`);
+              }}
+              className="px-4 py-2 bg-white text-green-600 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+            >
+              Вернуться
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Station Info */}
       <div className="bg-white mt-1 px-4 py-3">
         <div className="flex items-start justify-between">
@@ -285,73 +339,76 @@ export const ChargingPage = () => {
           <h3 className="text-sm font-medium text-gray-700 mb-2">
             Выберите коннектор:
           </h3>
-          {station.connectors.map((connector) => (
-            <button
-              key={connector.id}
-              onClick={() => setSelectedConnector(connector.id)}
-              disabled={connector.status !== "available"}
-              className={`w-full p-2.5 rounded-lg border transition-all ${
-                selectedConnector === connector.id
-                  ? "border-cyan-500 bg-cyan-50"
-                  : "border-gray-200 bg-white hover:border-gray-300"
-              } ${
-                connector.status !== "available"
-                  ? "opacity-50 cursor-not-allowed"
-                  : "cursor-pointer"
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${
-                      connector.status === "available"
-                        ? "bg-green-100 text-green-600"
-                        : connector.status === "occupied"
-                          ? "bg-orange-100 text-orange-600"
-                          : "bg-red-100 text-red-600"
-                    }`}
-                  >
-                    🔌
-                  </div>
-                  <div className="text-left">
-                    <div className="font-medium">{connector.type}</div>
-                    <div className="text-sm text-gray-500">
-                      Коннектор №{connector.id.split("-").pop()}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="text-right">
-                  <div className="flex flex-col items-end">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">
-                        ⚡ {connector.power || station.power || 0} кВт/ч
-                      </span>
-                      <span className="text-orange-500 font-semibold">
-                        {connectorPrices[connector.id] || station.price || 13.5}{" "}
-                        сом/кВт
-                      </span>
-                    </div>
+          {station &&
+            station.connectors.map((connector) => (
+              <button
+                key={connector.id}
+                onClick={() => setSelectedConnector(connector.id)}
+                disabled={connector.status !== "available"}
+                className={`w-full p-2.5 rounded-lg border transition-all ${
+                  selectedConnector === connector.id
+                    ? "border-cyan-500 bg-cyan-50"
+                    : "border-gray-200 bg-white hover:border-gray-300"
+                } ${
+                  connector.status !== "available"
+                    ? "opacity-50 cursor-not-allowed"
+                    : "cursor-pointer"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
                     <div
-                      className={`text-sm font-medium ${
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${
                         connector.status === "available"
-                          ? "text-green-600"
+                          ? "bg-green-100 text-green-600"
                           : connector.status === "occupied"
-                            ? "text-orange-600"
-                            : "text-red-600"
+                            ? "bg-orange-100 text-orange-600"
+                            : "bg-red-100 text-red-600"
                       }`}
                     >
-                      {connector.status === "available"
-                        ? "Работает"
-                        : connector.status === "occupied"
-                          ? "Занят"
-                          : "Неисправен"}
+                      🔌
+                    </div>
+                    <div className="text-left">
+                      <div className="font-medium">{connector.type}</div>
+                      <div className="text-sm text-gray-500">
+                        Коннектор №{connector.id.split("-").pop()}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="text-right">
+                    <div className="flex flex-col items-end">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">
+                          ⚡ {connector.power || station.power || 0} кВт/ч
+                        </span>
+                        <span className="text-orange-500 font-semibold">
+                          {connectorPrices[connector.id] ||
+                            station.price ||
+                            13.5}{" "}
+                          сом/кВт
+                        </span>
+                      </div>
+                      <div
+                        className={`text-sm font-medium ${
+                          connector.status === "available"
+                            ? "text-green-600"
+                            : connector.status === "occupied"
+                              ? "text-orange-600"
+                              : "text-red-600"
+                        }`}
+                      >
+                        {connector.status === "available"
+                          ? "Работает"
+                          : connector.status === "occupied"
+                            ? "Занят"
+                            : "Неисправен"}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </button>
-          ))}
+              </button>
+            ))}
         </div>
 
         {/* Balance Card */}
@@ -458,10 +515,10 @@ export const ChargingPage = () => {
                           estimatedDuration:
                             (amount /
                               currentPrice /
-                              (station.connectors.find(
+                              (station?.connectors.find(
                                 (c) => c.id === selectedConnector,
                               )?.power ||
-                                station.power ||
+                                station?.power ||
                                 22)) *
                             60,
                         });
@@ -507,10 +564,10 @@ export const ChargingPage = () => {
                           {Math.round(
                             ((chargingLimits.amount_som || 100) /
                               currentPrice /
-                              (station.connectors.find(
+                              (station?.connectors.find(
                                 (c) => c.id === selectedConnector,
                               )?.power ||
-                                station.power ||
+                                station?.power ||
                                 22)) *
                               60,
                           )}{" "}

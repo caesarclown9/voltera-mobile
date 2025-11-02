@@ -64,10 +64,25 @@ export const ChargingPage = () => {
   const station = useMemo(() => {
     if (!stationStatus) return null;
 
+    // Валидация обязательных полей
+    if (
+      !stationStatus.serial_number ||
+      !stationStatus.location_name ||
+      !stationStatus.connectors ||
+      stationStatus.connectors.length === 0
+    ) {
+      logger.error("Invalid station data:", {
+        serial_number: stationStatus.serial_number,
+        location_name: stationStatus.location_name,
+        connectors_count: stationStatus.connectors?.length,
+      });
+      return null;
+    }
+
     return {
       id: stationStatus.serial_number,
       name: stationStatus.location_name,
-      address: stationStatus.location_address,
+      address: stationStatus.location_address || "Адрес не указан",
       lat: 0,
       lng: 0,
       status: stationStatus.available_for_charging ? "available" : "offline",
@@ -144,6 +159,13 @@ export const ChargingPage = () => {
 
   const handleStartCharging = async () => {
     if (!selectedConnector || !station) return;
+
+    // Дополнительная валидация station
+    if (!station.id || !station.connectors || station.connectors.length === 0) {
+      logger.error("Invalid station data in handleStartCharging:", station);
+      setChargingError("Ошибка данных станции. Пожалуйста, обновите страницу.");
+      return;
+    }
 
     setChargingError(null);
 

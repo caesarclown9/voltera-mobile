@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { renderHook, act } from "@testing-library/react";
+import { renderHook, act, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import { useLogin, useLogout, useAuthStatus } from "../useAuth";
@@ -86,18 +86,19 @@ describe("Auth Hooks", () => {
 
       const { result } = renderHook(() => useLogin(), { wrapper });
 
-      await act(async () => {
-        try {
-          await result.current.mutateAsync({
-            email: "wrong@test.com",
-            password: "wrong",
-          });
-        } catch (error) {
-          expect(error).toBe(mockError);
-        }
+      // Используем mutate вместо mutateAsync - он не возвращает Promise
+      act(() => {
+        result.current.mutate({
+          email: "wrong@test.com",
+          password: "wrong",
+        });
       });
 
-      expect(result.current.isError).toBe(true);
+      // Ждем пока isError станет true
+      await waitFor(() => {
+        expect(result.current.isError).toBe(true);
+      });
+
       expect(result.current.error).toBe(mockError);
     });
   });

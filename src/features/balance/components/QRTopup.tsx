@@ -79,8 +79,25 @@ export function QRTopup({ onClose, onSuccess }: QRTopupProps) {
       }
     } catch (error) {
       logger.error("QR Topup error:", error);
-      const errorMessage =
-        error instanceof Error ? error.message : "Не удалось создать QR код";
+
+      // Улучшенная обработка ошибок с детальными сообщениями
+      let errorMessage = "Не удалось создать QR код";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+
+        // Добавляем контекст для специфичных ошибок
+        if (error.message.includes("Network request failed")) {
+          errorMessage =
+            "Ошибка сети. Проверьте подключение к интернету и попробуйте снова.";
+        } else if (error.message.includes("timeout")) {
+          errorMessage =
+            "Превышено время ожидания. Попробуйте снова через несколько секунд.";
+        } else if (error.message.includes("validation")) {
+          errorMessage =
+            "Ошибка проверки данных. Проверьте корректность введенной суммы.";
+        }
+      }
+
       setError(errorMessage);
     } finally {
       setLoading(false);

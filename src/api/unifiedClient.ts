@@ -60,10 +60,19 @@ export async function fetchJson<T>(
         const timeoutSeconds = Math.ceil(
           (options.timeoutMs ?? defaultOptions.timeoutMs) / 1000,
         );
+
+        // КРИТИЧНО: Content-Type header обязателен для нативных запросов!
+        // Backend OCPP API требует "application/json" для всех POST запросов
+        // Без этого заголовка запросы будут отклонены с ошибками:
+        // - Зарядка: NullPointerException
+        // - QR топ-ап: "Не удалось создать QR код"
         const response = await Http.request({
           url,
           method: options.method ?? "GET",
-          headers: options.headers ?? {},
+          headers: {
+            "Content-Type": "application/json",
+            ...(options.headers ?? {}),
+          },
           data: options.body,
           connectTimeout: timeoutSeconds,
           readTimeout: timeoutSeconds,
@@ -83,6 +92,21 @@ export async function fetchJson<T>(
             errorObj?.["error"] || errorObj?.["message"] || `HTTP ${status}`;
           const errorCode = (errorObj?.["error_code"] ||
             errorObj?.["error"]) as string | undefined;
+
+          // Детальное логирование для отладки APK проблем
+          console.error(
+            `[UnifiedClient] Native HTTP error: ${status} ${message}`,
+          );
+          console.error(`[UnifiedClient] URL: ${url}`);
+          console.error(`[UnifiedClient] Method: ${options.method ?? "GET"}`);
+          console.error(`[UnifiedClient] Error code: ${errorCode || "none"}`);
+          if (import.meta.env.DEV) {
+            console.error(
+              `[UnifiedClient] Response data:`,
+              JSON.stringify(json, null, 2),
+            );
+          }
+
           throw new TransportError(String(message), {
             status: status,
             code: errorCode,

@@ -6,6 +6,7 @@ import type {
   StopChargingResponse,
 } from "@/api/types";
 import { parseConnectorId } from "../../../shared/utils/parsers";
+import { logger } from "@/shared/utils/logger";
 
 // Состояния сессии зарядки (синхронизировано с backend)
 export const ChargingSessionStatus = {
@@ -137,8 +138,20 @@ export const useCharging = () => {
     amount_som?: number;
   }) => {
     try {
+      // Логируем параметры запуска зарядки для отладки
+      logger.debug("[useCharging] Starting charging with params:", {
+        stationId: data.stationId,
+        connectorId: data.connectorId,
+        energy_kwh: data.energy_kwh,
+        amount_som: data.amount_som,
+      });
+
       // Шаг 1: Проверяем доступность станции
       const stationStatus = await evpowerApi.getStationStatus(data.stationId);
+      logger.debug("[useCharging] Station status:", {
+        available: stationStatus.available_for_charging,
+        connectors: stationStatus.connectors?.length,
+      });
 
       // Проверяем доступность станции
       if (!stationStatus.available_for_charging) {
@@ -159,12 +172,21 @@ export const useCharging = () => {
 
       // КРИТИЧЕСКИ ВАЖНО: проверяем success в ответе API
       if (result.success === false) {
+        logger.error("[useCharging] Start charging failed:", {
+          error: result.error,
+          message: result.message,
+        });
         return {
           success: false,
           sessionId: "",
           message: result.error || result.message || "Ошибка запуска зарядки",
         };
       }
+
+      logger.debug("[useCharging] Charging started successfully:", {
+        sessionId: result.session_id,
+        message: result.message,
+      });
 
       // Сохраняем sessionId в Secure Storage для восстановления
       if (result.session_id) {

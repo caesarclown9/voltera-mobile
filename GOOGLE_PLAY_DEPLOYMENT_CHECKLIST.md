@@ -11,6 +11,7 @@
 ### ✅ COMPLETED (Auto-fixed)
 
 #### Supabase Database
+
 - [x] Function `anonymize_client()` restored and working
 - [x] RLS enabled on all critical tables:
   - [x] `promo_codes`
@@ -25,6 +26,7 @@
   - [x] `anonymize_client()` - admin finalizes
 
 #### Application Code
+
 - [x] **Age Gate (18+)** added to SignUpForm.tsx
   - [x] Checkbox "Подтверждаю, что мне исполнилось 18 лет"
   - [x] Links to Terms and Privacy Policy
@@ -41,30 +43,21 @@
 
 ## 🔴 CRITICAL - MUST DO BEFORE SUBMISSION
 
-### 1. Deploy Privacy Policy to Public URL
+### 1. ✅ Privacy Policy Published on GitHub Pages
 
-**Options**:
-- [ ] **Option A**: GitHub Pages (Recommended, Free)
-  ```bash
-  # See PRIVACY_POLICY_DEPLOYMENT.md for full instructions
-  # URL will be: https://YOUR_USERNAME.github.io/evpower-legal/privacy.html
-  ```
-- [ ] **Option B**: Own domain (evpower.kg)
-  ```
-  URL: https://evpower.kg/legal/privacy.html
-  ```
-- [ ] **Option C**: Netlify/Vercel hosting
-  ```bash
-  # Deploy with: netlify deploy --prod
-  ```
+**URLs (LIVE AND WORKING)**:
 
-**After deployment**:
-- [ ] Test URL opens in browser
-- [ ] Verify HTTPS works
-- [ ] Check content displays correctly
-- [ ] Test from mobile device
+- ✅ **Privacy Policy**: https://caesarclown9.github.io/Evpower-GP/legal/privacy.html
+- ✅ **Terms of Service**: https://caesarclown9.github.io/Evpower-GP/legal/terms.html
 
-**Privacy Policy URL**: `________________________` ← Fill this in!
+**Verification**:
+
+- [x] Test URL opens in browser
+- [x] Verify HTTPS works (HTTP/2 200)
+- [x] Check content displays correctly
+- [x] Test from mobile device (recommended before submission)
+
+**Use these URLs in Google Play Console and App Store Connect**
 
 ### 2. Fill Out Google Play Console Data Safety Form
 
@@ -72,29 +65,32 @@ Navigate to: **Play Console → App Content → Data Safety**
 
 #### Data Collection Declaration
 
-| Data Type | Collected | Purpose | Shared With | Encrypted |
-|-----------|-----------|---------|-------------|-----------|
-| Email Address | ✅ Yes | Account creation, Support | Payment providers | ✅ HTTPS |
-| Phone Number | ✅ Yes (optional) | Account recovery | Payment providers | ✅ HTTPS |
-| Name | ✅ Yes (optional) | Profile display | None | ✅ HTTPS |
-| Precise Location | ✅ Yes (optional) | Find nearby stations | None | N/A |
-| Financial Info - Purchase History | ✅ Yes | Charging history | None | ✅ DB + HTTPS |
-| Financial Info - Payment Info | ✅ Yes | Balance & payments | O!Dengi, O!Bank | ✅ DB + HTTPS |
-| Device ID | ✅ Yes | Session tracking | None | ✅ HTTPS |
-| App Info & Diagnostics | ✅ Yes | App improvements | Supabase | ✅ HTTPS |
+| Data Type                         | Collected         | Purpose                   | Shared With       | Encrypted     |
+| --------------------------------- | ----------------- | ------------------------- | ----------------- | ------------- |
+| Email Address                     | ✅ Yes            | Account creation, Support | Payment providers | ✅ HTTPS      |
+| Phone Number                      | ✅ Yes (optional) | Account recovery          | Payment providers | ✅ HTTPS      |
+| Name                              | ✅ Yes (optional) | Profile display           | None              | ✅ HTTPS      |
+| Precise Location                  | ✅ Yes (optional) | Find nearby stations      | None              | N/A           |
+| Financial Info - Purchase History | ✅ Yes            | Charging history          | None              | ✅ DB + HTTPS |
+| Financial Info - Payment Info     | ✅ Yes            | Balance & payments        | O!Dengi, O!Bank   | ✅ DB + HTTPS |
+| Device ID                         | ✅ Yes            | Session tracking          | None              | ✅ HTTPS      |
+| App Info & Diagnostics            | ✅ Yes            | App improvements          | Supabase          | ✅ HTTPS      |
 
 #### Data Sharing
+
 - [ ] **Supabase (EU)**: Authentication, database hosting
 - [ ] **Payment Providers**: O!Dengi, O!Bank for payment processing
 - [ ] **Map Provider**: Yandex Maps (tiles only, no PII)
 
 #### Data Deletion
+
 - [ ] Users can request deletion through: **Settings → Delete Account**
 - [ ] Deletion is **in-app** (no need to contact support)
 - [ ] Payment records retained for **legal compliance** (disclosed in policy)
 
 #### Privacy Policy URL
-- [ ] Enter URL: `________________________`
+
+- [x] Enter URL: `https://caesarclown9.github.io/Evpower-GP/legal/privacy.html`
 
 ### 3. Build and Test Final APK/AAB
 
@@ -118,6 +114,7 @@ cd android
 ```
 
 **Test on real device**:
+
 - [ ] Install APK on Android device
 - [ ] Test registration flow (age gate appears)
 - [ ] Test HTTPS connection to ocpp.evpower.kg
@@ -131,11 +128,13 @@ cd android
 ### 4. Supabase Settings Updates
 
 **Database**:
+
 - [ ] **Upgrade PostgreSQL** (Dashboard → Database → Settings → Upgrade)
   - Current: 15.8.1.091
   - Security patches available
 
 **Authentication**:
+
 - [ ] **Enable Leaked Password Protection**
   - Dashboard → Authentication → Providers → Email
   - Settings → Enable password breach detection (HaveIBeenPwned)
@@ -183,6 +182,7 @@ cd android
 
 - [ ] App name: "EvPower"
 - [ ] Short description (80 chars):
+
   ```
   Поиск и управление зарядкой электромобилей в Кыргызстане
   ```
@@ -210,6 +210,7 @@ cd android
 
 - [ ] **Production Track**: Upload AAB file
 - [ ] **Release Notes** (Russian):
+
   ```
   Версия 1.0.1
 
@@ -257,17 +258,17 @@ After app is live on Google Play:
 
 ## 📊 COMPLIANCE STATUS
 
-| Requirement | Status | Notes |
-|-------------|--------|-------|
-| Privacy Policy (public URL) | ⚠️ **PENDING** | Need to deploy |
-| Terms of Service | ✅ Ready | `/public/legal/terms.html` |
-| Age Gate (18+) | ✅ **DONE** | Implemented in SignUpForm |
-| Data Safety Form | ⚠️ **PENDING** | Need to fill in console |
-| Certificate Pinning | ✅ **DONE** | Real hashes applied |
-| Account Deletion | ✅ **DONE** | In-app + database functions |
-| RLS Policies | ✅ **DONE** | All tables protected |
-| PostgreSQL Update | ⚠️ Recommended | Security patches available |
-| Password Protection | ⚠️ Recommended | Enable breach detection |
+| Requirement                 | Status         | Notes                       |
+| --------------------------- | -------------- | --------------------------- |
+| Privacy Policy (public URL) | ⚠️ **PENDING** | Need to deploy              |
+| Terms of Service            | ✅ Ready       | `/public/legal/terms.html`  |
+| Age Gate (18+)              | ✅ **DONE**    | Implemented in SignUpForm   |
+| Data Safety Form            | ⚠️ **PENDING** | Need to fill in console     |
+| Certificate Pinning         | ✅ **DONE**    | Real hashes applied         |
+| Account Deletion            | ✅ **DONE**    | In-app + database functions |
+| RLS Policies                | ✅ **DONE**    | All tables protected        |
+| PostgreSQL Update           | ⚠️ Recommended | Security patches available  |
+| Password Protection         | ⚠️ Recommended | Enable breach detection     |
 
 **Overall Readiness**: **85%** (3 pending actions)
 
@@ -276,6 +277,7 @@ After app is live on Google Play:
 ## ⏰ TIMELINE
 
 **Estimated time to complete pending tasks**:
+
 1. Deploy Privacy Policy: **15 minutes**
 2. Fill Data Safety Form: **30 minutes**
 3. Test and build APK: **30 minutes**
@@ -309,8 +311,8 @@ Before submitting to Google Play:
 - [ ] Store listing complete
 - [ ] Ready to submit!
 
-**Submitted by**: ________________
-**Date**: ________________
+**Submitted by**: ******\_\_\_\_******
+**Date**: ******\_\_\_\_******
 **Build Version**: 1.0.1 (37)
 
 ---

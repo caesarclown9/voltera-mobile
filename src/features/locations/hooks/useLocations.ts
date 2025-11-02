@@ -86,10 +86,12 @@ export function useLocations(requestGeolocation: boolean = false) {
 
       return locations;
     },
-    staleTime: 1000 * 60 * 10, // 10 minutes for reference data
-    gcTime: 1000 * 60 * 60, // 1 hour
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: true,
+    staleTime: 1000 * 30, // 30 seconds - данные считаются устаревшими быстро
+    gcTime: 1000 * 60 * 60, // 1 hour - храним в кеше
+    refetchInterval: 1000 * 30, // Автообновление каждые 30 секунд (незаметно в фоне)
+    refetchIntervalInBackground: false, // НЕ обновлять когда приложение в фоне (экономия батареи)
+    refetchOnWindowFocus: true, // Обновлять при возврате в приложение
+    refetchOnReconnect: true, // Обновлять при восстановлении сети
   });
 
   return {
@@ -119,9 +121,11 @@ export function useLocation(
       return locations.find((loc) => loc.id === locationId);
     },
     enabled: !!locationId,
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    staleTime: 1000 * 30, // 30 seconds - синхронизировано с useLocations
     gcTime: 1000 * 60 * 60, // 1 hour
-    refetchOnWindowFocus: false,
+    refetchInterval: 1000 * 30, // Автообновление каждые 30 секунд (незаметно в фоне)
+    refetchIntervalInBackground: false, // НЕ обновлять когда приложение в фоне
+    refetchOnWindowFocus: true, // Обновлять при возврате в приложение
     refetchOnReconnect: true,
     placeholderData: () => {
       // Use cached data as placeholder
@@ -221,9 +225,11 @@ export function useStations(requestGeolocation: boolean = false) {
       // Извлекаем и обогащаем станции
       return extractStationsFromLocations(locations, userLocation || undefined);
     },
-    staleTime: 1000 * 60 * 10,
-    gcTime: 1000 * 60 * 60,
-    refetchOnWindowFocus: false,
+    staleTime: 1000 * 30, // 30 seconds - синхронизировано с useLocations
+    gcTime: 1000 * 60 * 60, // 1 hour
+    refetchInterval: 1000 * 30, // Автообновление каждые 30 секунд
+    refetchIntervalInBackground: false, // НЕ обновлять когда приложение в фоне
+    refetchOnWindowFocus: true, // Обновлять при возврате в приложение
     refetchOnReconnect: true,
   });
 

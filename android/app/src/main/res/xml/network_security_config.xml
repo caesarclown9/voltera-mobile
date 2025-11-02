@@ -3,19 +3,13 @@
     <!-- Certificate Pinning Configuration -->
 
     <!-- Production API -->
-    <domain-config>
+    <!-- Certificate Pinning removed: Let's Encrypt auto-renews every 90 days -->
+    <!-- Using system trust anchors instead for automatic certificate updates -->
+    <domain-config cleartextTrafficPermitted="false">
         <domain includeSubdomains="false">ocpp.evpower.kg</domain>
-        <pin-set expiration="2026-01-01">
-            <!-- Current certificate hash for ocpp.evpower.kg -->
-            <!-- Generated: 2025-10-21 -->
-            <pin digest="SHA-256">oZb2ItbSoJl3Kamv2sgIeC345I3lhH5V7HblBOPDPUs=</pin>
-            <!-- Backup pin: Let's Encrypt R12 issuer -->
-            <pin digest="SHA-256">SbqmW+BAJEQrrUnIU4uVF0v8P+uz0K3GpCQu2cl/AUo=</pin>
-        </pin-set>
-        <trustkit-config>
-            <report-uri>https://api.evpower.kg/security/pinning-report</report-uri>
-            <enforce-pinning>true</enforce-pinning>
-        </trustkit-config>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
     </domain-config>
 
     <!-- Debug configuration (only in debug builds) -->

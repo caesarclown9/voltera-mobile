@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { Capacitor } from "@capacitor/core";
+import { Http } from "@capacitor-community/http";
 
 export class TransportError extends Error {
   public status: number | undefined;
@@ -45,41 +47,96 @@ export async function fetchJson<T>(
   );
 
   const makeOnce = async (): Promise<T> => {
-    const resp = await fetch(url, {
-      method: options.method ?? "GET",
-      headers: {
-        "Content-Type": "application/json",
-        ...(options.headers ?? {}),
-      },
-      body: options.body ? JSON.stringify(options.body) : null,
-      signal: controller.signal,
-    });
+    // Use Capacitor HTTP on native platforms, browser fetch on web
+    const isNative = Capacitor.isNativePlatform();
 
-    const contentType = resp.headers.get("content-type") || "";
-    if (!contentType.includes("application/json")) {
-      const textResponse = await resp.text();
-      console.error(`Backend non-JSON response: ${resp.status} ${contentType}`);
-      throw new TransportError(
-        `Backend error (${resp.status}): ${textResponse || "No message"}`,
-        { status: resp.status },
-      );
-    }
+    let json: unknown;
+    let status: number;
+    let contentType: string;
 
-    const json = (await resp.json()) as unknown;
-    if (!resp.ok) {
-      const errorObj = json as Record<string, unknown>;
-      const message =
-        errorObj?.["error"] || errorObj?.["message"] || `HTTP ${resp.status}`;
-      // Бэкенд возвращает "error" вместо "error_code", используем fallback
-      const errorCode = (errorObj?.["error_code"] || errorObj?.["error"]) as
-        | string
-        | undefined;
-      throw new TransportError(String(message), {
-        status: resp.status,
-        code: errorCode,
+    if (isNative) {
+      // Native platform: use @capacitor-community/http
+      try {
+        const response = await Http.request({
+          url,
+          method: options.method ?? "GET",
+          headers: {
+            "Content-Type": "application/json",
+            ...(options.headers ?? {}),
+          },
+          data: options.body,
+          connectTimeout: options.timeoutMs ?? defaultOptions.timeoutMs,
+          readTimeout: options.timeoutMs ?? defaultOptions.timeoutMs,
+        });
+
+        status = response.status;
+        contentType =
+          response.headers?.["content-type"] ||
+          response.headers?.["Content-Type"] ||
+          "";
+        json = response.data;
+
+        // Capacitor HTTP doesn't throw on non-2xx, handle manually
+        if (status < 200 || status >= 300) {
+          const errorObj = json as Record<string, unknown>;
+          const message =
+            errorObj?.["error"] || errorObj?.["message"] || `HTTP ${status}`;
+          const errorCode = (errorObj?.["error_code"] ||
+            errorObj?.["error"]) as string | undefined;
+          throw new TransportError(String(message), {
+            status: status,
+            code: errorCode,
+          });
+        }
+      } catch (err) {
+        // Re-throw TransportError as-is, wrap others
+        if (err instanceof TransportError) throw err;
+        throw new TransportError(
+          err instanceof Error ? err.message : "Network request failed",
+          { status: 0 },
+        );
+      }
+    } else {
+      // Web platform: use browser fetch
+      const resp = await fetch(url, {
+        method: options.method ?? "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...(options.headers ?? {}),
+        },
+        body: options.body ? JSON.stringify(options.body) : null,
+        signal: controller.signal,
       });
+
+      status = resp.status;
+      contentType = resp.headers.get("content-type") || "";
+
+      if (!contentType.includes("application/json")) {
+        const textResponse = await resp.text();
+        console.error(`Backend non-JSON response: ${status} ${contentType}`);
+        throw new TransportError(
+          `Backend error (${status}): ${textResponse || "No message"}`,
+          { status },
+        );
+      }
+
+      json = (await resp.json()) as unknown;
+
+      if (!resp.ok) {
+        const errorObj = json as Record<string, unknown>;
+        const message =
+          errorObj?.["error"] || errorObj?.["message"] || `HTTP ${status}`;
+        const errorCode = (errorObj?.["error_code"] || errorObj?.["error"]) as
+          | string
+          | undefined;
+        throw new TransportError(String(message), {
+          status,
+          code: errorCode,
+        });
+      }
     }
 
+    // Common validation logic for both platforms
     const parsed = schema.safeParse(json);
     if (!parsed.success) {
       // Детальное логирование ошибок валидации для отладки
@@ -94,7 +151,7 @@ export async function fetchJson<T>(
         console.error("Response data:", JSON.stringify(json, null, 2));
       }
       throw new TransportError("Response validation failed", {
-        status: resp.status,
+        status,
         code: "INVALID_RESPONSE",
       });
     }

@@ -30,8 +30,9 @@ import { z } from "zod";
 
 const API_VERSION = "/api/v1";
 // В dev принудительно используем относительный путь через proxy; в prod — берем из VITE_API_URL
+// КРИТИЧНО: import.meta.env.VITE_API_URL напрямую (не через .env) для правильной работы в Capacitor
 const API_ORIGIN: string = import.meta.env.PROD
-  ? (import.meta as any).env?.VITE_API_URL || ""
+  ? String(import.meta.env.VITE_API_URL || "https://ocpp.evpower.kg")
   : "";
 
 export interface StartChargingRequest {

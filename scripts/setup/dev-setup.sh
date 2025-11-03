@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🚀 EvPower Mobile Development Setup"
+echo "🚀 Voltera Mobile Development Setup"
 echo "===================================="
 echo ""
 echo "Choose your development environment:"

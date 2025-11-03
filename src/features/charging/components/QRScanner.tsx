@@ -33,15 +33,15 @@ export function QRScanner({ onScan, onError, onCancel }: QRScannerProps) {
       if (result.success && result.data) {
         // Парсим QR код станции
         // Форматы:
-        // 1. evpower://station/station_001/connector/1
-        // 2. https://app.evpower.kg/charging/station_001?connector=1
+        // 1. voltera://station/station_001/connector/1
+        // 2. https://app.voltera.kg/charging/station_001?connector=1
 
         let stationId: string | null = null;
         let connectorId: string | null = null;
 
         // Пробуем формат deep link
         const deepLinkMatch = result.data.match(
-          /evpower:\/\/station\/(.+)\/connector\/(.+)/,
+          /voltera:\/\/station\/(.+)\/connector\/(.+)/,
         );
         if (deepLinkMatch) {
           stationId = deepLinkMatch[1] ?? null;
@@ -72,7 +72,7 @@ export function QRScanner({ onScan, onError, onCancel }: QRScannerProps) {
           });
         } else {
           const errorMsg =
-            "Неверный QR код. Используйте QR код зарядной станции EvPower.";
+            "Неверный QR код. Используйте QR код зарядной станции Voltera.";
           setScanError(errorMsg);
           onError?.(errorMsg);
         }

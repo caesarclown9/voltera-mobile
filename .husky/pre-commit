@@ -35,7 +35,7 @@ fi
 
 # 5. Проверка что нет console.log в production коде
 echo "🚫 Checking for console.log..."
-console_logs=$(git diff --cached --name-only | grep -E '\.(ts|tsx)$' | grep -v '\.test\.' | xargs grep -nH 'console\.log' 2>/dev/null | grep -v '// TODO:' | grep -v '// DEBUG:' || true)
+console_logs=$(git diff --cached --name-only | grep -E '\.(ts|tsx)$' | grep -v '\.test\.' | grep -v 'logger\.ts' | xargs grep -nH 'console\.log' 2>/dev/null | grep -v '// TODO:' | grep -v '// DEBUG:' || true)
 if [ -n "$console_logs" ]; then
   echo "⚠️  Warning: console.log found in code:"
   echo "$console_logs"

@@ -5,7 +5,7 @@
 
 set -e
 
-echo "📱 Preparing Store Assets for EvPower Mobile"
+echo "📱 Preparing Store Assets for Voltera Mobile"
 echo "==========================================="
 
 # Colors
@@ -76,7 +76,7 @@ create_feature_graphic() {
         'gradient:#00BCD4-#0097A7' \
         -gravity center \
         -fill white -font Arial-Bold -pointsize 72 \
-        -annotate +0-50 'EvPower' \
+        -annotate +0-50 'Voltera' \
         -fill white -font Arial -pointsize 36 \
         -annotate +0+50 'Зарядка для электромобилей' \
         "$OUTPUT"
@@ -202,7 +202,7 @@ create_tv_banner() {
         'gradient:#00BCD4-#0097A7' \
         -gravity center \
         -fill white -font Arial-Bold -pointsize 96 \
-        -annotate +0+0 'EvPower' \
+        -annotate +0+0 'Voltera' \
         "$OUTPUT"
 
     optipng -o7 "$OUTPUT"

@@ -1,9 +1,11 @@
 # Privacy Policy Deployment Guide
 
 ## Overview
+
 Google Play Store requires that your Privacy Policy is accessible via a **public URL**. This guide explains how to deploy your privacy policy.
 
 ## Current Status
+
 - ✅ Privacy Policy exists: `/public/legal/privacy.html`
 - ✅ Terms of Service exists: `/public/legal/terms.html`
 - ❌ Not yet publicly accessible (required by Google Play)
@@ -15,6 +17,7 @@ Google Play Store requires that your Privacy Policy is accessible via a **public
 **Steps:**
 
 1. **Create a new repository** (or use existing):
+
    ```bash
    cd /mnt/d/Projects
    mkdir evpower-legal
@@ -23,30 +26,33 @@ Google Play Store requires that your Privacy Policy is accessible via a **public
    ```
 
 2. **Copy legal files**:
+
    ```bash
    cp /mnt/d/Projects/Evpower-mobile/public/legal/privacy.html ./
    cp /mnt/d/Projects/Evpower-mobile/public/legal/terms.html ./
    ```
 
 3. **Create index.html** (optional):
+
    ```html
    <!DOCTYPE html>
    <html lang="ru">
-   <head>
-       <meta charset="UTF-8">
-       <title>EvPower Legal</title>
-   </head>
-   <body>
-       <h1>EvPower Legal Documents</h1>
+     <head>
+       <meta charset="UTF-8" />
+       <title>Voltera Legal</title>
+     </head>
+     <body>
+       <h1>Voltera Legal Documents</h1>
        <ul>
-           <li><a href="privacy.html">Privacy Policy</a></li>
-           <li><a href="terms.html">Terms of Service</a></li>
+         <li><a href="privacy.html">Privacy Policy</a></li>
+         <li><a href="terms.html">Terms of Service</a></li>
        </ul>
-   </body>
+     </body>
    </html>
    ```
 
 4. **Commit and push**:
+
    ```bash
    git add .
    git commit -m "Add legal documents"
@@ -65,27 +71,29 @@ Google Play Store requires that your Privacy Policy is accessible via a **public
    Terms:   https://YOUR_USERNAME.github.io/evpower-legal/terms.html
    ```
 
-### Option 2: Own Domain (evpower.kg)
+### Option 2: Own Domain (voltera.kg)
 
-If you have hosting for evpower.kg:
+If you have hosting for voltera.kg:
 
 1. **Upload files** to your web server:
+
    ```
-   /var/www/evpower.kg/legal/privacy.html
-   /var/www/evpower.kg/legal/terms.html
+   /var/www/voltera.kg/legal/privacy.html
+   /var/www/voltera.kg/legal/terms.html
    ```
 
 2. **Configure nginx/apache** to serve static files
 
 3. **Your URLs will be**:
    ```
-   Privacy: https://evpower.kg/legal/privacy.html
-   Terms:   https://evpower.kg/legal/terms.html
+   Privacy: https://voltera.kg/legal/privacy.html
+   Terms:   https://voltera.kg/legal/terms.html
    ```
 
 ### Option 3: Netlify/Vercel (Free Hosting)
 
 **Netlify:**
+
 ```bash
 npm install -g netlify-cli
 netlify login
@@ -94,6 +102,7 @@ netlify deploy --prod
 ```
 
 **Vercel:**
+
 ```bash
 npm install -g vercel
 cd /path/to/legal/files
@@ -115,6 +124,7 @@ vercel --prod
 ### 2. Verify Links Work
 
 Test from different devices:
+
 - ✅ Opens in browser
 - ✅ No CORS errors
 - ✅ HTTPS enabled
@@ -127,13 +137,15 @@ If you update links in the app:
 **File**: `/src/pages/AboutPage.tsx` or `/src/pages/SettingsPage.tsx`
 
 Replace:
+
 ```typescript
-href="/legal/privacy.html"  // Local path
+href = "/legal/privacy.html"; // Local path
 ```
 
 With:
+
 ```typescript
-href="https://YOUR_URL/privacy.html"  // Public URL
+href = "https://YOUR_URL/privacy.html"; // Public URL
 ```
 
 ## Important Notes
@@ -158,7 +170,7 @@ href="https://YOUR_URL/privacy.html"  // Public URL
 - [ ] URLs use HTTPS
 - [ ] URLs accessible without authentication
 - [ ] Content matches app's data collection practices
-- [ ] Email contact visible: support@evpower.kg
+- [ ] Email contact visible: support@voltera.kg
 - [ ] Version and date visible in document
 - [ ] Links tested from mobile devices
 - [ ] URL entered in Google Play Console
@@ -167,6 +179,7 @@ href="https://YOUR_URL/privacy.html"  // Public URL
 ## Support
 
 If you need help with deployment:
+
 - GitHub Pages: https://pages.github.com/
 - Netlify: https://docs.netlify.com/
 - Vercel: https://vercel.com/docs
@@ -174,4 +187,4 @@ If you need help with deployment:
 ---
 
 **Generated**: 2025-10-21
-**For**: EvPower Mobile App v1.0.1
+**For**: Voltera Mobile App v1.0.1

@@ -7,7 +7,7 @@
 
 set -e
 
-DOMAIN="ocpp.evpower.kg"
+DOMAIN="ocpp.voltera.kg"
 CONFIG_FILE="android/app/src/main/res/xml/network_security_config.xml"
 
 echo "🔒 Certificate Pinning Hash Update"

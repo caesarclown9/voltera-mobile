@@ -6,7 +6,7 @@
 
 set -e  # Остановка при первой ошибке
 
-echo "🚀 EvPower Mobile - Pre-Release Check"
+echo "🚀 Voltera Mobile - Pre-Release Check"
 echo "======================================"
 echo ""
 

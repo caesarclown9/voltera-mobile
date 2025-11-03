@@ -1,6 +1,6 @@
 # 🚀 Google Play Store Deployment Checklist
 
-**App**: EvPower Mobile
+**App**: Voltera Mobile
 **Version**: 1.0.1 (Build 37)
 **Last Updated**: 2025-10-21
 
@@ -117,7 +117,7 @@ cd android
 
 - [ ] Install APK on Android device
 - [ ] Test registration flow (age gate appears)
-- [ ] Test HTTPS connection to ocpp.evpower.kg
+- [ ] Test HTTPS connection to ocpp.voltera.kg
 - [ ] Test account deletion flow
 - [ ] Verify Privacy Policy links work
 
@@ -180,7 +180,7 @@ cd android
 
 ### Store Listing
 
-- [ ] App name: "EvPower"
+- [ ] App name: "Voltera"
 - [ ] Short description (80 chars):
 
   ```
@@ -249,7 +249,7 @@ After app is live on Google Play:
 
 ## 📞 SUPPORT CHECKLIST
 
-- [ ] **Email**: support@evpower.kg is monitored
+- [ ] **Email**: support@voltera.kg is monitored
 - [ ] **Phone**: +996555123456 is available
 - [ ] **Privacy Requests**: Process within 30 days
 - [ ] **Account Deletion**: Process within 48 hours
@@ -311,8 +311,8 @@ Before submitting to Google Play:
 - [ ] Store listing complete
 - [ ] Ready to submit!
 
-**Submitted by**: ******\_\_\_\_******
-**Date**: ******\_\_\_\_******
+**Submitted by**: **\*\***\_\_\_\_**\*\***
+**Date**: **\*\***\_\_\_\_**\*\***
 **Build Version**: 1.0.1 (37)
 
 ---

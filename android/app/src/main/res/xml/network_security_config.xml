@@ -6,7 +6,7 @@
     <!-- Certificate Pinning removed: Let's Encrypt auto-renews every 90 days -->
     <!-- Using system trust anchors instead for automatic certificate updates -->
     <domain-config cleartextTrafficPermitted="false">
-        <domain includeSubdomains="false">ocpp.evpower.kg</domain>
+        <domain includeSubdomains="false">ocpp.voltera.kg</domain>
         <trust-anchors>
             <certificates src="system" />
         </trust-anchors>

@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# 🚀 EvPower iOS Release Preparation Script
+# 🚀 Voltera iOS Release Preparation Script
 # Автоматизирует подготовку к релизу в App Store
 
 set -e  # Exit on error
 
-echo "🚀 EvPower iOS Release Preparation"
+echo "🚀 Voltera iOS Release Preparation"
 echo "=================================="
 echo ""
 

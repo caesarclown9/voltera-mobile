@@ -38,7 +38,7 @@ interface PricingDB extends DBSchema {
 
 class PricingCacheService {
   private db: IDBPDatabase<PricingDB> | null = null;
-  private dbName = "evpower-pricing-cache";
+  private dbName = "voltera-pricing-cache";
   private dbVersion = 1;
 
   async init(): Promise<void> {

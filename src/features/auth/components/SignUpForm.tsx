@@ -70,13 +70,13 @@ export function SignUpForm({ onSuccess, onSwitchToSignIn }: SignUpFormProps) {
       <div className="text-center mb-8">
         <div className="flex items-center justify-center mx-auto mb-4">
           <img
-            src="/icons/evpower-logo-horizontal.png"
-            alt="EvPower"
+            src="/icons/voltera-logo-horizontal.png"
+            alt="Voltera"
             className="h-16 w-auto"
           />
         </div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          Регистрация в EvPower
+          Регистрация в Voltera
         </h2>
         <p className="text-gray-600">Создайте новый аккаунт</p>
       </div>

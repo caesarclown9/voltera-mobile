@@ -1,4 +1,4 @@
-# EvPower Mobile - Comprehensive Codebase Analysis Report
+# Voltera Mobile - Comprehensive Codebase Analysis Report
 
 **Date:** 2025-11-03  
 **Version Analyzed:** 1.0.1 (Build 80)  
@@ -187,7 +187,7 @@ src/features/[feature]/
 
 ### 3.2 OCPP Backend Integration
 
-**Base URL:** `https://ocpp.evpower.kg/api/v1`
+**Base URL:** `https://ocpp.voltera.kg/api/v1`
 
 **Key Endpoints:**
 
@@ -649,7 +649,7 @@ release {
 ```env
 VITE_SUPABASE_URL=<your-supabase-url>
 VITE_SUPABASE_ANON_KEY=<your-anon-key>
-VITE_API_URL=https://ocpp.evpower.kg
+VITE_API_URL=https://ocpp.voltera.kg
 VITE_YANDEX_API_KEY=<yandex-maps-key>
 ```
 
@@ -868,7 +868,7 @@ KEY_PASSWORD=<key-password>
 
 ## CONCLUSION
 
-EvPower Mobile is a **well-architected, production-ready mobile application** with:
+Voltera Mobile is a **well-architected, production-ready mobile application** with:
 
 ✅ **Strengths:**
 

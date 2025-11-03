@@ -1,6 +1,6 @@
 {
-  "name": "EvPower Зарядные Станции",
-  "short_name": "EvPower",
+  "name": "Voltera Зарядные Станции",
+  "short_name": "Voltera",
   "description": "Управление зарядкой электромобилей в Кыргызстане. Найдите ближайшую станцию, начните зарядку через QR-код, отслеживайте процесс в реальном времени.",
   "start_url": "/",
   "scope": "/",
@@ -8,7 +8,7 @@
   "orientation": "portrait",
   "theme_color": "#10B981",
   "background_color": "#ffffff",
-  "id": "kg.evpower.app",
+  "id": "kg.voltera.app",
   "lang": "ru",
   "dir": "ltr",
   "categories": ["utilities", "transportation", "navigation"],
@@ -147,11 +147,7 @@
       ]
     }
   ],
-  "features": [
-    "geolocation",
-    "camera",
-    "notifications"
-  ],
+  "features": ["geolocation", "camera", "notifications"],
   "launch_handler": {
     "client_mode": ["navigate-existing", "auto"]
   },
@@ -169,7 +165,7 @@
   },
   "protocol_handlers": [
     {
-      "protocol": "web+evpower",
+      "protocol": "web+voltera",
       "url": "/station?id=%s"
     }
   ]

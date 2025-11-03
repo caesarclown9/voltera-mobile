@@ -8,7 +8,7 @@ PORT=${2:-443}
 
 if [ -z "$DOMAIN" ]; then
     echo "Usage: $0 domain.com [port]"
-    echo "Example: $0 ocpp.evpower.kg 443"
+    echo "Example: $0 ocpp.voltera.kg 443"
     exit 1
 fi
 

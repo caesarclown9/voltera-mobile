@@ -6,7 +6,7 @@
     <true/>
     <key>TSKPinnedDomains</key>
     <dict>
-        <key>ocpp.evpower.kg</key>
+        <key>ocpp.voltera.kg</key>
         <dict>
             <key>TSKEnforcePinning</key>
             <true/>
@@ -20,10 +20,10 @@
             </array>
             <key>TSKReportUris</key>
             <array>
-                <string>https://api.evpower.kg/security/pinning-report</string>
+                <string>https://api.voltera.kg/security/pinning-report</string>
             </array>
         </dict>
-        <key>api.evpower.kg</key>
+        <key>api.voltera.kg</key>
         <dict>
             <key>TSKEnforcePinning</key>
             <true/>

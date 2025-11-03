@@ -100,7 +100,7 @@ export const registerPlatformHandlers = () => {
         logger.info("Platform: Deep link opened", { url });
 
         // Обработка deep links для зарядки
-        // Например: evpower://charging/station_001
+        // Например: voltera://charging/station_001
         if (url.includes("charging")) {
           const match = url.match(/charging\/([^?/]+)/);
           if (match) {

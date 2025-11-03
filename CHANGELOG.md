@@ -1,6 +1,6 @@
 # Changelog
 
-Все значимые изменения в проекте EvPower Mobile будут документироваться в этом файле.
+Все значимые изменения в проекте Voltera Mobile будут документироваться в этом файле.
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 и проект следует [Semantic Versioning](https://semver.org/lang/ru/).
@@ -218,7 +218,7 @@
 
 **Backend Integration:**
 
-- Backend API: `https://ocpp.evpower.kg`
+- Backend API: `https://ocpp.voltera.kg`
 - Supabase Auth: полностью интегрирован
 - Payment Provider: O!Dengi (ODENGI)
 - OCPP 1.6J Protocol
@@ -360,12 +360,12 @@
 
 #### Исправлено
 
-- ✅ **КРИТИЧНО: Удален Certificate Pinning для ocpp.evpower.kg**
+- ✅ **КРИТИЧНО: Удален Certificate Pinning для ocpp.voltera.kg**
   - **Проблема:** APK не мог подключиться к backend API
   - **Корневая причина:**
     - SSL сертификат на сервере обновился 6 сентября 2025
     - В APK были жестко прописаны хеши старого сертификата (Generated: 2025-10-21)
-    - Android блокировал все HTTPS запросы к `ocpp.evpower.kg` из-за несовпадения хешей
+    - Android блокировал все HTTPS запросы к `ocpp.voltera.kg` из-за несовпадения хешей
     - Backend логи: нет запросов от APK
     - Web версия работала т.к. использует browser fetch без certificate pinning
   - **Решение:**
@@ -387,7 +387,7 @@
 **Что НЕ было проблемой:**
 
 1. ✅ JWT токен отправлялся правильно (`Authorization: Bearer ...`)
-2. ✅ API_ORIGIN был корректным (`https://ocpp.evpower.kg`)
+2. ✅ API_ORIGIN был корректным (`https://ocpp.voltera.kg`)
 3. ✅ Content-Type header присутствовал
 4. ✅ Backend API работал корректно
 
@@ -420,12 +420,12 @@
     - Неправильный доступ к env переменной: `(import.meta as any).env?.VITE_API_URL` возвращал `undefined`
     - В результате `API_ORIGIN` был пустой строкой `""`
     - APK делал запросы на `capacitor://localhost/api/v1` (не существует!)
-    - APK НЕ обращался к backend API `https://ocpp.evpower.kg`
+    - APK НЕ обращался к backend API `https://ocpp.voltera.kg`
     - Backend логи подтверждают: нет запросов от APK
     - APK использовал Supabase fallback, который падал из-за `price_per_kwh: null`
   - **Решение:**
     - Изменен доступ на правильный: `import.meta.env.VITE_API_URL`
-    - Добавлен fallback на `https://ocpp.evpower.kg` для безопасности
+    - Добавлен fallback на `https://ocpp.voltera.kg` для безопасности
     - Теперь APK корректно обращается к backend API
   - **Файл:** `src/services/evpowerApi.ts:31-36`
   - **Эффект:**
@@ -993,8 +993,8 @@ Http.request({
 ## Ссылки
 
 - **Repository:** https://github.com/caesarclown9/evpower-mobile-app
-- **Backend API:** https://ocpp.evpower.kg
-- **Support:** support@evpower.kg
+- **Backend API:** https://ocpp.voltera.kg
+- **Support:** support@voltera.kg
 
 ---
 

@@ -23,7 +23,7 @@ export function AboutPage() {
       <div className="p-6 space-y-4">
         <div className="bg-white rounded-2xl p-4 shadow-sm">
           <p className="text-sm text-gray-600">Версия приложения</p>
-          <p className="text-lg font-semibold">EvPower {appVersion}</p>
+          <p className="text-lg font-semibold">Voltera {appVersion}</p>
         </div>
 
         <div className="bg-white rounded-2xl p-4 shadow-sm space-y-3">
@@ -46,10 +46,10 @@ export function AboutPage() {
         <div className="bg-white rounded-2xl p-4 shadow-sm">
           <p className="text-sm text-gray-600">Поддержка</p>
           <a
-            href="mailto:support@evpower.kg"
+            href="mailto:support@voltera.kg"
             className="text-cyan-600 font-medium"
           >
-            support@evpower.kg
+            support@voltera.kg
           </a>
         </div>
       </div>

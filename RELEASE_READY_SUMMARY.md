@@ -1,4 +1,4 @@
-# 🚀 EvPower Mobile - Production Release Summary
+# 🚀 Voltera Mobile - Production Release Summary
 
 **Version:** 1.0.1
 **Build:** 80
@@ -9,7 +9,7 @@
 
 ## ✨ Release Highlights
 
-After comprehensive testing and issue resolution, EvPower Mobile is **100% ready** for deployment to **Google Play** and **App Store**.
+After comprehensive testing and issue resolution, Voltera Mobile is **100% ready** for deployment to **Google Play** and **App Store**.
 
 ### 🎯 All Critical Issues Resolved
 
@@ -148,7 +148,7 @@ Cache: 75 precached entries
 ## 🔄 Backend Integration
 
 ```
-Backend API: https://ocpp.evpower.kg
+Backend API: https://ocpp.voltera.kg
 Status: ✅ Fully operational
 ```
 
@@ -279,8 +279,8 @@ Status: ✅ Fully operational
 
 ## 📞 Support Information
 
-**Backend API:** https://ocpp.evpower.kg
-**Support Email:** support@evpower.kg
+**Backend API:** https://ocpp.voltera.kg
+**Support Email:** support@voltera.kg
 **Documentation:** See README.md and RULES.md
 
 ---

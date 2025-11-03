@@ -7,12 +7,12 @@ import {
   PushNotifications,
   type PushNotificationSchema,
   type Token,
-  type ActionPerformed
-} from '@capacitor/push-notifications';
-import { isNativePlatform, getPlatform } from './env';
-import { logger } from '@/shared/utils/logger';
-import { evpowerApi } from '@/services/evpowerApi';
-import { APP_VERSION } from '@/lib/versionManager';
+  type ActionPerformed,
+} from "@capacitor/push-notifications";
+import { isNativePlatform, getPlatform } from "./env";
+import { logger } from "@/shared/utils/logger";
+import { evpowerApi } from "@/services/evpowerApi";
+import { APP_VERSION } from "@/lib/versionManager";
 
 /**
  * Интерфейс для push-уведомления
@@ -61,12 +61,12 @@ class PushNotificationService {
       } else {
         // Для веба пока используем заглушку
         // TODO: Реализовать Web Push API когда backend будет готов
-        logger.info('Push: Web push notifications not yet implemented');
+        logger.info("Push: Web push notifications not yet implemented");
         this.isInitialized = true;
         return false;
       }
     } catch (error) {
-      logger.error('Push: initialization failed', error);
+      logger.error("Push: initialization failed", error);
       return false;
     }
   }
@@ -76,52 +76,61 @@ class PushNotificationService {
    */
   private async initializeNative(): Promise<void> {
     // Слушатель регистрации (получение токена)
-    await PushNotifications.addListener('registration', async (token: Token) => {
-      logger.info('Push: device registered with token');
-      this.currentToken = token.value;
+    await PushNotifications.addListener(
+      "registration",
+      async (token: Token) => {
+        logger.info("Push: device registered with token");
+        this.currentToken = token.value;
 
-      // Регистрируем токен на бэкенде
-      try {
-        const platform = getPlatform();
-        const result = await evpowerApi.registerDevice(
-          token.value,
-          platform,
-          APP_VERSION
-        );
+        // Регистрируем токен на бэкенде
+        try {
+          const platform = getPlatform();
+          const result = await evpowerApi.registerDevice(
+            token.value,
+            platform,
+            APP_VERSION,
+          );
 
-        if (result.success) {
-          logger.info('Push: token registered on backend');
-        } else {
-          logger.warn('Push: failed to register token on backend', result.message);
+          if (result.success) {
+            logger.info("Push: token registered on backend");
+          } else {
+            logger.warn(
+              "Push: failed to register token on backend",
+              result.message,
+            );
+          }
+        } catch (error) {
+          logger.error("Push: error registering token on backend", error);
         }
-      } catch (error) {
-        logger.error('Push: error registering token on backend', error);
-      }
 
-      this.notifyTokenCallbacks(token.value);
-    });
+        this.notifyTokenCallbacks(token.value);
+      },
+    );
 
     // Слушатель ошибок регистрации
-    await PushNotifications.addListener('registrationError', (error: unknown) => {
-      logger.error('Push: registration error', error);
-    });
+    await PushNotifications.addListener(
+      "registrationError",
+      (error: unknown) => {
+        logger.error("Push: registration error", error);
+      },
+    );
 
     // Слушатель получения уведомлений (когда приложение открыто)
     await PushNotifications.addListener(
-      'pushNotificationReceived',
+      "pushNotificationReceived",
       (notification: PushNotificationSchema) => {
-        logger.info('Push: notification received', notification);
+        logger.info("Push: notification received", notification);
         this.handleNotification(notification);
-      }
+      },
     );
 
     // Слушатель действий с уведомлением (клик по уведомлению)
     await PushNotifications.addListener(
-      'pushNotificationActionPerformed',
+      "pushNotificationActionPerformed",
       (notification: ActionPerformed) => {
-        logger.info('Push: notification action performed', notification);
+        logger.info("Push: notification action performed", notification);
         this.handleNotificationAction(notification);
-      }
+      },
     );
   }
 
@@ -132,17 +141,17 @@ class PushNotificationService {
     try {
       if (isNativePlatform()) {
         const result = await PushNotifications.requestPermissions();
-        return result.receive === 'granted';
+        return result.receive === "granted";
       } else {
         // Для веба используем Notification API
-        if ('Notification' in window) {
+        if ("Notification" in window) {
           const permission = await Notification.requestPermission();
-          return permission === 'granted';
+          return permission === "granted";
         }
         return false;
       }
     } catch (error) {
-      logger.error('Push: failed to request permissions', error);
+      logger.error("Push: failed to request permissions", error);
       return false;
     }
   }
@@ -154,16 +163,16 @@ class PushNotificationService {
     try {
       if (isNativePlatform()) {
         const result = await PushNotifications.checkPermissions();
-        return result.receive === 'granted';
+        return result.receive === "granted";
       } else {
         // Для веба проверяем Notification API
-        if ('Notification' in window) {
-          return Notification.permission === 'granted';
+        if ("Notification" in window) {
+          return Notification.permission === "granted";
         }
         return false;
       }
     } catch (error) {
-      logger.error('Push: failed to check permissions', error);
+      logger.error("Push: failed to check permissions", error);
       return false;
     }
   }
@@ -178,7 +187,7 @@ class PushNotificationService {
       if (!hasPermission) {
         const granted = await this.requestPermissions();
         if (!granted) {
-          logger.warn('Push: permissions not granted');
+          logger.warn("Push: permissions not granted");
           return null;
         }
       }
@@ -202,7 +211,7 @@ class PushNotificationService {
 
           // Ждем токен с таймаутом
           const timeout = setTimeout(() => {
-            logger.warn('Push: token registration timeout');
+            logger.warn("Push: token registration timeout");
             resolve(null);
           }, 10000);
 
@@ -216,11 +225,11 @@ class PushNotificationService {
         });
       } else {
         // Для веба возвращаем заглушку
-        logger.info('Push: web registration not implemented');
+        logger.info("Push: web registration not implemented");
         return null;
       }
     } catch (error) {
-      logger.error('Push: registration failed', error);
+      logger.error("Push: registration failed", error);
       return null;
     }
   }
@@ -238,7 +247,7 @@ class PushNotificationService {
   async unregister(): Promise<boolean> {
     try {
       if (!this.currentToken) {
-        logger.warn('Push: no token to unregister');
+        logger.warn("Push: no token to unregister");
         return false;
       }
 
@@ -246,15 +255,15 @@ class PushNotificationService {
       const result = await evpowerApi.unregisterDevice(this.currentToken);
 
       if (result.success) {
-        logger.info('Push: token unregistered from backend');
+        logger.info("Push: token unregistered from backend");
         this.currentToken = null;
         return true;
       } else {
-        logger.warn('Push: failed to unregister token from backend');
+        logger.warn("Push: failed to unregister token from backend");
         return false;
       }
     } catch (error) {
-      logger.error('Push: error unregistering token', error);
+      logger.error("Push: error unregistering token", error);
       return false;
     }
   }
@@ -300,34 +309,37 @@ class PushNotificationService {
       if (isNativePlatform()) {
         // Для нативных платформ можно использовать Local Notifications plugin
         // Пока используем системный алерт как заглушку
-        logger.info('Push: showing local notification', notification);
+        logger.info("Push: showing local notification", notification);
 
         // TODO: Добавить @capacitor/local-notifications для полноценных локальных уведомлений
       } else {
         // Для веба используем Notification API
-        if ('Notification' in window && Notification.permission === 'granted') {
-          const webNotification = new Notification(notification.title || 'EvPower', {
-            body: notification.body,
-            icon: '/icons/icon-192x192.png',
-            badge: '/icons/icon-192x192.png',
-            data: notification.data,
-            tag: notification.id
-          });
+        if ("Notification" in window && Notification.permission === "granted") {
+          const webNotification = new Notification(
+            notification.title || "Voltera",
+            {
+              body: notification.body,
+              icon: "/icons/icon-192x192.png",
+              badge: "/icons/icon-192x192.png",
+              data: notification.data,
+              tag: notification.id,
+            },
+          );
 
           webNotification.onclick = () => {
             window.focus();
             this.handleNotificationAction({
-              actionId: 'tap',
+              actionId: "tap",
               notification: {
                 ...notification,
-                id: notification.id || ''
-              } as PushNotificationSchema
+                id: notification.id || "",
+              } as PushNotificationSchema,
             } as ActionPerformed);
           };
         }
       }
     } catch (error) {
-      logger.error('Push: failed to show local notification', error);
+      logger.error("Push: failed to show local notification", error);
     }
   }
 
@@ -340,15 +352,15 @@ class PushNotificationService {
       title: notification.title,
       body: notification.body,
       data: notification.data,
-      badge: notification.badge
+      badge: notification.badge,
     };
 
     // Уведомляем всех слушателей
-    this.notificationCallbacks.forEach(callback => {
+    this.notificationCallbacks.forEach((callback) => {
       try {
         callback(pushNotification);
       } catch (error) {
-        logger.error('Push: error in notification callback', error);
+        logger.error("Push: error in notification callback", error);
       }
     });
   }
@@ -364,13 +376,13 @@ class PushNotificationService {
       // Например, переход на страницу зарядки
       if (data.sessionId) {
         // TODO: Implement navigation to charging session
-        logger.info('Push: navigate to charging session', data.sessionId);
+        logger.info("Push: navigate to charging session", data.sessionId);
       }
 
       // Или показ уведомления о завершении
-      if (data.type === 'charging_complete') {
+      if (data.type === "charging_complete") {
         // TODO: Show charging complete notification
-        logger.info('Push: charging complete', data);
+        logger.info("Push: charging complete", data);
       }
     }
   }
@@ -379,11 +391,11 @@ class PushNotificationService {
    * Уведомляет слушателей о получении токена
    */
   private notifyTokenCallbacks(token: string): void {
-    this.tokenCallbacks.forEach(callback => {
+    this.tokenCallbacks.forEach((callback) => {
       try {
         callback(token);
       } catch (error) {
-        logger.error('Push: error in token callback', error);
+        logger.error("Push: error in token callback", error);
       }
     });
   }

@@ -3,70 +3,75 @@
  * Автоматически отключает логи в production
  */
 
-type LogLevel = 'debug' | 'info' | 'warn' | 'error'
+type LogLevel = "debug" | "info" | "warn" | "error";
 
 interface LoggerConfig {
-  enabled: boolean
-  level: LogLevel
-  prefix?: string
+  enabled: boolean;
+  level: LogLevel;
+  prefix?: string;
 }
 
 class Logger {
-  private config: LoggerConfig
+  private config: LoggerConfig;
 
   constructor(config?: Partial<LoggerConfig>) {
     this.config = {
-      enabled: import.meta.env.DEV || import.meta.env['VITE_DEBUG_MODE'] === 'true',
-      level: (import.meta.env['VITE_LOG_LEVEL'] as LogLevel) || 'info',
-      prefix: '[EvPower]',
+      enabled:
+        import.meta.env.DEV || import.meta.env["VITE_DEBUG_MODE"] === "true",
+      level: (import.meta.env["VITE_LOG_LEVEL"] as LogLevel) || "info",
+      prefix: "[Voltera]",
       ...config,
-    }
+    };
   }
 
   private shouldLog(level: LogLevel): boolean {
-    if (!this.config.enabled) return false
-    
+    if (!this.config.enabled) return false;
+
     const levels: Record<LogLevel, number> = {
       debug: 0,
       info: 1,
       warn: 2,
       error: 3,
-    }
-    
-    return levels[level] >= levels[this.config.level]
+    };
+
+    return levels[level] >= levels[this.config.level];
   }
 
-  private formatMessage(level: LogLevel, message: string, _data?: unknown): string {
-    const timestamp = new Date().toISOString()
-    const prefix = this.config.prefix || ''
-    return `${prefix} [${timestamp}] [${level.toUpperCase()}] ${message}`
+  private formatMessage(
+    level: LogLevel,
+    message: string,
+    _data?: unknown,
+  ): string {
+    const timestamp = new Date().toISOString();
+    const prefix = this.config.prefix || "";
+    return `${prefix} [${timestamp}] [${level.toUpperCase()}] ${message}`;
   }
 
   debug(message: string, data?: unknown): void {
-    if (this.shouldLog('debug')) {
-      console.log(this.formatMessage('debug', message, data), data || '')
+    if (this.shouldLog("debug")) {
+      console.log(this.formatMessage("debug", message, data), data || "");
     }
   }
 
   info(message: string, data?: unknown): void {
-    if (this.shouldLog('info')) {
-      console.info(this.formatMessage('info', message, data), data || '')
+    if (this.shouldLog("info")) {
+      console.info(this.formatMessage("info", message, data), data || "");
     }
   }
 
   warn(message: string, data?: unknown): void {
-    if (this.shouldLog('warn')) {
-      console.warn(this.formatMessage('warn', message, data), data || '')
+    if (this.shouldLog("warn")) {
+      console.warn(this.formatMessage("warn", message, data), data || "");
     }
   }
 
   error(message: string, error?: unknown): void {
-    if (this.shouldLog('error')) {
-      console.error(this.formatMessage('error', message, error), error || '')
-      
+    if (this.shouldLog("error")) {
+      console.error(this.formatMessage("error", message, error), error || "");
+
       // В production отправляем ошибки в систему мониторинга
       if (import.meta.env.PROD && error instanceof Error) {
-        this.reportError(error, { context: message })
+        this.reportError(error, { context: message });
       }
     }
   }
@@ -76,11 +81,11 @@ class Logger {
    */
   group(label: string, callback: () => void): void {
     if (this.config.enabled) {
-      console.group(`${this.config.prefix} ${label}`)
-      callback()
-      console.groupEnd()
+      console.group(`${this.config.prefix} ${label}`);
+      callback();
+      console.groupEnd();
     } else {
-      callback()
+      callback();
     }
   }
 
@@ -89,13 +94,13 @@ class Logger {
    */
   time(label: string): void {
     if (this.config.enabled) {
-      console.time(`${this.config.prefix} ${label}`)
+      console.time(`${this.config.prefix} ${label}`);
     }
   }
 
   timeEnd(label: string): void {
     if (this.config.enabled) {
-      console.timeEnd(`${this.config.prefix} ${label}`)
+      console.timeEnd(`${this.config.prefix} ${label}`);
     }
   }
 
@@ -105,8 +110,29 @@ class Logger {
   private reportError(error: Error, context?: Record<string, unknown>): void {
     // Здесь будет интеграция с Sentry или другой системой мониторинга
     // Пока просто заглушка
-    if (typeof window !== 'undefined' && (window as { Sentry?: { captureException: (error: Error, options?: { extra?: Record<string, unknown> }) => void } }).Sentry) {
-      (window as { Sentry?: { captureException: (error: Error, options?: { extra?: Record<string, unknown> }) => void } }).Sentry?.captureException(error, { extra: context })
+    if (
+      typeof window !== "undefined" &&
+      (
+        window as {
+          Sentry?: {
+            captureException: (
+              error: Error,
+              options?: { extra?: Record<string, unknown> },
+            ) => void;
+          };
+        }
+      ).Sentry
+    ) {
+      (
+        window as {
+          Sentry?: {
+            captureException: (
+              error: Error,
+              options?: { extra?: Record<string, unknown> },
+            ) => void;
+          };
+        }
+      ).Sentry?.captureException(error, { extra: context });
     }
   }
 
@@ -117,18 +143,18 @@ class Logger {
     return new Logger({
       ...this.config,
       prefix: `${this.config.prefix} [${moduleName}]`,
-    })
+    });
   }
 }
 
 // Экспортируем singleton для использования во всем приложении
-export const logger = new Logger()
+export const logger = new Logger();
 
 // Экспортируем также класс для создания кастомных логгеров
-export { Logger }
+export { Logger };
 
 // Хелперы для быстрого доступа
-export const logDebug = logger.debug.bind(logger)
-export const logInfo = logger.info.bind(logger)
-export const logWarn = logger.warn.bind(logger)
-export const logError = logger.error.bind(logger)
+export const logDebug = logger.debug.bind(logger);
+export const logInfo = logger.info.bind(logger);
+export const logWarn = logger.warn.bind(logger);
+export const logError = logger.error.bind(logger);

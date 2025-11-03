@@ -9,12 +9,12 @@ import { logger } from "@/shared/utils/logger";
 
 // Текущая версия приложения (синхронизируется с package.json)
 export const APP_VERSION = "1.0.1";
-export const APP_BUILD = 81; // Увеличивается при каждой сборке
+export const APP_BUILD = 2; // Увеличивается при каждой сборке
 
 // Ключи для хранения
-const VERSION_STORAGE_KEY = "evpower_app_version";
-const BUILD_STORAGE_KEY = "evpower_app_build";
-const LAST_MIGRATION_KEY = "evpower_last_migration";
+const VERSION_STORAGE_KEY = "voltera_app_version";
+const BUILD_STORAGE_KEY = "voltera_app_build";
+const LAST_MIGRATION_KEY = "voltera_last_migration";
 
 interface VersionInfo {
   version: string;
@@ -220,7 +220,7 @@ class VersionManager {
 
     try {
       // React Query Persist использует idb-keyval
-      const dbName = "evpower-cache";
+      const dbName = "voltera-cache";
 
       // Удаляем всю базу данных
       await new Promise<void>((resolve, reject) => {
@@ -256,7 +256,7 @@ class VersionManager {
 
     // Не парсим и не логируем содержимое токена. Безопасно очищаем некорректные/устаревшие ключи.
     try {
-      const key = "evpower-auth-token";
+      const key = "voltera-auth-token";
       const raw = localStorage.getItem(key);
       if (!raw) return;
 
@@ -269,7 +269,7 @@ class VersionManager {
       }
 
       // Если установлена явная метка устаревшей миграции — очищаем.
-      const lastMigration = localStorage.getItem("evpower_last_migration");
+      const lastMigration = localStorage.getItem(LAST_MIGRATION_KEY);
       if (!lastMigration) {
         // После первой миграции ключ будет выставлен; до этого безопасно не трогаем токен
         return;
@@ -422,7 +422,7 @@ class VersionManager {
     ]);
 
     // Очищаем localStorage (кроме критичных данных)
-    const keysToKeep = ["evpower-auth-token"];
+    const keysToKeep = ["voltera-auth-token"];
     Object.keys(localStorage).forEach((key) => {
       if (!keysToKeep.includes(key)) {
         localStorage.removeItem(key);

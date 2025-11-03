@@ -1,4 +1,4 @@
-package kg.evpower.app;
+package kg.voltera.app;
 
 import android.os.Build;
 import android.os.Bundle;

@@ -112,12 +112,12 @@ async function analyzeDatabase() {
       console.log('\nClients table ready for use ✅');
     }
 
-    // 5. Проверяем связь с EvPower API
+    // 5. Проверяем связь с Voltera API
     console.log('\n🔗 Integration points:');
     console.log('- Auth: Supabase Auth (email/phone)');
     console.log('- User data: clients table (id, email, phone, balance)');
-    console.log('- Charging/Stations: External EvPower API');
-    console.log('- Payment: External EvPower API');
+    console.log('- Charging/Stations: External Voltera API');
+    console.log('- Payment: External Voltera API');
 
   } catch (error) {
     console.error('Analysis error:', error);

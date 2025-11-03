@@ -12,8 +12,8 @@ export default defineConfig(() => {
         injectRegister: "auto",
         includeAssets: ["favicon.ico", "apple-touch-icon.png", "mask-icon.svg"],
         manifest: {
-          name: "EvPower Зарядные Станции",
-          short_name: "EvPower",
+          name: "Voltera Зарядные Станции",
+          short_name: "Voltera",
           description: "Управление зарядкой электромобилей",
           theme_color: "#10B981",
           background_color: "#ffffff",
@@ -21,7 +21,7 @@ export default defineConfig(() => {
           orientation: "portrait",
           scope: "/",
           start_url: "/",
-          id: "kg.evpower.app",
+          id: "kg.voltera.app",
           categories: ["utilities", "transportation"],
           icons: [
             {
@@ -46,7 +46,7 @@ export default defineConfig(() => {
             // Charging and status endpoints - always from network
             {
               urlPattern:
-                /^https:\/\/ocpp\.evpower\.kg\/api\/v1\/(charging|status)\/.*/i,
+                /^https:\/\/ocpp\.voltera\.kg\/api\/v1\/(charging|status)\/.*/i,
               handler: "NetworkOnly",
               options: {
                 cacheName: "no-cache",
@@ -54,7 +54,7 @@ export default defineConfig(() => {
             },
             // General API endpoints - StaleWhileRevalidate for instant loading
             {
-              urlPattern: /^https:\/\/ocpp\.evpower\.kg\/api\/.*/i,
+              urlPattern: /^https:\/\/ocpp\.voltera\.kg\/api\/.*/i,
               handler: "StaleWhileRevalidate",
               method: "GET",
               options: {
@@ -131,7 +131,7 @@ export default defineConfig(() => {
         process.env.NODE_ENV === "development"
           ? {
               "/api": {
-                target: "https://ocpp.evpower.kg",
+                target: "https://ocpp.voltera.kg",
                 changeOrigin: true,
                 secure: true,
                 // Пробрасываем все заголовки, включая Authorization

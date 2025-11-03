@@ -1,8 +1,8 @@
-# EvPower Android Keystore Generator Script
+# Voltera Android Keystore Generator Script
 # Запускать в PowerShell от имени администратора
 
 Write-Host "======================================" -ForegroundColor Cyan
-Write-Host "  EvPower Android Keystore Generator " -ForegroundColor Cyan
+Write-Host "  Voltera Android Keystore Generator " -ForegroundColor Cyan
 Write-Host "======================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -71,17 +71,17 @@ if (Test-Path "evpower-release.keystore") {
 # Параметры keystore
 $keystoreName = "evpower-release.keystore"
 $alias = "evpower"
-$storePass = "EvPower2024Secure!"
-$keyPass = "EvPower2024Secure!"
+$storePass = "Voltera2024Secure!"
+$keyPass = "Voltera2024Secure!"
 $validity = 10000
-$dname = "CN=EvPower, OU=Mobile Development, O=EvPower, L=Bishkek, ST=Chui, C=KG"
+$dname = "CN=Voltera, OU=Mobile Development, O=Voltera, L=Bishkek, ST=Chui, C=KG"
 
 Write-Host "`n======================================" -ForegroundColor Cyan
 Write-Host "Creating keystore with parameters:" -ForegroundColor Cyan
 Write-Host "Keystore: $keystoreName" -ForegroundColor White
 Write-Host "Alias: $alias" -ForegroundColor White
 Write-Host "Validity: $validity days" -ForegroundColor White
-Write-Host "Organization: EvPower" -ForegroundColor White
+Write-Host "Organization: Voltera" -ForegroundColor White
 Write-Host "Location: Bishkek, Kyrgyzstan" -ForegroundColor White
 Write-Host "======================================" -ForegroundColor Cyan
 Write-Host ""
@@ -149,7 +149,7 @@ Write-Host "Creating secure backup..." -ForegroundColor Cyan
 Write-Host "======================================" -ForegroundColor Cyan
 
 $date = Get-Date -Format "yyyy-MM-dd_HHmmss"
-$backupDir = "$env:USERPROFILE\Documents\EvPower-Keystore-Backup"
+$backupDir = "$env:USERPROFILE\Documents\Voltera-Keystore-Backup"
 
 if (-not (Test-Path $backupDir)) {
     New-Item -ItemType Directory -Force -Path $backupDir | Out-Null

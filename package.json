@@ -1,7 +1,14 @@
 {
-  "name": "evpower-pwa",
+  "name": "voltera-pwa",
   "private": true,
   "version": "1.0.1",
+  "description": "Voltera - Мобильное приложение для управления зарядкой электромобилей в Кыргызстане. Находите ближайшие станции, начинайте зарядку по QR-коду, управляйте балансом и отслеживайте историю зарядок.",
+  "author": "Voltera",
+  "homepage": "https://voltera.kg",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/caesarclown9/voltera-mobile.git"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",

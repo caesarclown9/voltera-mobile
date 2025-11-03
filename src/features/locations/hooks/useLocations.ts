@@ -68,7 +68,6 @@ export function useLocations(requestGeolocation: boolean = false) {
         logger.debug("[useLocations] Query function called!");
       const locations = await evpowerApi.getLocations(true);
 
-      // DEBUG: временное логирование
       if (import.meta.env.DEV)
         logger.debug("[useLocations] Fetched locations from API", {
           count: locations.length,

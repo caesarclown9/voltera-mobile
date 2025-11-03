@@ -1,6 +1,10 @@
 import { z } from "zod";
-import { Capacitor } from "@capacitor/core";
+// import { Capacitor } from "@capacitor/core"; // Reserved for future native HTTP implementation
 import { Http } from "@capacitor-community/http";
+import { ApiError, handleApiError } from "@/shared/errors/apiErrors";
+
+// Re-export for backward compatibility
+export { ApiError, handleApiError };
 
 export class TransportError extends Error {
   public status: number | undefined;
@@ -48,7 +52,8 @@ export async function fetchJson<T>(
 
   const makeOnce = async (): Promise<T> => {
     // Use Capacitor HTTP on native platforms, browser fetch on web
-    const isNative = Capacitor.isNativePlatform();
+    // Note: Currently using fetch for all platforms due to better stability
+    const isNative = false; // Capacitor.isNativePlatform();
 
     let json: unknown;
     let status: number;
@@ -56,27 +61,39 @@ export async function fetchJson<T>(
 
     if (isNative) {
       // Native platform: use @capacitor-community/http
+      if (!Http || typeof Http.request !== "function") {
+        throw new Error("Capacitor HTTP plugin not available");
+      }
+
       try {
         const timeoutSeconds = Math.ceil(
           (options.timeoutMs ?? defaultOptions.timeoutMs) / 1000,
         );
 
-        // КРИТИЧНО: Content-Type header обязателен для нативных запросов!
-        // Backend OCPP API требует "application/json" для всех POST запросов
-        // Без этого заголовка запросы будут отклонены с ошибками:
-        // - Зарядка: NullPointerException
-        // - QR топ-ап: "Не удалось создать QR код"
-        const response = await Http.request({
+        // Content-Type header is required for backend API
+        const allHeaders = {
+          "Content-Type": "application/json",
+          ...(options.headers ?? {}),
+        };
+
+        // Filter out null/undefined header values to prevent Java NPE
+        const cleanHeaders: Record<string, string> = {};
+        for (const [key, value] of Object.entries(allHeaders)) {
+          if (value != null && value !== undefined && value !== "") {
+            cleanHeaders[key] = String(value);
+          }
+        }
+
+        const requestParams = {
           url,
           method: options.method ?? "GET",
-          headers: {
-            "Content-Type": "application/json",
-            ...(options.headers ?? {}),
-          },
-          data: options.body,
+          headers: cleanHeaders,
+          ...(options.body ? { data: options.body } : {}),
           connectTimeout: timeoutSeconds,
           readTimeout: timeoutSeconds,
-        });
+        };
+
+        const response = await Http.request(requestParams);
 
         status = response.status;
         contentType =
@@ -93,18 +110,13 @@ export async function fetchJson<T>(
           const errorCode = (errorObj?.["error_code"] ||
             errorObj?.["error"]) as string | undefined;
 
-          // Детальное логирование для отладки APK проблем
-          console.error(
-            `[UnifiedClient] Native HTTP error: ${status} ${message}`,
-          );
-          console.error(`[UnifiedClient] URL: ${url}`);
-          console.error(`[UnifiedClient] Method: ${options.method ?? "GET"}`);
-          console.error(`[UnifiedClient] Error code: ${errorCode || "none"}`);
           if (import.meta.env.DEV) {
             console.error(
-              `[UnifiedClient] Response data:`,
-              JSON.stringify(json, null, 2),
+              `[UnifiedClient] Native HTTP error: ${status} ${message}`,
             );
+            console.error(`[UnifiedClient] URL: ${url}`);
+            console.error(`[UnifiedClient] Method: ${options.method ?? "GET"}`);
+            console.error(`[UnifiedClient] Error code: ${errorCode || "none"}`);
           }
 
           throw new TransportError(String(message), {
@@ -113,6 +125,11 @@ export async function fetchJson<T>(
           });
         }
       } catch (err) {
+        if (import.meta.env.DEV) {
+          console.error("[UnifiedClient] Capacitor HTTP error:", err);
+          console.error("[UnifiedClient] URL:", url);
+        }
+
         // Re-throw TransportError as-is, wrap others
         if (err instanceof TransportError) throw err;
         throw new TransportError(
@@ -137,7 +154,11 @@ export async function fetchJson<T>(
 
       if (!contentType.includes("application/json")) {
         const textResponse = await resp.text();
-        console.error(`Backend non-JSON response: ${status} ${contentType}`);
+        if (import.meta.env.DEV) {
+          console.error(
+            `[UnifiedClient] Backend non-JSON response: ${status} ${contentType}`,
+          );
+        }
         throw new TransportError(
           `Backend error (${status}): ${textResponse || "No message"}`,
           { status },
@@ -163,16 +184,18 @@ export async function fetchJson<T>(
     // Common validation logic for both platforms
     const parsed = schema.safeParse(json);
     if (!parsed.success) {
-      // Детальное логирование ошибок валидации для отладки
-      console.error(
-        `❌ Validation failed: ${options.method ?? "GET"} ${url} (${parsed.error.errors.length} errors)`,
-      );
-      console.error(
-        "Validation errors:",
-        JSON.stringify(parsed.error.errors, null, 2),
-      );
       if (import.meta.env.DEV) {
-        console.error("Response data:", JSON.stringify(json, null, 2));
+        console.error(
+          `[UnifiedClient] Validation failed: ${options.method ?? "GET"} ${url}`,
+        );
+        console.error(
+          "[UnifiedClient] Validation errors:",
+          JSON.stringify(parsed.error.errors, null, 2),
+        );
+        console.error(
+          "[UnifiedClient] Response data:",
+          JSON.stringify(json, null, 2),
+        );
       }
       throw new TransportError("Response validation failed", {
         status,
@@ -186,7 +209,7 @@ export async function fetchJson<T>(
     const retries = options.retries ?? defaultOptions.retries;
     let attempt = 0;
     let delay = 300;
-    // Экспоненциальный бэкофф только для идемпотентных запросов
+    // Exponential backoff only for idempotent requests
     // eslint-disable-next-line no-constant-condition
     while (true) {
       try {
@@ -211,134 +234,5 @@ export async function fetchJson<T>(
 export { z };
 
 // ================== Error utilities for API boundary ==================
-
-export class ApiError extends Error {
-  public code: string;
-  public status?: number;
-  constructor(code: string, message: string, status?: number) {
-    super(message);
-    this.name = "ApiError";
-    this.code = code;
-    this.status = status;
-  }
-}
-
-const ERROR_MESSAGES: Record<string, string> = {
-  // Client errors
-  client_not_found: "Клиент не найден",
-  client_blocked: "Аккаунт заблокирован",
-  client_deleted: "Аккаунт удален",
-
-  // Station errors
-  station_unavailable: "Станция недоступна",
-  station_offline: "Станция не в сети",
-  station_maintenance: "Станция на техническом обслуживании",
-  station_not_found: "Станция не найдена",
-
-  // Connector errors
-  connector_occupied: "Коннектор уже используется",
-  connector_unavailable: "Коннектор недоступен",
-  connector_not_found: "Коннектор не найден",
-  connector_faulted: "Коннектор неисправен",
-
-  // Charging session errors
-  session_not_found: "Сессия зарядки не найдена",
-  session_already_active: "У вас уже есть активная сессия зарядки",
-  session_expired: "Сессия зарядки истекла",
-  session_failed: "Не удалось запустить зарядку",
-  charging_limit_exceeded: "Превышен лимит зарядки",
-
-  // Balance and payment errors
-  insufficient_balance: "Недостаточно средств на балансе",
-  payment_not_found: "Платеж не найден",
-  payment_expired: "Время оплаты истекло",
-  payment_failed: "Платеж не прошел",
-  payment_pending: "Платеж обрабатывается",
-  invalid_amount: "Некорректная сумма",
-  minimum_amount_required: "Сумма меньше минимальной",
-  maximum_amount_exceeded: "Сумма превышает максимальную",
-
-  // Provider errors
-  provider_error: "Ошибка платежной системы",
-  provider_unavailable: "Платежная система недоступна",
-  provider_timeout: "Превышено время ожидания платежной системы",
-
-  // Device registration errors
-  device_already_registered: "Устройство уже зарегистрировано",
-  device_not_found: "Устройство не найдено",
-  fcm_token_invalid: "Некорректный FCM токен",
-
-  // General errors
-  internal_error: "Внутренняя ошибка сервера",
-  invalid_request: "Некорректный запрос",
-  validation_error: "Ошибка валидации данных",
-  timeout: "Превышено время ожидания",
-  network_error: "Ошибка сети",
-  unauthorized: "Требуется авторизация",
-  forbidden: "Доступ запрещен",
-  not_found: "Не найдено",
-  rate_limit_exceeded: "Превышено количество запросов",
-  service_unavailable: "Сервис временно недоступен",
-};
-
-function isObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
-
-export function handleApiError(error: unknown): string {
-  if (error instanceof ApiError) {
-    return ERROR_MESSAGES[error.code] ?? error.message ?? "Неизвестная ошибка";
-  }
-
-  if (error instanceof TransportError && error.code) {
-    return ERROR_MESSAGES[error.code] ?? error.message ?? "Неизвестная ошибка";
-  }
-
-  if (isObject(error)) {
-    // axios-like error shape
-    const resp = error["response"];
-    if (isObject(resp)) {
-      const data = resp["data"];
-      if (isObject(data)) {
-        const errorCode =
-          typeof data["error_code"] === "string"
-            ? (data["error_code"] as string)
-            : undefined;
-        const code =
-          typeof data["error"] === "string"
-            ? (data["error"] as string)
-            : undefined;
-        const message =
-          typeof data["message"] === "string"
-            ? (data["message"] as string)
-            : undefined;
-        // Приоритет: error_code > error > message
-        if (errorCode)
-          return ERROR_MESSAGES[errorCode] ?? message ?? "Ошибка сервера";
-        if (code) return ERROR_MESSAGES[code] ?? message ?? "Ошибка сервера";
-        if (message) return message;
-      }
-    }
-
-    // generic { error_code, error, message }
-    const errorCode =
-      typeof error["error_code"] === "string"
-        ? (error["error_code"] as string)
-        : undefined;
-    const code =
-      typeof error["error"] === "string"
-        ? (error["error"] as string)
-        : undefined;
-    const message =
-      typeof error["message"] === "string"
-        ? (error["message"] as string)
-        : undefined;
-    // Приоритет: error_code > error > message
-    if (errorCode)
-      return ERROR_MESSAGES[errorCode] ?? message ?? "Неизвестная ошибка";
-    if (code) return ERROR_MESSAGES[code] ?? message ?? "Неизвестная ошибка";
-    if (message) return message;
-  }
-
-  return "Неизвестная ошибка";
-}
+// NOTE: ApiError and handleApiError now imported from @/shared/errors/apiErrors
+// DO NOT duplicate error handling code here!

@@ -29,7 +29,17 @@
     <meta property="og:image" content="https://app.evpower.kg/icons/icon-512x512.png">
     <meta property="og:url" content="https://app.evpower.kg">
     <meta property="og:site_name" content="EvPower">
-    <!-- CSP: включайте на проде; в DEV допускаются послабления -->
+    <!--
+      Content Security Policy (CSP)
+
+      ВАЖНО: 'unsafe-eval' и 'unsafe-inline' оставлены для совместимости с:
+      - Vite HMR в dev режиме (требует eval)
+      - Inline стили от Vite и библиотек
+      - Capacitor WebView особенности
+
+      Для строгой production версии можно убрать 'unsafe-*' после тестирования.
+      Текущая политика обеспечивает баланс безопасности и функциональности.
+    -->
     <meta http-equiv="Content-Security-Policy"
           content="default-src 'self';
                    script-src 'self' 'unsafe-eval' https://cdn.jsdelivr.net https://api-maps.yandex.ru https://yastatic.net https://*.yandex.ru https://*.yandex.net;
@@ -38,7 +48,10 @@
                    img-src 'self' data: https: blob:;
                    connect-src 'self' https://ocpp.evpower.kg wss://ocpp.evpower.kg https://*.supabase.co wss://*.supabase.co https://api-maps.yandex.ru https://yastatic.net https://*.yandex.ru https://*.yandex.net;
                    object-src 'none';
-                   frame-ancestors 'none';" />
+                   base-uri 'self';
+                   form-action 'self';
+                   frame-ancestors 'none';
+                   upgrade-insecure-requests;" />
     <title>EvPower - Зарядные станции для электромобилей</title>
   </head>
   <body>

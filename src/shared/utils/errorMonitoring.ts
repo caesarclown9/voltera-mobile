@@ -1,3 +1,19 @@
+/**
+ * Custom Error Monitoring - Базовый мониторинг ошибок
+ *
+ * ТЕКУЩИЙ: Custom implementation с offline queue
+ * АЛЬТЕРНАТИВА: Sentry (см. src/shared/monitoring/sentry.ts)
+ *
+ * Sentry преимущества:
+ * - Source maps support
+ * - Session replays
+ * - Performance monitoring
+ * - Better stack traces
+ * - Release tracking
+ *
+ * @module shared/utils/errorMonitoring
+ */
+
 interface ErrorInfo {
   message: string;
   stack?: string;

@@ -13,7 +13,7 @@ android {
         applicationId "kg.evpower.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 74
+        versionCode 80
         versionName "1.0.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
@@ -37,9 +37,8 @@ android {
 
     buildTypes {
         release {
-            // 🔍 ВРЕМЕННО ОТКЛЮЧЕНО ДЛЯ ОТЛАДКИ - проверяем не ProGuard ли удаляет Capacitor HTTP
-            minifyEnabled false
-            shrinkResources false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }

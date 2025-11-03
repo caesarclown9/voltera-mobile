@@ -8,7 +8,7 @@
     "noUncheckedIndexedAccess": true,
     "noImplicitReturns": true,
     "noPropertyAccessFromIndexSignature": true
-    // exactOptionalPropertyTypes: Отключено - требует значительных изменений типов
-    // TODO: Включить после рефакторинга типов с явным | undefined
+    // NOTE: exactOptionalPropertyTypes отключено - требует значительных изменений типов
+    // Tracked in technical debt backlog (требуется рефакторинг типов с явным | undefined)
   }
 }

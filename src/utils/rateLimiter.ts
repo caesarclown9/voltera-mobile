@@ -1,5 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// Note: `any` types used for generic function wrapper
+/**
+ * Rate Limiter - ограничение частоты вызовов функций
+ *
+ * Используется для защиты от спама и DDoS атак на критичных операциях
+ */
 
 interface RateLimitConfig {
   maxRequests: number;
@@ -93,11 +96,24 @@ class RateLimiter {
 
 export const rateLimiter = new RateLimiter();
 
-export function withRateLimit<T extends (...args: any[]) => any>(
+/**
+ * Обертка для функции с rate limiting
+ *
+ * @template T - Тип функции
+ * @param fn - Функция для оборачивания
+ * @param config - Конфигурация лимитов
+ * @returns Обернутая функция
+ *
+ * @example
+ * ```typescript
+ * const limitedFn = withRateLimit(myFunction, { maxRequests: 5, windowMs: 60000 });
+ * ```
+ */
+export function withRateLimit<T extends (...args: unknown[]) => unknown>(
   fn: T,
   config: Omit<RateLimitConfig, "identifier">,
 ): T {
-  return ((...args: Parameters<T>) => {
+  return ((...args: Parameters<T>): ReturnType<T> => {
     const identifier = `${fn.name || "anonymous"}_${JSON.stringify(args)}`;
 
     if (!rateLimiter.isAllowed({ ...config, identifier })) {
@@ -110,7 +126,7 @@ export function withRateLimit<T extends (...args: any[]) => any>(
       );
     }
 
-    return fn(...args);
+    return fn(...args) as ReturnType<T>;
   }) as T;
 }
 

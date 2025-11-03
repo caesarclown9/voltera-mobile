@@ -173,7 +173,6 @@ export function StationMap({
     (loc) => loc.latitude != null && loc.longitude != null,
   );
 
-  // DEBUG: временное логирование для отладки
   logger.debug("[StationMap] Received locations:", locations.length);
   logger.debug("[StationMap] Valid locations:", validLocations.length);
   if (validLocations.length > 0) {

@@ -1,9 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * EvPower API v1 Service - ЕДИНСТВЕННЫЙ API клиент для всего приложения
  * Интеграция с бэкендом OCPP сервера
- *
- * Note: `any` types used temporarily for external API responses lacking proper type definitions
  *
  * ВАЖНО:
  * - НЕ использует JWT токены
@@ -16,6 +13,7 @@ import { supabase } from "../shared/config/supabase";
 import { logger } from "@/shared/utils/logger";
 import { fetchJson } from "@/api/unifiedClient";
 import { generateIdempotencyKey } from "@/shared/utils/idempotency";
+import { ApiError, handleApiError } from "@/shared/errors/apiErrors";
 import {
   zLocationsEnvelopeBackend,
   zStartChargingResponse,
@@ -27,6 +25,74 @@ import {
   zStationStatusResponse,
 } from "@/api/schemas";
 import { z } from "zod";
+
+// ============= Supabase Fallback Types =============
+
+/**
+ * Supabase connector row type (для fallback запросов)
+ */
+interface SupabaseConnectorRow {
+  id?: string;
+  connector_number?: number;
+  connector_type?: string;
+  power_kw?: number;
+  status?: string;
+  error_code?: string;
+  [key: string]: unknown;
+}
+
+/**
+ * Mapped connector type (промежуточный формат)
+ */
+interface MappedConnector {
+  id: number | undefined;
+  type: string | undefined;
+  power_kw: number | undefined;
+  available: boolean;
+  status: string | undefined;
+  error_code: string;
+}
+
+/**
+ * Supabase station row type (для fallback запросов)
+ */
+interface SupabaseStationRow {
+  id: string;
+  serial_number: string;
+  model?: string;
+  manufacturer?: string;
+  location_id: string;
+  power_capacity?: number;
+  connector_types?: string[];
+  status: string;
+  connectors_count?: number;
+  price_per_kwh?: string | number;
+  session_fee?: string | number;
+  currency?: string;
+  firmware_version?: string;
+  is_available?: boolean;
+  last_heartbeat_at?: string;
+  connectors?: SupabaseConnectorRow[];
+  [key: string]: unknown;
+}
+
+/**
+ * Supabase location row type (для fallback запросов)
+ */
+interface SupabaseLocationRow {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  country: string;
+  latitude: number;
+  longitude: number;
+  status: string;
+  stations_count?: number;
+  connectors_count?: number;
+  stations?: SupabaseStationRow[];
+  [key: string]: unknown;
+}
 
 const API_VERSION = "/api/v1";
 // В dev принудительно используем относительный путь через proxy; в prod — берем из VITE_API_URL
@@ -435,59 +501,66 @@ class EvPowerApiService {
           throw err;
         }
 
-        // DEBUG: временное логирование
         logger.debug(
           `[EvPowerAPI] Supabase fallback returned locations: ${locations?.length || 0}`,
         );
 
         // Преобразуем к формату API
-        const mappedLocations = (locations || []).map((loc: any) => {
-          const mappedStatus = this.mapLocationStatus(loc.stations || []);
-          logger.debug(
-            `[EvPowerAPI] Location ${loc.id}: DB status="${loc.status}" -> mapped status="${mappedStatus}"`,
-          );
+        const mappedLocations = (locations || []).map(
+          (loc: SupabaseLocationRow) => {
+            const mappedStatus = this.mapLocationStatus(loc.stations || []);
+            logger.debug(
+              `[EvPowerAPI] Location ${loc.id}: DB status="${loc.status}" -> mapped status="${mappedStatus}"`,
+            );
 
-          return {
-            id: loc.id,
-            name: loc.name,
-            address: loc.address,
-            city: loc.city,
-            country: loc.country,
-            latitude: loc.latitude,
-            longitude: loc.longitude,
-            status: mappedStatus,
-            stations_count: loc.stations_count || 0,
-            connectors_count: loc.connectors_count || 0,
-            available_connectors: this.countAvailableConnectors(
-              loc.stations || [],
-            ),
-            stations: (loc.stations || []).map((s: any) => ({
-              id: s.id,
-              serial_number: s.serial_number,
-              model: s.model,
-              manufacturer: s.manufacturer,
-              location_id: s.location_id,
-              power_capacity: s.power_capacity,
-              connector_types: s.connector_types || [],
-              status: s.status,
-              connectors_count: s.connectors_count || 1,
-              price_per_kwh: parseFloat(s.price_per_kwh) || 0,
-              session_fee: parseFloat(s.session_fee) || 0,
-              currency: s.currency || "KGS",
-              firmware_version: s.firmware_version,
-              is_available: s.is_available ?? true, // Добавляем is_available
-              last_heartbeat_at: s.last_heartbeat_at,
-              connectors: Array.isArray(s.connectors)
-                ? s.connectors
-                : undefined,
-              // Добавляем координаты из parent location
+            return {
+              id: loc.id,
+              name: loc.name,
+              address: loc.address,
+              city: loc.city,
+              country: loc.country,
               latitude: loc.latitude,
               longitude: loc.longitude,
-              locationName: loc.name,
-              locationAddress: loc.address,
-            })),
-          };
-        });
+              status: mappedStatus,
+              stations_count: loc.stations_count || 0,
+              connectors_count: loc.connectors_count || 0,
+              available_connectors: this.countAvailableConnectors(
+                loc.stations || [],
+              ),
+              stations: (loc.stations || []).map((s: SupabaseStationRow) => ({
+                id: s.id,
+                serial_number: s.serial_number,
+                model: s.model,
+                manufacturer: s.manufacturer,
+                location_id: s.location_id,
+                power_capacity: s.power_capacity,
+                connector_types: s.connector_types || [],
+                status: s.status,
+                connectors_count: s.connectors_count || 1,
+                price_per_kwh:
+                  typeof s.price_per_kwh === "number"
+                    ? s.price_per_kwh
+                    : parseFloat(String(s.price_per_kwh || 0)),
+                session_fee:
+                  typeof s.session_fee === "number"
+                    ? s.session_fee
+                    : parseFloat(String(s.session_fee || 0)),
+                currency: s.currency || "KGS",
+                firmware_version: s.firmware_version,
+                is_available: s.is_available ?? true, // Добавляем is_available
+                last_heartbeat_at: s.last_heartbeat_at,
+                connectors: Array.isArray(s.connectors)
+                  ? s.connectors
+                  : undefined,
+                // Добавляем координаты из parent location
+                latitude: loc.latitude,
+                longitude: loc.longitude,
+                locationName: loc.name,
+                locationAddress: loc.address,
+              })),
+            };
+          },
+        );
 
         logger.debug(
           `[EvPowerAPI] Returning ${mappedLocations.length} mapped locations`,
@@ -513,7 +586,7 @@ class EvPowerApiService {
   }
 
   private mapLocationStatus(
-    stations: any[],
+    stations: SupabaseStationRow[],
   ): "available" | "occupied" | "offline" | "maintenance" | "partial" {
     if (!stations || stations.length === 0) return "offline";
 
@@ -534,7 +607,8 @@ class EvPowerApiService {
       allConnectors.length === 0
         ? true // нет телеметрии по коннекторам => по умолчанию свободны
         : allConnectors.some(
-            (c: any) => (c?.status ?? "available") === "available",
+            (c: SupabaseConnectorRow) =>
+              (c?.status ?? "available") === "available",
           );
 
     if (!hasAnyFreeConnector) return "occupied";
@@ -545,12 +619,12 @@ class EvPowerApiService {
       : "available";
   }
 
-  private countAvailableConnectors(stations: any[]): number {
+  private countAvailableConnectors(stations: SupabaseStationRow[]): number {
     // Учитываем только активные и доступные станции; коннекторы по умолчанию свободны
     return stations
       .filter((s) => s.status === "active" && s.is_available === true)
       .reduce((sum, s) => {
-        const connectors: any[] = Array.isArray(s.connectors)
+        const connectors: SupabaseConnectorRow[] = Array.isArray(s.connectors)
           ? s.connectors
           : [];
         if (connectors.length === 0) {
@@ -578,8 +652,9 @@ class EvPowerApiService {
         { method: "GET" },
         zStationStatusResponse,
       );
-      if ((resp as any).tariff_rub_kwh == null) {
-        (resp as any).tariff_rub_kwh = 13.5;
+      const respData = resp as Record<string, unknown>;
+      if (respData["tariff_rub_kwh"] == null) {
+        respData["tariff_rub_kwh"] = 13.5;
       }
       return resp as unknown as import("../api/types").StationStatusResponse;
     } catch (error) {
@@ -609,14 +684,16 @@ class EvPowerApiService {
       const stations = await stationResponse.json();
       const station = stations[0];
       if (!station) throw new Error(`Station ${stationId} not found`);
-      const connectors = (station.connectors || []).map((c: any) => ({
-        id: c.connector_number,
-        type: c.connector_type,
-        power_kw: c.power_kw,
-        available: c.status === "available",
-        status: c.status,
-        error_code: c.error_code || "NoError",
-      }));
+      const connectors = (station.connectors || []).map(
+        (c: SupabaseConnectorRow) => ({
+          id: c.connector_number,
+          type: c.connector_type,
+          power_kw: c.power_kw,
+          available: c.status === "available",
+          status: c.status,
+          error_code: c.error_code || "NoError",
+        }),
+      );
       const location = station.locations;
       const result: import("../api/types").StationStatusResponse = {
         success: true,
@@ -631,7 +708,7 @@ class EvPowerApiService {
         location_id: station.location_id,
         location_name: location?.name || "",
         location_address: location?.address || "",
-        connectors: connectors.map((c: any) => ({
+        connectors: connectors.map((c: MappedConnector) => ({
           id: c.id,
           type: c.type,
           power_kw: c.power_kw ?? 0,
@@ -640,10 +717,14 @@ class EvPowerApiService {
           error: c.error_code,
         })),
         total_connectors: connectors.length,
-        available_connectors: connectors.filter((c: any) => c.available).length,
-        occupied_connectors: connectors.filter((c: any) => !c.available).length,
+        available_connectors: connectors.filter(
+          (c: MappedConnector) => c.available,
+        ).length,
+        occupied_connectors: connectors.filter(
+          (c: MappedConnector) => !c.available,
+        ).length,
         faulted_connectors: connectors.filter(
-          (c: any) => c.status === "faulted",
+          (c: MappedConnector) => c.status === "faulted",
         ).length,
         tariff_rub_kwh: 13.5,
         session_fee: 0,
@@ -855,8 +936,7 @@ class EvPowerApiService {
     const client_id = await this.getClientId();
 
     // В dev — всегда через proxy от текущего origin; в prod — VITE_WS_URL или VITE_API_URL (http->ws)
-    const wsOriginEnv: string | undefined = (import.meta as any).env
-      ?.VITE_WS_URL;
+    const wsOriginEnv: string | undefined = import.meta.env["VITE_WS_URL"];
     const wsBase = import.meta.env.PROD
       ? wsOriginEnv ||
         (API_ORIGIN
@@ -916,8 +996,9 @@ class EvPowerApiService {
     // Вызываем RPC (предпочтительный способ)
     const { error } = await supabase.rpc("request_account_deletion");
     if (error) {
-      const msg = String((error as any)?.message || "");
-      const code = String((error as any)?.code || "");
+      const errorObj = error as unknown as Record<string, unknown>;
+      const msg = String(errorObj?.["message"] || "");
+      const code = String(errorObj?.["code"] || "");
       const isMissingFn =
         code === "PGRST202" || /Could not find the function/i.test(msg);
       if (!isMissingFn) {
@@ -934,8 +1015,9 @@ class EvPowerApiService {
         .single();
 
       if (updError) {
-        const msg2 = String((updError as any)?.message || "");
-        const code2 = String((updError as any)?.code || "");
+        const updErrorObj = updError as unknown as Record<string, unknown>;
+        const msg2 = String(updErrorObj?.["message"] || "");
+        const code2 = String(updErrorObj?.["code"] || "");
         const missingCol =
           code2 === "PGRST204" || /delete_requested_at/i.test(msg2);
         if (!missingCol) throw updError;
@@ -1102,66 +1184,9 @@ export const evpowerApi = new EvPowerApiService();
 
 // ============== ДОПОЛНИТЕЛЬНЫЕ МЕТОДЫ ДЛЯ СОВМЕСТИМОСТИ ==============
 
-/**
- * API Error class для совместимости
- */
-export class ApiError extends Error {
-  public code: string;
-  public status?: number;
-
-  constructor(code: string, message: string, status?: number) {
-    super(message);
-    this.name = "ApiError";
-    this.code = code;
-    this.status = status;
-  }
-}
-
-/**
- * Маппинг ошибок для русской локализации
- */
-const ERROR_MESSAGES: Record<string, string> = {
-  client_not_found: "Клиент не найден",
-  station_unavailable: "Станция недоступна",
-  insufficient_balance: "Недостаточно средств на балансе",
-  connector_occupied: "Коннектор уже используется",
-  session_not_found: "Сессия зарядки не найдена",
-  station_offline: "Станция не в сети",
-  payment_not_found: "Платеж не найден",
-  payment_expired: "Время оплаты истекло",
-  invalid_amount: "Некорректная сумма",
-  provider_error: "Ошибка платежной системы",
-  internal_error: "Внутренняя ошибка сервера",
-  invalid_request: "Некорректный запрос",
-  timeout: "Превышено время ожидания",
-  network_error: "Ошибка сети",
-  unauthorized: "Требуется авторизация",
-  forbidden: "Доступ запрещен",
-  not_found: "Не найдено",
-};
-
-/**
- * Обработка ошибок API для совместимости со старым кодом
- */
-export function handleApiError(error: any): string {
-  if (error instanceof ApiError) {
-    return ERROR_MESSAGES[error.code] || error.message || "Неизвестная ошибка";
-  }
-
-  if (error?.response?.data?.error) {
-    return (
-      ERROR_MESSAGES[error.response.data.error] ||
-      error.response.data.message ||
-      "Ошибка сервера"
-    );
-  }
-
-  if (error?.error) {
-    return ERROR_MESSAGES[error.error] || error.message || "Неизвестная ошибка";
-  }
-
-  return error?.message || "Неизвестная ошибка";
-}
+// NOTE: ApiError and handleApiError now imported from @/shared/errors/apiErrors
+// Re-export for backward compatibility
+export { ApiError, handleApiError };
 
 // Типы уже экспортированы выше через export interface
 

@@ -141,6 +141,7 @@ describe("useAuth hooks", () => {
       (authService.signUpWithEmail as any).mockResolvedValue({
         success: true,
         client: mockUser,
+        session: { access_token: "mock-token", refresh_token: "mock-refresh" },
       });
 
       const { result } = renderHook(() => useSignUp(), { wrapper });

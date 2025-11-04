@@ -1,4 +1,4 @@
-import { supabase } from '../../../shared/config/supabase';
+import { supabase } from "../../../shared/config/supabase";
 
 export class FavoriteService {
   private static instance: FavoriteService;
@@ -16,18 +16,18 @@ export class FavoriteService {
   async getFavorites(userId: string): Promise<string[]> {
     try {
       const { data, error } = await supabase
-        .from('user_favorites')
-        .select('location_id')
-        .eq('user_id', userId);
+        .from("user_favorites")
+        .select("location_id")
+        .eq("user_id", userId);
 
       if (error) {
-        console.error('Error fetching favorites:', error);
+        console.error("Error fetching favorites:", error);
         return [];
       }
 
-      return data?.map(f => f.location_id) || [];
+      return data?.map((f) => f.location_id) || [];
     } catch (error) {
-      console.error('Failed to fetch favorites:', error);
+      console.error("Failed to fetch favorites:", error);
       return [];
     }
   }
@@ -35,46 +35,47 @@ export class FavoriteService {
   // Добавить станцию в избранное (location_id)
   async addToFavorites(userId: string, locationId: string): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('user_favorites')
-        .insert({
-          user_id: userId,
-          location_id: locationId
-        });
+      const { error } = await supabase.from("user_favorites").insert({
+        user_id: userId,
+        location_id: locationId,
+      });
 
       if (error) {
         // Если ошибка уникальности - значит уже в избранном, это нормально
-        if (error.code === '23505') {
+        if (error.code === "23505") {
           return true;
         }
-        console.error('Error adding to favorites:', error);
+        console.error("Error adding to favorites:", error);
         return false;
       }
 
       return true;
     } catch (error) {
-      console.error('Failed to add to favorites:', error);
+      console.error("Failed to add to favorites:", error);
       return false;
     }
   }
 
   // Удалить локацию из избранного
-  async removeFromFavorites(userId: string, locationId: string): Promise<boolean> {
+  async removeFromFavorites(
+    userId: string,
+    locationId: string,
+  ): Promise<boolean> {
     try {
       const { error } = await supabase
-        .from('user_favorites')
+        .from("user_favorites")
         .delete()
-        .eq('user_id', userId)
-        .eq('location_id', locationId);
+        .eq("user_id", userId)
+        .eq("location_id", locationId);
 
       if (error) {
-        console.error('Error removing from favorites:', error);
+        console.error("Error removing from favorites:", error);
         return false;
       }
 
       return true;
     } catch (error) {
-      console.error('Failed to remove from favorites:', error);
+      console.error("Failed to remove from favorites:", error);
       return false;
     }
   }
@@ -83,14 +84,14 @@ export class FavoriteService {
   async toggleFavorite(userId: string, stationId: string): Promise<boolean> {
     try {
       const favorites = await this.getFavorites(userId);
-      
+
       if (favorites.includes(stationId)) {
         return await this.removeFromFavorites(userId, stationId);
       } else {
         return await this.addToFavorites(userId, stationId);
       }
     } catch (error) {
-      console.error('Failed to toggle favorite:', error);
+      console.error("Failed to toggle favorite:", error);
       return false;
     }
   }
@@ -101,7 +102,7 @@ export class FavoriteService {
       const favorites = await this.getFavorites(userId);
       return favorites.includes(stationId);
     } catch (error) {
-      console.error('Failed to check favorite status:', error);
+      console.error("Failed to check favorite status:", error);
       return false;
     }
   }

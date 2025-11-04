@@ -15,26 +15,26 @@ const navItems: NavItem[] = [
     path: "/",
     label: "Карта",
     icon: "🗺️",
-    color: "text-cyan-500",
+    color: "text-primary-500",
   },
   {
     path: "/stations",
     label: "Списком",
     icon: "📋",
-    color: "text-cyan-500",
+    color: "text-primary-500",
   },
   {
     path: "/favorites",
     label: "Избранное",
     icon: "❤️",
-    color: "text-cyan-500",
+    color: "text-primary-500",
     authRequired: false,
   },
   {
     path: "/profile",
     label: "Профиль",
     icon: "👤",
-    color: "text-cyan-500",
+    color: "text-primary-500",
   },
 ];
 

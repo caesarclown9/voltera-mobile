@@ -21,8 +21,8 @@ export function StationCard({
     const configs = {
       active: {
         text: "Активна",
-        color: "text-green-600 bg-green-50 border-green-200",
-        icon: "🟢",
+        color: "text-success-600 bg-success-50 border-success-200",
+        icon: "⚡",
       },
       inactive: {
         text: "Неактивна",
@@ -31,7 +31,7 @@ export function StationCard({
       },
       maintenance: {
         text: "Обслуживание",
-        color: "text-purple-600 bg-purple-50 border-purple-200",
+        color: "text-dark-500 bg-dark-50 border-dark-200",
         icon: "🔧",
       },
     };
@@ -194,7 +194,7 @@ export function StationCard({
           className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-colors ${
             station.status === "inactive" || station.status === "maintenance"
               ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-              : "bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+              : "bg-success-600 text-white hover:bg-success-700 focus:outline-none focus:ring-2 focus:ring-success-500 focus:ring-offset-2"
           }`}
         >
           {station.status === "active" ? "Выбрать станцию" : "Недоступна"}

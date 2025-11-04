@@ -13,8 +13,8 @@ export interface ChargingHistoryItem {
   totalCost: number; // сом
   averagePower: number; // кВт
   maxPower: number; // кВт
-  status: 'completed' | 'stopped' | 'failed';
-  limitType?: 'energy' | 'amount' | 'none';
+  status: "completed" | "stopped" | "failed";
+  limitType?: "energy" | "amount" | "none";
   limitValue?: number;
   meterStart?: number;
   meterStop?: number;
@@ -24,14 +24,14 @@ export interface ChargingHistoryItem {
 
 export interface TransactionHistoryItem {
   id: string;
-  type: 'topup' | 'charge' | 'refund';
+  type: "topup" | "charge" | "refund";
   amount: number;
   balance_before: number;
   balance_after: number;
   timestamp: string;
   description: string;
-  status: 'success' | 'pending' | 'failed';
-  paymentMethod?: 'qr_odengi' | 'card_obank' | 'token' | 'admin';
+  status: "success" | "pending" | "failed";
+  paymentMethod?: "qr_odengi" | "card_obank" | "token" | "admin";
   sessionId?: string; // для связи с зарядной сессией
 }
 

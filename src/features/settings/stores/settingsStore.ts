@@ -1,23 +1,23 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 interface SettingsStore {
   // Настройки приложения
   notifications: boolean;
   darkMode: boolean;
-  language: 'ru' | 'en' | 'ky';
+  language: "ru" | "en" | "ky";
 
   // Actions
   setNotifications: (enabled: boolean) => void;
   setDarkMode: (enabled: boolean) => void;
-  setLanguage: (lang: 'ru' | 'en' | 'ky') => void;
+  setLanguage: (lang: "ru" | "en" | "ky") => void;
   resetSettings: () => void;
 }
 
 const defaultSettings = {
   notifications: true,
   darkMode: false,
-  language: 'ru' as const,
+  language: "ru" as const,
 };
 
 export const useSettingsStore = create<SettingsStore>()(
@@ -25,20 +25,16 @@ export const useSettingsStore = create<SettingsStore>()(
     (set) => ({
       ...defaultSettings,
 
-      setNotifications: (enabled) =>
-        set({ notifications: enabled }),
+      setNotifications: (enabled) => set({ notifications: enabled }),
 
-      setDarkMode: (enabled) =>
-        set({ darkMode: enabled }),
+      setDarkMode: (enabled) => set({ darkMode: enabled }),
 
-      setLanguage: (language) =>
-        set({ language }),
+      setLanguage: (language) => set({ language }),
 
-      resetSettings: () =>
-        set(defaultSettings),
+      resetSettings: () => set(defaultSettings),
     }),
     {
-      name: 'app-settings',
-    }
-  )
+      name: "app-settings",
+    },
+  ),
 );

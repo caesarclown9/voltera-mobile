@@ -1,18 +1,18 @@
-import React, { useState } from 'react';
-import { Download, FileText, FileSpreadsheet } from 'lucide-react';
-import { ExportService } from '../services/exportService';
-import type { ChargingHistoryItem, TransactionHistoryItem } from '../types';
+import React, { useState } from "react";
+import { Download, FileText, FileSpreadsheet } from "lucide-react";
+import { ExportService } from "../services/exportService";
+import type { ChargingHistoryItem, TransactionHistoryItem } from "../types";
 
 interface ExportButtonProps {
   data: ChargingHistoryItem[] | TransactionHistoryItem[];
-  type: 'charging' | 'transaction';
+  type: "charging" | "transaction";
   className?: string;
 }
 
 export const ExportButton: React.FC<ExportButtonProps> = ({
   data,
   type,
-  className = ''
+  className = "",
 }) => {
   const [isExporting, setIsExporting] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -22,14 +22,16 @@ export const ExportButton: React.FC<ExportButtonProps> = ({
     setShowMenu(false);
 
     try {
-      if (type === 'charging') {
+      if (type === "charging") {
         ExportService.exportChargingHistoryToPDF(data as ChargingHistoryItem[]);
       } else {
-        ExportService.exportTransactionHistoryToPDF(data as TransactionHistoryItem[]);
+        ExportService.exportTransactionHistoryToPDF(
+          data as TransactionHistoryItem[],
+        );
       }
     } catch (error) {
-      console.error('Export to PDF failed:', error);
-      alert('Не удалось экспортировать в PDF');
+      console.error("Export to PDF failed:", error);
+      alert("Не удалось экспортировать в PDF");
     } finally {
       setIsExporting(false);
     }
@@ -40,14 +42,16 @@ export const ExportButton: React.FC<ExportButtonProps> = ({
     setShowMenu(false);
 
     try {
-      if (type === 'charging') {
+      if (type === "charging") {
         ExportService.exportChargingHistoryToCSV(data as ChargingHistoryItem[]);
       } else {
-        ExportService.exportTransactionHistoryToCSV(data as TransactionHistoryItem[]);
+        ExportService.exportTransactionHistoryToCSV(
+          data as TransactionHistoryItem[],
+        );
       }
     } catch (error) {
-      console.error('Export to CSV failed:', error);
-      alert('Не удалось экспортировать в CSV');
+      console.error("Export to CSV failed:", error);
+      alert("Не удалось экспортировать в CSV");
     } finally {
       setIsExporting(false);
     }
@@ -67,7 +71,7 @@ export const ExportButton: React.FC<ExportButtonProps> = ({
           bg-blue-500 text-white rounded-lg
           hover:bg-blue-600 transition-colors
           disabled:opacity-50 disabled:cursor-not-allowed
-          ${isExporting ? 'animate-pulse' : ''}
+          ${isExporting ? "animate-pulse" : ""}
         `}
       >
         <Download size={18} />
@@ -96,10 +100,7 @@ export const ExportButton: React.FC<ExportButtonProps> = ({
 
       {/* Клик вне меню закрывает его */}
       {showMenu && (
-        <div
-          className="fixed inset-0 z-0"
-          onClick={() => setShowMenu(false)}
-        />
+        <div className="fixed inset-0 z-0" onClick={() => setShowMenu(false)} />
       )}
     </div>
   );

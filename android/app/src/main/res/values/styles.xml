@@ -19,9 +19,11 @@
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/black</item>
-        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
         <!-- Use dark status bar icons (for light background) -->
         <item name="android:windowLightStatusBar">true</item>
+        <!-- Support for edge-to-edge and large screens -->
+        <item name="android:enforceNavigationBarContrast">false</item>
+        <item name="android:enforceStatusBarContrast">false</item>
     </style>
 
 

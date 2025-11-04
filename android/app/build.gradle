@@ -13,13 +13,19 @@ android {
         applicationId "kg.voltera.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 2
+        versionCode 7
         versionName "1.0.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
              // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+        }
+        // Поддержка 16KB страниц памяти (требование Google Play с 1 ноября 2025)
+        // https://developer.android.com/guide/practices/page-sizes
+        ndk {
+            // Включаем все архитектуры с поддержкой 16KB страниц
+            abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
         }
     }
 
@@ -58,6 +64,14 @@ android {
         }
         abi {
             enableSplit = true
+        }
+    }
+
+    // Поддержка 16KB страниц памяти (Google Play requirement)
+    // Используем uncompressed, page-aligned JNI libs
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = false
         }
     }
 }

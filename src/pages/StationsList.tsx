@@ -52,7 +52,7 @@ export const StationsList = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Загружаем станции...</p>
         </div>
       </div>
@@ -70,9 +70,16 @@ export const StationsList = () => {
           >
             <ChevronLeft className="w-6 h-6" />
           </button>
-          <h1 className="text-xl font-semibold ml-2">
-            {isFavoritesPage ? "Избранные станции" : "Станции списком"}
-          </h1>
+          <div className="flex items-center gap-2 ml-2">
+            <img
+              src="/icons/voltera-logo-square.svg"
+              alt=""
+              className="h-6 w-auto"
+            />
+            <h1 className="text-xl font-semibold">
+              {isFavoritesPage ? "Избранные станции" : "Станции списком"}
+            </h1>
+          </div>
         </div>
 
         {/* City Filter - only show on regular stations page */}
@@ -85,7 +92,7 @@ export const StationsList = () => {
                   onClick={() => setSelectedCity(city ?? null)}
                   className={`px-4 py-2 rounded-full whitespace-nowrap transition-colors ${
                     selectedCity === city
-                      ? "bg-cyan-100 text-cyan-700 font-medium"
+                      ? "bg-primary-100 text-primary-700 font-medium"
                       : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                   }`}
                 >
@@ -101,6 +108,11 @@ export const StationsList = () => {
       <div className="p-4 space-y-4">
         {filteredStations.length === 0 && isFavoritesPage ? (
           <div className="text-center py-12">
+            <img
+              src="/icons/voltera-logo-square.svg"
+              alt=""
+              className="h-16 w-auto mx-auto mb-3 opacity-20"
+            />
             <Heart className="w-12 h-12 mx-auto text-gray-300 mb-4" />
             <p className="text-gray-500 text-lg">Нет избранных станций</p>
             <p className="text-gray-400 text-sm mt-2">
@@ -124,14 +136,14 @@ export const StationsList = () => {
                     <div
                       className={`w-12 h-12 rounded-lg flex items-center justify-center ${
                         station.status === "active"
-                          ? "bg-green-100"
+                          ? "bg-success-100"
                           : "bg-gray-100"
                       }`}
                     >
                       <Zap
                         className={`w-6 h-6 ${
                           station.status === "active"
-                            ? "text-green-600"
+                            ? "text-success-600"
                             : "text-gray-400"
                         }`}
                       />
@@ -185,9 +197,12 @@ export const StationsList = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <span>Разъемы: {station.connector_types.join(", ")}</span>
+                    <span>
+                      Разъемы:{" "}
+                      {station.connector_types?.join(", ") || "Не указаны"}
+                    </span>
                     <span className="text-gray-400">
-                      ({station.connectors_count} шт.)
+                      ({station.connectors_count || 0} шт.)
                     </span>
                   </div>
                   <div className="text-sm text-gray-600">
@@ -230,7 +245,7 @@ export const StationsList = () => {
                     disabled={station.status !== "active"}
                     className={`flex-1 py-2 rounded-lg font-medium transition-colors ${
                       station.status === "active"
-                        ? "bg-cyan-500 text-white hover:bg-cyan-600"
+                        ? "bg-primary-500 text-white hover:bg-primary-600"
                         : "bg-gray-200 text-gray-400 cursor-not-allowed"
                     }`}
                   >

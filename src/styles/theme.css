@@ -1,40 +1,147 @@
-/* Цветовая схема EvPower */
+/* Цветовая схема Voltera */
 :root {
-  /* Основные цвета */
-  --primary-green: #10B981;
-  --primary-yellow: #FCD34D;
-  --primary-blue: #06B6D4;
-  
+  /* ========================================
+     ОСНОВНЫЕ ЦВЕТА БРЕНДА
+     ======================================== */
+
+  /* Primary - Электрический синий (основной цвет бренда Voltera) */
+  --primary-50: #eff6ff;
+  --primary-100: #dbeafe;
+  --primary-200: #bfdbfe;
+  --primary-300: #93c5fd;
+  --primary-400: #60a5fa;
+  --primary-500: #3b82f6; /* Base */
+  --primary-600: #2563eb;
+  --primary-700: #1d4ed8;
+  --primary-800: #1e40af;
+  --primary-900: #1e3a8a;
+
+  /* Accent - Фиолетовый (для акцентов и выделения) */
+  --accent-50: #f5f3ff;
+  --accent-100: #ede9fe;
+  --accent-200: #ddd6fe;
+  --accent-300: #c4b5fd;
+  --accent-400: #a78bfa;
+  --accent-500: #8b5cf6; /* Base */
+  --accent-600: #7c3aed;
+  --accent-700: #6d28d9;
+  --accent-800: #5b21b6;
+  --accent-900: #4c1d95;
+
+  /* Dark - Темный (из логотипа Voltera) */
+  --dark-50: #f9fafb;
+  --dark-100: #f3f4f6;
+  --dark-200: #e5e7eb;
+  --dark-300: #d1d5db;
+  --dark-400: #9ca3af;
+  --dark-500: #6b7280;
+  --dark-600: #4b5563;
+  --dark-700: #374151;
+  --dark-800: #2b2a29; /* Base - из логотипа */
+  --dark-900: #1f2937; /* Darkest */
+
+  /* Success - Изумрудный (для успеха и доступности) */
+  --success-500: #10b981;
+  --success-600: #059669;
+
+  /* Warning - Янтарный (для предупреждений) */
+  --warning-500: #f59e0b;
+  --warning-600: #d97706;
+
+  /* Error - Красный (для ошибок) */
+  --error-500: #ef4444;
+  --error-600: #dc2626;
+
+  /* ========================================
+     ГРАДИЕНТЫ
+     ======================================== */
+
+  /* Основной градиент молнии (электрический) */
+  --gradient-lightning: linear-gradient(
+    135deg,
+    #60a5fa 0%,
+    #3b82f6 50%,
+    #2563eb 100%
+  );
+
+  /* Градиент для кнопок и активных элементов */
+  --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+
+  /* Градиент для карточек */
+  --gradient-card: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+
+  /* Темный градиент для фонов */
+  --gradient-dark: linear-gradient(135deg, #2b2a29 0%, #374151 100%);
+
+  /* Энергетический градиент (для зарядки) */
+  --gradient-energy: linear-gradient(
+    90deg,
+    #3b82f6 0%,
+    #8b5cf6 50%,
+    #a78bfa 100%
+  );
+
+  /* ========================================
+     ФУНКЦИОНАЛЬНЫЕ ЦВЕТА
+     ======================================== */
+
   /* Фоновые цвета */
-  --bg-main: #F3F4F6;
-  --bg-card: #FFFFFF;
-  --bg-dark: #1F2937;
-  
+  --bg-main: #f3f4f6;
+  --bg-card: #ffffff;
+  --bg-dark: #2b2a29;
+  --bg-light: #eff6ff;
+
   /* Текстовые цвета */
   --text-primary: #111827;
-  --text-secondary: #6B7280;
-  --text-light: #9CA3AF;
-  
-  /* Статусы */
-  --status-available: #10B981;
-  --status-occupied: #F59E0B;
-  --status-offline: #EF4444;
-  --status-maintenance: #6B7280;
-  
-  /* Тени */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-  
+  --text-secondary: #6b7280;
+  --text-light: #9ca3af;
+  --text-white: #ffffff;
+  --text-blue: #3b82f6;
+
+  /* Статусы станций */
+  --status-available: #3b82f6; /* Электрический синий - доступна */
+  --status-charging: #8b5cf6; /* Фиолетовый - заряжается */
+  --status-occupied: #f59e0b; /* Янтарный - занята */
+  --status-offline: #ef4444; /* Красный - не работает */
+  --status-maintenance: #6b7280; /* Серый - обслуживание */
+
+  /* ========================================
+     ЭФФЕКТЫ И ТЕНИ
+     ======================================== */
+
+  /* Тени с электрическим синим оттенком */
+  --shadow-sm: 0 1px 2px 0 rgba(59, 130, 246, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(59, 130, 246, 0.15);
+  --shadow-xl: 0 20px 25px -5px rgba(59, 130, 246, 0.2);
+
+  /* Эффекты свечения */
+  --glow-primary: 0 0 20px rgba(59, 130, 246, 0.4);
+  --glow-accent: 0 0 20px rgba(139, 92, 246, 0.4);
+  --glow-energy: 0 0 30px rgba(96, 165, 250, 0.6);
+
+  /* ========================================
+     ГЕОМЕТРИЯ
+     ======================================== */
+
   /* Радиусы */
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 24px;
-  
-  /* Анимации */
+  --radius-full: 9999px;
+
+  /* ========================================
+     АНИМАЦИИ
+     ======================================== */
+
+  /* Переходы */
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-base: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Пружинистая анимация */
+  --transition-spring: 600ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* Глобальные стили */

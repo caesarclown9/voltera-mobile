@@ -437,7 +437,57 @@ class EvPowerApiService {
         `[VolteraAPI] Locations count from API: ${response.locations?.length || 0}`,
       );
 
-      return response.locations as Location[];
+      // ВАЖНО: Преобразуем вложенный coordinates в плоские latitude/longitude
+      const transformedLocations = response.locations.map((loc) => {
+        // Вычисляем total для connectors_summary если Backend не вернул
+        const connectorsTotal =
+          loc.connectors_summary?.total ??
+          (loc.connectors_summary?.available ?? 0) +
+            (loc.connectors_summary?.occupied ?? 0) +
+            (loc.connectors_summary?.faulted ?? 0);
+
+        return {
+          ...loc,
+          latitude: loc.coordinates?.latitude ?? undefined,
+          longitude: loc.coordinates?.longitude ?? undefined,
+          // Обновляем поля для совместимости с Location interface
+          stations_count: loc.stations_summary?.total ?? 0,
+          connectors_count: connectorsTotal,
+          available_connectors: loc.connectors_summary?.available ?? 0,
+          // Обновляем connectors_summary с вычисленным total
+          connectors_summary: {
+            ...loc.connectors_summary,
+            total: connectorsTotal,
+          },
+          // Преобразуем stations если есть
+          stations: loc.stations?.map((station) => {
+            // Вычисляем total для connectors_summary станции
+            const stationConnectorsTotal =
+              station.connectors_summary?.total ??
+              (station.connectors_summary?.available ?? 0) +
+                (station.connectors_summary?.occupied ?? 0) +
+                (station.connectors_summary?.faulted ?? 0);
+
+            return {
+              ...station,
+              // Преобразуем вложенный tariff в плоские поля
+              price_per_kwh: station.tariff?.price_per_kwh ?? 0,
+              session_fee: station.tariff?.session_fee ?? 0,
+              currency: (station.tariff?.currency as "KGS") ?? "KGS",
+              // Обновляем connectors_summary станции
+              connectors_summary: {
+                ...station.connectors_summary,
+                total: stationConnectorsTotal,
+              },
+            };
+          }),
+        };
+      });
+
+      logger.debug(
+        `[VolteraAPI] Transformed ${transformedLocations.length} locations with coordinates`,
+      );
+      return transformedLocations as Location[];
     } catch (error) {
       if (
         import.meta.env.PROD &&

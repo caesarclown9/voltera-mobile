@@ -3,14 +3,14 @@
  * Использует правильное безопасное хранилище вместо XOR обфускации
  */
 
-import { authStorage } from '@/lib/platform/secureStorage';
+import { authStorage } from "@/lib/platform/secureStorage";
 
 /**
  * Менеджер безопасного хранения токенов
  * Использует Secure Storage Plugin для native и sessionStorage для web
  */
 export class SecureTokenStorage {
-  private static readonly EXPIRY_KEY = 'auth_token_expiry';
+  private static readonly EXPIRY_KEY = "auth_token_expiry";
   private static readonly TOKEN_LIFETIME = 15 * 60 * 1000; // 15 минут
 
   /**
@@ -29,7 +29,7 @@ export class SecureTokenStorage {
       // Время жизни сохраняем отдельно для быстрого доступа
       sessionStorage.setItem(this.EXPIRY_KEY, expiry.toString());
     } catch (error) {
-      console.error('Failed to store token securely:', error);
+      console.error("Failed to store token securely:", error);
     }
   }
 
@@ -50,7 +50,7 @@ export class SecureTokenStorage {
       const token = await authStorage.getAuthToken();
       return token;
     } catch (error) {
-      console.error('Failed to retrieve token:', error);
+      console.error("Failed to retrieve token:", error);
       return null;
     }
   }
@@ -104,22 +104,22 @@ export class XSSDetector {
   static isSuspicious(input: string): boolean {
     if (!input) return false;
 
-    return this.SUSPICIOUS_PATTERNS.some(pattern => pattern.test(input));
+    return this.SUSPICIOUS_PATTERNS.some((pattern) => pattern.test(input));
   }
 
   /**
    * Санитизирует потенциально опасный ввод
    */
   static sanitize(input: string): string {
-    if (!input) return '';
+    if (!input) return "";
 
     // Базовая санитизация HTML
     return input
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#x27;')
-      .replace(/\//g, '&#x2F;');
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#x27;")
+      .replace(/\//g, "&#x2F;");
   }
 }
 
@@ -140,7 +140,7 @@ export class SecurityMonitor {
     this.lastAttemptTime = Date.now();
 
     if (this.failedAttempts >= this.MAX_ATTEMPTS) {
-      console.warn('Multiple failed auth attempts detected');
+      console.warn("Multiple failed auth attempts detected");
       // В production можно отправить алерт на сервер
     }
   }

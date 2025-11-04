@@ -13,7 +13,7 @@ const config: CapacitorConfig = {
   plugins: {
     SplashScreen: {
       launchShowDuration: 2000,
-      backgroundColor: "#10B981", // Primary green color
+      backgroundColor: "#3B82F6", // Primary electric blue color
       androidScaleType: "CENTER_CROP",
       showSpinner: false,
       androidSpinnerStyle: "large",
@@ -36,6 +36,10 @@ const config: CapacitorConfig = {
     allowMixedContent: false,
     captureInput: true,
     webContentsDebuggingEnabled: false,
+    // Автоматическая поддержка edge-to-edge для Android 15+
+    // Заменяет deprecated StatusBar.setBackgroundColor() и setOverlaysWebView()
+    // См. https://capacitorjs.com/docs/config#androidadjustmarginsforedgetoedge
+    adjustMarginsForEdgeToEdge: "auto",
   },
 };
 

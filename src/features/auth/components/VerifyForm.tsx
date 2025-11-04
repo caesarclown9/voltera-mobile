@@ -1,27 +1,33 @@
-import { useState } from 'react'
+import { useState } from "react";
 
 interface VerifyFormProps {
-  phoneNumber: string
-  onVerify: (code: string) => void
-  onBack: () => void
-  isLoading?: boolean
-  error?: string
+  phoneNumber: string;
+  onVerify: (code: string) => void;
+  onBack: () => void;
+  isLoading?: boolean;
+  error?: string;
 }
 
-export function VerifyForm({ phoneNumber, onVerify, onBack, isLoading, error }: VerifyFormProps) {
-  const [code, setCode] = useState('')
+export function VerifyForm({
+  phoneNumber,
+  onVerify,
+  onBack,
+  isLoading,
+  error,
+}: VerifyFormProps) {
+  const [code, setCode] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (code.length === 6) {
-      onVerify(code)
+      onVerify(code);
     }
-  }
+  };
 
   const handleCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, '').slice(0, 6)
-    setCode(value)
-  }
+    const value = e.target.value.replace(/\D/g, "").slice(0, 6);
+    setCode(value);
+  };
 
   return (
     <div className="w-full max-w-md mx-auto">
@@ -29,9 +35,7 @@ export function VerifyForm({ phoneNumber, onVerify, onBack, isLoading, error }: 
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
           Введите код подтверждения
         </h2>
-        <p className="text-gray-600">
-          Код отправлен на номер {phoneNumber}
-        </p>
+        <p className="text-gray-600">Код отправлен на номер {phoneNumber}</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -48,9 +52,7 @@ export function VerifyForm({ phoneNumber, onVerify, onBack, isLoading, error }: 
         </div>
 
         {error && (
-          <div className="text-red-600 text-sm text-center">
-            {error}
-          </div>
+          <div className="text-error-600 text-sm text-center">{error}</div>
         )}
 
         <div className="space-y-3">
@@ -59,7 +61,7 @@ export function VerifyForm({ phoneNumber, onVerify, onBack, isLoading, error }: 
             disabled={code.length !== 6 || isLoading}
             className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {isLoading ? 'Проверка...' : 'Подтвердить'}
+            {isLoading ? "Проверка..." : "Подтвердить"}
           </button>
 
           <button
@@ -78,5 +80,5 @@ export function VerifyForm({ phoneNumber, onVerify, onBack, isLoading, error }: 
         </button>
       </div>
     </div>
-  )
+  );
 }

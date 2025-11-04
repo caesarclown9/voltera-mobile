@@ -53,7 +53,7 @@ interface StationMapProps {
  * Компонент карты с маркерами локаций (не отдельных станций!)
  *
  * Логика цветов маркеров:
- * - ЗЕЛЁНЫЙ: location.status === 'available' или 'partial' (есть хотя бы 1 свободный коннектор)
+ * - СИНИЙ: location.status === 'available' или 'partial' (есть хотя бы 1 свободный коннектор)
  * - ЖЁЛТЫЙ: location.status === 'occupied' (все коннекторы всех станций заняты)
  * - СЕРЫЙ: location.status === 'offline' или 'maintenance' (станции недоступны)
  */
@@ -85,7 +85,7 @@ export function StationMap({
       case "available":
       case "partial":
         // Есть хотя бы 1 свободный коннектор
-        return "#22c55e"; // green-500
+        return "#2196F3"; // primary-500 (Voltera blue)
 
       case "occupied":
         // Все коннекторы заняты, но станции работают
@@ -159,7 +159,7 @@ export function StationMap({
     const ClusterIconLayout = ymaps.templateLayoutFactory.createClass(
       '<div style="position: absolute; width: 40px; height: 40px; left: -20px; top: -20px; font-family: Arial, sans-serif;">' +
         '<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">' +
-        '<circle cx="20" cy="20" r="18" fill="#10B981" stroke="#fff" stroke-width="2"/>' +
+        '<circle cx="20" cy="20" r="18" fill="#2196F3" stroke="#fff" stroke-width="2"/>' +
         "</svg>" +
         '<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-weight: bold; font-size: 14px;">{{ properties.geoObjects.length }}</div>' +
         "</div>",

@@ -3,7 +3,7 @@ export function LoadingScreen() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="text-center">
         <img
-          src="/icons/voltera-logo-horizontal.png"
+          src="/icons/voltera-logo-horizontal.svg"
           alt="Voltera"
           className="h-16 w-auto mx-auto mb-6"
         />

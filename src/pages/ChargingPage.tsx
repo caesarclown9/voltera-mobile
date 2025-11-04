@@ -243,7 +243,7 @@ export const ChargingPage = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Загружаем станцию...</p>
         </div>
       </div>
@@ -257,7 +257,7 @@ export const ChargingPage = () => {
           <p className="text-xl text-gray-600">Станция не найдена</p>
           <button
             onClick={() => navigate("/")}
-            className="mt-4 px-6 py-2 bg-cyan-500 text-white rounded-lg"
+            className="mt-4 px-6 py-2 bg-primary-500 text-white rounded-lg"
           >
             На главную
           </button>
@@ -277,7 +277,14 @@ export const ChargingPage = () => {
           >
             <ChevronLeft className="w-6 h-6" />
           </button>
-          <h1 className="text-xl font-semibold">Зарядка</h1>
+          <div className="flex items-center gap-2">
+            <img
+              src="/icons/voltera-logo-square.svg"
+              alt=""
+              className="h-6 w-auto"
+            />
+            <h1 className="text-xl font-semibold">Зарядка</h1>
+          </div>
           <div className="text-right">
             <div className="text-sm">
               <p className="font-semibold">
@@ -291,7 +298,7 @@ export const ChargingPage = () => {
 
       {/* Active Charging Session Banner */}
       {activeSession && (
-        <div className="bg-gradient-to-r from-green-500 to-emerald-600 px-4 py-3 shadow-md">
+        <div className="bg-gradient-to-r from-success-500 to-success-600 px-4 py-3 shadow-md">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
@@ -308,7 +315,7 @@ export const ChargingPage = () => {
               onClick={() => {
                 navigate(`/charging-process/${activeSession}`);
               }}
-              className="px-4 py-2 bg-white text-green-600 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+              className="px-4 py-2 bg-white text-success-600 rounded-lg font-medium hover:bg-gray-50 transition-colors"
             >
               Вернуться
             </button>
@@ -320,7 +327,7 @@ export const ChargingPage = () => {
       <div className="bg-white mt-1 px-4 py-3">
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-3">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
               <span className="text-2xl">⚡</span>
             </div>
             <div>
@@ -369,7 +376,7 @@ export const ChargingPage = () => {
                 disabled={connector.status !== "available"}
                 className={`w-full p-2.5 rounded-lg border transition-all ${
                   selectedConnector === connector.id
-                    ? "border-cyan-500 bg-cyan-50"
+                    ? "border-primary-500 bg-primary-50"
                     : "border-gray-200 bg-white hover:border-gray-300"
                 } ${
                   connector.status !== "available"
@@ -382,7 +389,7 @@ export const ChargingPage = () => {
                     <div
                       className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${
                         connector.status === "available"
-                          ? "bg-green-100 text-green-600"
+                          ? "bg-success-100 text-success-600"
                           : connector.status === "occupied"
                             ? "bg-orange-100 text-orange-600"
                             : "bg-red-100 text-red-600"
@@ -414,7 +421,7 @@ export const ChargingPage = () => {
                       <div
                         className={`text-sm font-medium ${
                           connector.status === "available"
-                            ? "text-green-600"
+                            ? "text-success-600"
                             : connector.status === "occupied"
                               ? "text-orange-600"
                               : "text-red-600"
@@ -437,8 +444,8 @@ export const ChargingPage = () => {
         <div className="mt-4 pt-3 border-t border-gray-100">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center">
-                <CreditCard className="w-6 h-6 text-cyan-600" />
+              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
+                <CreditCard className="w-6 h-6 text-primary-600" />
               </div>
               <div>
                 <p className="text-2xl font-bold">
@@ -485,7 +492,7 @@ export const ChargingPage = () => {
             <div className="space-y-3">
               {/* Кнопка: Полный заряд */}
               <button
-                className="w-full bg-green-500 text-white py-4 rounded-xl font-semibold hover:bg-green-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full bg-primary-500 text-white py-4 rounded-xl font-semibold hover:bg-primary-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 onClick={() => {
                   setChargingLimits({ type: "none" });
                   handleStartCharging();
@@ -516,7 +523,7 @@ export const ChargingPage = () => {
                       <span className="text-sm text-gray-600">
                         Сумма зарядки
                       </span>
-                      <span className="text-lg font-bold text-cyan-600">
+                      <span className="text-lg font-bold text-primary-600">
                         {chargingLimits.amount_som || 100} сом
                       </span>
                     </div>
@@ -601,7 +608,7 @@ export const ChargingPage = () => {
                 )}
 
                 <button
-                  className="w-full bg-cyan-500 text-white py-3 rounded-xl font-semibold hover:bg-cyan-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="w-full bg-primary-500 text-white py-3 rounded-xl font-semibold hover:bg-primary-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                   onClick={() => {
                     if (chargingLimits.type !== "amount") {
                       setChargingLimits({ type: "amount", amount_som: 100 });

@@ -130,12 +130,16 @@ FIXES*.md
 FIXES_*.md
 TODO*.md
 NOTES*.md
+ANALYSIS_REPORT.md
+BACKEND_JWT_FIX.md
+VOLTERA_MIGRATION_GUIDE.md
 
 # Temporary screenshots (keep final ones in docs/)
 screenshots/
 !screenshots/.gitkeep
 
-# Temporary/test icons (keep only production icons)
+# Temporary/test icons and logos (keep only production icons)
+temp logos/
 public/icons/**/3*.png
 public/icons/**/4*.png
 public/icons/**/*УМ*.png

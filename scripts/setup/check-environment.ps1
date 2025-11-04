@@ -1,12 +1,24 @@
 # ========================================
 # Check environment for Android APK build
 # ========================================
+# Автоматически определяет пути к проекту
+# ========================================
 
 Write-Host "`n========================================" -ForegroundColor Cyan
 Write-Host "ENVIRONMENT CHECK FOR ANDROID APK BUILD" -ForegroundColor Cyan
 Write-Host "========================================`n" -ForegroundColor Cyan
 
 $allGood = $true
+
+# Определяем пути к проекту автоматически
+$scriptPath = Split-Path -Parent $MyInvocation.MyCommand.Path
+$projectRoot = Split-Path -Parent (Split-Path -Parent $scriptPath)
+$androidPath = Join-Path $projectRoot "android"
+$gradlewPath = Join-Path $androidPath "gradlew.bat"
+$environmentCheckFile = Join-Path $projectRoot "environment-check.txt"
+
+Write-Host "Project root: $projectRoot" -ForegroundColor Gray
+Write-Host ""
 
 # ========================================
 # 1. NODE.JS AND NPM
@@ -116,14 +128,13 @@ if (-not $sdkFound) {
 Write-Host "`n[6/7] Checking Gradle..." -ForegroundColor Yellow
 
 # Check Gradle wrapper in project
-$gradlewPath = "D:\Projects\Evpower-mobile\android\gradlew.bat"
 if (Test-Path $gradlewPath) {
     Write-Host "  [OK] Gradle wrapper found in project" -ForegroundColor Green
     Write-Host "    Path: $gradlewPath" -ForegroundColor Gray
 
     # Try to get Gradle version
     try {
-        Push-Location "D:\Projects\Evpower-mobile\android"
+        Push-Location $androidPath
         $gradleVersion = .\gradlew.bat --version 2>&1 | Select-String "Gradle" | Select-Object -First 1
         if ($gradleVersion) {
             Write-Host "  [OK] $gradleVersion" -ForegroundColor Green
@@ -135,6 +146,7 @@ if (Test-Path $gradlewPath) {
     }
 } else {
     Write-Host "  [ERROR] Gradle wrapper NOT FOUND in project!" -ForegroundColor Red
+    Write-Host "    Expected: $gradlewPath" -ForegroundColor Red
     $allGood = $false
 }
 
@@ -187,6 +199,8 @@ $javaVer = try { java -version 2>&1 | Select-String "version" | Select-Object -F
 ========================================
 ENVIRONMENT CHECK - $(Get-Date)
 ========================================
+Project: Voltera Mobile
+Root:    $projectRoot
 
 Node.js: $nodeVer
 npm: v$npmVer
@@ -196,6 +210,6 @@ ANDROID_HOME: $env:ANDROID_HOME
 Gradle wrapper: $(if (Test-Path $gradlewPath) { "Found" } else { "Not found" })
 
 ========================================
-"@ | Out-File -FilePath "D:\Projects\Evpower-mobile\environment-check.txt" -Encoding UTF8
+"@ | Out-File -FilePath $environmentCheckFile -Encoding UTF8
 
 Write-Host "[OK] Info saved to environment-check.txt`n" -ForegroundColor Green

@@ -45,7 +45,14 @@ export function HistoryPage() {
           >
             <ChevronLeft className="w-6 h-6" />
           </button>
-          <h1 className="text-xl font-semibold">История</h1>
+          <div className="flex items-center gap-2">
+            <img
+              src="/icons/voltera-logo-square.svg"
+              alt=""
+              className="h-6 w-auto"
+            />
+            <h1 className="text-xl font-semibold">История</h1>
+          </div>
           <button
             onClick={() => setShowFilters(!showFilters)}
             className="p-2 -mr-2 rounded-full hover:bg-gray-100 transition-colors"
@@ -60,7 +67,7 @@ export function HistoryPage() {
             onClick={() => setActiveTab("charging")}
             className={`flex-1 py-3 px-4 text-sm font-medium transition-colors relative ${
               activeTab === "charging"
-                ? "text-cyan-600"
+                ? "text-primary-600"
                 : "text-gray-600 hover:text-gray-900"
             }`}
           >
@@ -69,7 +76,7 @@ export function HistoryPage() {
               <span>Зарядки</span>
             </div>
             {activeTab === "charging" && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-cyan-600" />
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-600" />
             )}
           </button>
 
@@ -77,7 +84,7 @@ export function HistoryPage() {
             onClick={() => setActiveTab("transactions")}
             className={`flex-1 py-3 px-4 text-sm font-medium transition-colors relative ${
               activeTab === "transactions"
-                ? "text-cyan-600"
+                ? "text-primary-600"
                 : "text-gray-600 hover:text-gray-900"
             }`}
           >
@@ -86,7 +93,7 @@ export function HistoryPage() {
               <span>Платежи</span>
             </div>
             {activeTab === "transactions" && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-cyan-600" />
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-600" />
             )}
           </button>
 
@@ -94,7 +101,7 @@ export function HistoryPage() {
             onClick={() => setActiveTab("statistics")}
             className={`flex-1 py-3 px-4 text-sm font-medium transition-colors relative ${
               activeTab === "statistics"
-                ? "text-cyan-600"
+                ? "text-primary-600"
                 : "text-gray-600 hover:text-gray-900"
             }`}
           >
@@ -103,7 +110,7 @@ export function HistoryPage() {
               <span>Статистика</span>
             </div>
             {activeTab === "statistics" && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-cyan-600" />
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-600" />
             )}
           </button>
         </div>
@@ -113,7 +120,7 @@ export function HistoryPage() {
       {showFilters && (
         <div className="bg-white border-b border-gray-200 px-4 py-3">
           <div className="flex items-center gap-2 overflow-x-auto">
-            <button className="px-3 py-1.5 bg-cyan-100 text-cyan-700 rounded-full text-sm font-medium whitespace-nowrap">
+            <button className="px-3 py-1.5 bg-primary-100 text-primary-700 rounded-full text-sm font-medium whitespace-nowrap">
               Последние 30 дней
             </button>
             <button className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full text-sm font-medium whitespace-nowrap hover:bg-gray-200">
@@ -143,7 +150,7 @@ export function HistoryPage() {
 
             {isLoadingCharging ? (
               <div className="flex justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-600"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
               </div>
             ) : chargingHistory && chargingHistory.length > 0 ? (
               chargingHistory.map((item) => (
@@ -155,6 +162,11 @@ export function HistoryPage() {
               ))
             ) : (
               <div className="text-center py-12">
+                <img
+                  src="/icons/voltera-logo-square.svg"
+                  alt=""
+                  className="h-16 w-auto mx-auto mb-3 opacity-20"
+                />
                 <Zap className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                 <p className="text-gray-500">История зарядок пуста</p>
                 <p className="text-sm text-gray-400 mt-1">
@@ -177,7 +189,7 @@ export function HistoryPage() {
 
             {isLoadingTransactions ? (
               <div className="flex justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-600"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
               </div>
             ) : transactionHistory && transactionHistory.length > 0 ? (
               transactionHistory.map((transaction) => (
@@ -188,6 +200,11 @@ export function HistoryPage() {
               ))
             ) : (
               <div className="text-center py-12">
+                <img
+                  src="/icons/voltera-logo-square.svg"
+                  alt=""
+                  className="h-16 w-auto mx-auto mb-3 opacity-20"
+                />
                 <CreditCard className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                 <p className="text-gray-500">История платежей пуста</p>
                 <p className="text-sm text-gray-400 mt-1">
@@ -203,7 +220,7 @@ export function HistoryPage() {
           <div className="space-y-4">
             {isLoadingStats ? (
               <div className="flex justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-600"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
               </div>
             ) : statistics ? (
               <>
@@ -280,8 +297,8 @@ export function HistoryPage() {
                       Любимая станция
                     </h3>
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center">
-                        <Zap className="w-5 h-5 text-cyan-600" />
+                      <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
+                        <Zap className="w-5 h-5 text-primary-600" />
                       </div>
                       <div className="flex-1">
                         <p className="font-medium text-gray-900">
@@ -315,7 +332,7 @@ export function HistoryPage() {
                             </div>
                             <div className="bg-gray-200 rounded-full h-2">
                               <div
-                                className="bg-cyan-500 h-2 rounded-full"
+                                className="bg-primary-500 h-2 rounded-full"
                                 style={{
                                   width: `${(month.energy / Math.max(...statistics.monthlyData.map((m) => m.energy))) * 100}%`,
                                 }}
@@ -337,6 +354,11 @@ export function HistoryPage() {
               </>
             ) : (
               <div className="text-center py-12">
+                <img
+                  src="/icons/voltera-logo-square.svg"
+                  alt=""
+                  className="h-16 w-auto mx-auto mb-3 opacity-20"
+                />
                 <TrendingUp className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                 <p className="text-gray-500">Нет данных для статистики</p>
                 <p className="text-sm text-gray-400 mt-1">

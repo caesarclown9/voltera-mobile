@@ -81,7 +81,14 @@ export const ProfilePage = () => {
           >
             <ChevronLeft className="w-6 h-6" />
           </button>
-          <h1 className="text-xl font-semibold">Ваш профиль</h1>
+          <div className="flex items-center gap-2">
+            <img
+              src="/icons/voltera-logo-square.svg"
+              alt=""
+              className="h-6 w-auto"
+            />
+            <h1 className="text-xl font-semibold">Ваш профиль</h1>
+          </div>
           <div className="w-10" /> {/* Пустое место для симметрии */}
         </div>
       </div>
@@ -111,7 +118,7 @@ export const ProfilePage = () => {
               )}
               <div className="mt-4 px-4 py-2 bg-gray-100 rounded-lg">
                 <p className="text-sm text-gray-600">Баланс</p>
-                <p className="text-2xl font-bold text-green-600">
+                <p className="text-2xl font-bold text-primary-600">
                   {isBalanceLoading ? "…" : (balanceData?.balance ?? 0)}{" "}
                   {balanceData?.currency || "сом"}
                 </p>
@@ -125,7 +132,7 @@ export const ProfilePage = () => {
       <div className="p-4 space-y-3">
         <button
           onClick={() => navigate("/history" + (!user ? "?auth=required" : ""))}
-          className="w-full bg-cyan-500 text-white py-4 rounded-xl font-semibold hover:bg-cyan-600 transition-colors flex items-center justify-center gap-2"
+          className="w-full bg-primary-500 text-white py-4 rounded-xl font-semibold hover:bg-primary-600 transition-colors flex items-center justify-center gap-2"
         >
           <Clock className="w-5 h-5" />
           История зарядок
@@ -135,7 +142,7 @@ export const ProfilePage = () => {
           onClick={() =>
             navigate("/payments" + (!user ? "?auth=required" : ""))
           }
-          className="w-full bg-cyan-500 text-white py-4 rounded-xl font-semibold hover:bg-cyan-600 transition-colors flex items-center justify-center gap-2"
+          className="w-full bg-primary-500 text-white py-4 rounded-xl font-semibold hover:bg-primary-600 transition-colors flex items-center justify-center gap-2"
         >
           <DollarSign className="w-5 h-5" />
           История платежей
@@ -161,7 +168,7 @@ export const ProfilePage = () => {
         ) : (
           <button
             onClick={() => navigate("/auth")}
-            className="w-full bg-green-500 text-white py-4 rounded-xl font-semibold hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
+            className="w-full bg-primary-500 text-white py-4 rounded-xl font-semibold hover:bg-primary-600 transition-colors flex items-center justify-center gap-2"
           >
             Войти в аккаунт
           </button>

@@ -1,19 +1,22 @@
-import { Zap, Clock, DollarSign, Calendar, ChevronRight } from 'lucide-react';
-import type { ChargingHistoryItem } from '../types';
+import { Zap, Clock, DollarSign, Calendar, ChevronRight } from "lucide-react";
+import type { ChargingHistoryItem } from "../types";
 
 interface ChargingHistoryCardProps {
   item: ChargingHistoryItem;
   onClick?: (item: ChargingHistoryItem) => void;
 }
 
-export function ChargingHistoryCard({ item, onClick }: ChargingHistoryCardProps) {
+export function ChargingHistoryCard({
+  item,
+  onClick,
+}: ChargingHistoryCardProps) {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat('ru-RU', {
-      day: 'numeric',
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Intl.DateTimeFormat("ru-RU", {
+      day: "numeric",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
     }).format(date);
   };
 
@@ -28,27 +31,27 @@ export function ChargingHistoryCard({ item, onClick }: ChargingHistoryCardProps)
 
   const getStatusColor = () => {
     switch (item.status) {
-      case 'completed':
-        return 'bg-green-100 text-green-700';
-      case 'stopped':
-        return 'bg-orange-100 text-orange-700';
-      case 'failed':
-        return 'bg-red-100 text-red-700';
+      case "completed":
+        return "bg-green-100 text-green-700";
+      case "stopped":
+        return "bg-orange-100 text-orange-700";
+      case "failed":
+        return "bg-red-100 text-red-700";
       default:
-        return 'bg-gray-100 text-gray-700';
+        return "bg-gray-100 text-gray-700";
     }
   };
 
   const getStatusText = () => {
     switch (item.status) {
-      case 'completed':
-        return 'Завершена';
-      case 'stopped':
-        return 'Остановлена';
-      case 'failed':
-        return 'Ошибка';
+      case "completed":
+        return "Завершена";
+      case "stopped":
+        return "Остановлена";
+      case "failed":
+        return "Ошибка";
       default:
-        return 'Неизвестно';
+        return "Неизвестно";
     }
   };
 
@@ -60,8 +63,8 @@ export function ChargingHistoryCard({ item, onClick }: ChargingHistoryCardProps)
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0">
-            <Zap className="w-5 h-5 text-cyan-600" />
+          <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <Zap className="w-5 h-5 text-primary-600" />
           </div>
           <div>
             <h4 className="font-semibold text-gray-900">{item.stationName}</h4>
@@ -77,7 +80,9 @@ export function ChargingHistoryCard({ item, onClick }: ChargingHistoryCardProps)
           <Calendar className="w-4 h-4" />
           <span>{formatDate(item.startTime)}</span>
         </div>
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor()}`}>
+        <span
+          className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor()}`}
+        >
           {getStatusText()}
         </span>
       </div>
@@ -90,7 +95,9 @@ export function ChargingHistoryCard({ item, onClick }: ChargingHistoryCardProps)
             <Zap className="w-3 h-3" />
             <span className="text-xs">Энергия</span>
           </div>
-          <p className="font-semibold text-sm">{item.energyConsumed.toFixed(1)} кВт·ч</p>
+          <p className="font-semibold text-sm">
+            {item.energyConsumed.toFixed(1)} кВт·ч
+          </p>
         </div>
 
         {/* Duration */}
@@ -99,7 +106,9 @@ export function ChargingHistoryCard({ item, onClick }: ChargingHistoryCardProps)
             <Clock className="w-3 h-3" />
             <span className="text-xs">Время</span>
           </div>
-          <p className="font-semibold text-sm">{formatDuration(item.duration)}</p>
+          <p className="font-semibold text-sm">
+            {formatDuration(item.duration)}
+          </p>
         </div>
 
         {/* Cost */}
@@ -108,15 +117,18 @@ export function ChargingHistoryCard({ item, onClick }: ChargingHistoryCardProps)
             <DollarSign className="w-3 h-3" />
             <span className="text-xs">Стоимость</span>
           </div>
-          <p className="font-semibold text-sm">{item.totalCost.toFixed(0)} сом</p>
+          <p className="font-semibold text-sm">
+            {item.totalCost.toFixed(0)} сом
+          </p>
         </div>
       </div>
 
       {/* Limit info if exists */}
-      {item.limitType && item.limitType !== 'none' && (
+      {item.limitType && item.limitType !== "none" && (
         <div className="mt-3 pt-3 border-t border-gray-100">
           <p className="text-xs text-gray-500">
-            Лимит: {item.limitType === 'energy'
+            Лимит:{" "}
+            {item.limitType === "energy"
               ? `${item.limitValue} кВт·ч`
               : `${item.limitValue} сом`}
           </p>

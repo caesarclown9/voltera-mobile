@@ -2,8 +2,9 @@ const sharp = require('sharp');
 const fs = require('fs');
 const path = require('path');
 
-const whiteLogo = path.join(__dirname, '../public/icons/evpower-logo-white.png');
-const backgroundColor = { r: 16, g: 185, b: 129 }; // #10B981
+// TODO: Конвертировать voltera-logo-horizontal.svg в белый PNG перед использованием этого скрипта
+const whiteLogo = path.join(__dirname, '../public/icons/voltera-logo-white.png');
+const backgroundColor = { r: 33, g: 150, b: 243 }; // #2196F3 - Voltera blue
 
 // Android splash screen sizes
 const androidSizes = {

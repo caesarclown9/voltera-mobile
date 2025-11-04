@@ -9,6 +9,10 @@ ext {
     androidxFragmentVersion = '1.8.4'
     coreSplashScreenVersion = '1.0.1'
     androidxWebkitVersion = '1.12.1'
+    // Поддержка 16KB memory pages для Google Play требования (дедлайн: 1 ноября 2025)
+    // Решает проблему с нативными библиотеками из @capacitor-mlkit/barcode-scanning
+    // ИСПРАВЛЕНО: правильное имя переменной и версия 1.5.0
+    androidxCameraCoreVersion = '1.5.0'
     junitVersion = '4.13.2'
     androidxJunitVersion = '1.2.1'
     androidxEspressoCoreVersion = '3.6.1'

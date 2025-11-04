@@ -213,7 +213,7 @@ export function LazyList<T>({
 
       {visibleCount < items.length && (
         <div ref={loaderRef} className="flex justify-center py-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-600" />
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600" />
         </div>
       )}
     </div>

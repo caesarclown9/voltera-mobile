@@ -1,7 +1,7 @@
-import { useMemo } from 'react';
-import { Calculator, Zap, Clock, CreditCard, TrendingDown } from 'lucide-react';
-import { pricingService } from '../pricingService';
-import type { PricingResult } from '../types';
+import { useMemo } from "react";
+import { Calculator, Zap, Clock, CreditCard, TrendingDown } from "lucide-react";
+import { pricingService } from "../pricingService";
+import type { PricingResult } from "../types";
 
 interface PricingBreakdownProps {
   energyKwh: number;
@@ -10,20 +10,19 @@ interface PricingBreakdownProps {
   compact?: boolean;
 }
 
-export function PricingBreakdown({ 
-  energyKwh, 
-  durationMinutes, 
+export function PricingBreakdown({
+  energyKwh,
+  durationMinutes,
   pricing,
-  compact = false 
+  compact = false,
 }: PricingBreakdownProps) {
-  
   const breakdown = useMemo(() => {
     if (!pricing) return null;
-    
+
     return pricingService.calculateSessionCost(
       energyKwh,
       durationMinutes,
-      pricing
+      pricing,
     );
   }, [energyKwh, durationMinutes, pricing]);
 
@@ -46,7 +45,7 @@ export function PricingBreakdown({
             </span>
           </div>
         )}
-        
+
         {breakdown.time_cost > 0 && (
           <div className="flex justify-between text-sm">
             <span className="text-gray-600 flex items-center gap-1">
@@ -58,11 +57,11 @@ export function PricingBreakdown({
             </span>
           </div>
         )}
-        
+
         <div className="border-t pt-2">
           <div className="flex justify-between">
             <span className="font-medium">Итого:</span>
-            <span className="font-bold text-lg text-cyan-600">
+            <span className="font-bold text-lg text-primary-600">
               {breakdown.final_amount.toFixed(2)} {breakdown.currency}
             </span>
           </div>
@@ -80,7 +79,7 @@ export function PricingBreakdown({
           Расчет стоимости
         </h3>
       </div>
-      
+
       <div className="p-4 space-y-3">
         {/* Стоимость энергии */}
         {breakdown.energy_cost > 0 && (
@@ -90,9 +89,12 @@ export function PricingBreakdown({
                 <Zap className="w-4 h-4 text-yellow-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-700">Электроэнергия</p>
+                <p className="text-sm font-medium text-gray-700">
+                  Электроэнергия
+                </p>
                 <p className="text-xs text-gray-500">
-                  {energyKwh.toFixed(2)} кВт·ч × {pricing.rate_per_kwh} {pricing.currency}
+                  {energyKwh.toFixed(2)} кВт·ч × {pricing.rate_per_kwh}{" "}
+                  {pricing.currency}
                 </p>
               </div>
             </div>
@@ -110,9 +112,12 @@ export function PricingBreakdown({
                 <Clock className="w-4 h-4 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-700">Время зарядки</p>
+                <p className="text-sm font-medium text-gray-700">
+                  Время зарядки
+                </p>
                 <p className="text-xs text-gray-500">
-                  {durationMinutes} мин × {pricing.rate_per_minute} {pricing.currency}
+                  {durationMinutes} мин × {pricing.rate_per_minute}{" "}
+                  {pricing.currency}
                 </p>
               </div>
             </div>
@@ -130,7 +135,9 @@ export function PricingBreakdown({
                 <CreditCard className="w-4 h-4 text-purple-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-700">Плата за сессию</p>
+                <p className="text-sm font-medium text-gray-700">
+                  Плата за сессию
+                </p>
                 <p className="text-xs text-gray-500">Фиксированная плата</p>
               </div>
             </div>
@@ -148,9 +155,12 @@ export function PricingBreakdown({
                 <Clock className="w-4 h-4 text-orange-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-700">Плата за парковку</p>
+                <p className="text-sm font-medium text-gray-700">
+                  Плата за парковку
+                </p>
                 <p className="text-xs text-gray-500">
-                  {durationMinutes} мин × {pricing.parking_fee_per_minute} {pricing.currency}
+                  {durationMinutes} мин × {pricing.parking_fee_per_minute}{" "}
+                  {pricing.currency}
                 </p>
               </div>
             </div>
@@ -170,7 +180,9 @@ export function PricingBreakdown({
               <div>
                 <p className="text-sm font-medium text-green-700">Скидка</p>
                 <p className="text-xs text-gray-500">
-                  {pricing.is_client_tariff ? 'Персональный тариф' : 'Промо-код'}
+                  {pricing.is_client_tariff
+                    ? "Персональный тариф"
+                    : "Промо-код"}
                 </p>
               </div>
             </div>
@@ -184,9 +196,13 @@ export function PricingBreakdown({
         <div className="border-t pt-3 mt-3">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-base font-semibold text-gray-700">Итого к оплате</p>
+              <p className="text-base font-semibold text-gray-700">
+                Итого к оплате
+              </p>
               {pricing.is_client_tariff && (
-                <p className="text-xs text-purple-600 mt-1">✨ Специальный тариф</p>
+                <p className="text-xs text-purple-600 mt-1">
+                  ✨ Специальный тариф
+                </p>
               )}
             </div>
             <div className="text-right">
@@ -195,7 +211,7 @@ export function PricingBreakdown({
                   {breakdown.base_amount.toFixed(2)} {breakdown.currency}
                 </p>
               )}
-              <p className="text-2xl font-bold text-cyan-600">
+              <p className="text-2xl font-bold text-primary-600">
                 {breakdown.final_amount.toFixed(2)} {breakdown.currency}
               </p>
             </div>

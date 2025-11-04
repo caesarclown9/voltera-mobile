@@ -144,9 +144,9 @@ export const ChargingProcessPage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-cyan-50 to-white flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-cyan-600 mx-auto" />
+          <Loader2 className="w-12 h-12 animate-spin text-primary-600 mx-auto" />
           <p className="mt-4 text-gray-600">Загружаем данные зарядки...</p>
         </div>
       </div>
@@ -156,14 +156,14 @@ export const ChargingProcessPage = () => {
   // Ошибка загрузки данных
   if (error && !chargingData) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-cyan-50 to-white flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white flex items-center justify-center">
         <div className="text-center">
           <WifiOff className="w-16 h-16 text-orange-500 mx-auto" />
           <p className="mt-4 text-xl text-gray-800">Ошибка получения данных</p>
           <p className="mt-2 text-sm text-gray-600">{error.message}</p>
           <button
             onClick={() => navigate("/stations")}
-            className="mt-6 px-6 py-3 bg-cyan-500 text-white rounded-lg"
+            className="mt-6 px-6 py-3 bg-primary-500 text-white rounded-lg"
           >
             К станциям
           </button>
@@ -175,7 +175,7 @@ export const ChargingProcessPage = () => {
   // Нет данных
   if (!chargingData && !isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-cyan-50 to-white flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white flex items-center justify-center">
         <div className="text-center">
           <XCircle className="w-16 h-16 text-red-500 mx-auto" />
           <p className="mt-4 text-xl text-gray-800">
@@ -183,7 +183,7 @@ export const ChargingProcessPage = () => {
           </p>
           <button
             onClick={() => navigate("/stations")}
-            className="mt-6 px-6 py-3 bg-cyan-500 text-white rounded-lg"
+            className="mt-6 px-6 py-3 bg-primary-500 text-white rounded-lg"
           >
             К станциям
           </button>
@@ -201,7 +201,7 @@ export const ChargingProcessPage = () => {
 
   return (
     <div
-      className={`min-h-screen bg-gradient-to-b from-cyan-50 to-white ${isCharging ? "pb-40" : "pb-20"}`}
+      className={`min-h-screen bg-gradient-to-b from-primary-50 to-white ${isCharging ? "pb-40" : "pb-20"}`}
     >
       {/* Header */}
       <div className="bg-white shadow-sm sticky-header-safe z-10">
@@ -232,7 +232,7 @@ export const ChargingProcessPage = () => {
               className={`px-3 py-1 rounded-full text-sm font-medium ${
                 chargingData?.status === ChargingStates.STARTED ||
                 chargingData?.status === ChargingStates.CHARGING
-                  ? "bg-green-100 text-green-700"
+                  ? "bg-success-100 text-success-700"
                   : chargingData?.status === ChargingStates.PREPARING
                     ? "bg-yellow-100 text-yellow-700"
                     : chargingData?.status === ChargingStates.FINISHING
@@ -285,7 +285,7 @@ export const ChargingProcessPage = () => {
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center px-4">
-              <Battery className="w-12 h-12 text-cyan-600 mb-2" />
+              <Battery className="w-12 h-12 text-primary-600 mb-2" />
               <span className="text-3xl font-bold">
                 {chargingData?.evBatterySoc !== undefined
                   ? `${Math.round(chargingData.evBatterySoc)}%`
@@ -316,7 +316,7 @@ export const ChargingProcessPage = () => {
             {/* Energy */}
             <div className="bg-gray-50 rounded-xl p-4">
               <div className="flex items-center gap-2 mb-2">
-                <Activity className="w-5 h-5 text-green-500" />
+                <Activity className="w-5 h-5 text-success-500" />
                 <span className="text-sm text-gray-600">Получено</span>
               </div>
               <p className="text-2xl font-bold">
@@ -349,7 +349,7 @@ export const ChargingProcessPage = () => {
             {/* Cost */}
             <div className="bg-gray-50 rounded-xl p-4">
               <div className="flex items-center gap-2 mb-2">
-                <DollarSign className="w-5 h-5 text-cyan-500" />
+                <DollarSign className="w-5 h-5 text-primary-500" />
                 <span className="text-sm text-gray-600">Стоимость</span>
               </div>
               <p className="text-2xl font-bold">
@@ -417,9 +417,9 @@ export const ChargingProcessPage = () => {
 
         {/* Completion Message */}
         {chargingData?.status === ChargingStates.COMPLETED && (
-          <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
-            <p className="text-green-700 font-semibold">Зарядка завершена!</p>
-            <p className="text-sm text-green-600 mt-1">Перенаправление...</p>
+          <div className="bg-success-50 border border-success-200 rounded-xl p-4 text-center">
+            <p className="text-success-700 font-semibold">Зарядка завершена!</p>
+            <p className="text-sm text-success-600 mt-1">Перенаправление...</p>
           </div>
         )}
       </div>

@@ -21,7 +21,12 @@ export function AboutPage() {
       </div>
 
       <div className="p-6 space-y-4">
-        <div className="bg-white rounded-2xl p-4 shadow-sm">
+        <div className="bg-white rounded-2xl p-6 shadow-sm text-center">
+          <img
+            src="/icons/voltera-logo-horizontal.svg"
+            alt="Voltera"
+            className="h-20 w-auto mx-auto mb-4"
+          />
           <p className="text-sm text-gray-600">Версия приложения</p>
           <p className="text-lg font-semibold">Voltera {appVersion}</p>
         </div>
@@ -47,7 +52,7 @@ export function AboutPage() {
           <p className="text-sm text-gray-600">Поддержка</p>
           <a
             href="mailto:support@voltera.kg"
-            className="text-cyan-600 font-medium"
+            className="text-primary-600 font-medium"
           >
             support@voltera.kg
           </a>

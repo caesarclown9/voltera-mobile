@@ -1,16 +1,25 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Bell, Moon, Globe, Info, Shield, FileText } from 'lucide-react';
-import { useSettingsStore } from '../features/settings/stores/settingsStore';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  ArrowLeft,
+  Bell,
+  Moon,
+  Globe,
+  Info,
+  Shield,
+  FileText,
+} from "lucide-react";
+import { useSettingsStore } from "../features/settings/stores/settingsStore";
 
 export const SettingsPage: React.FC = () => {
   const navigate = useNavigate();
-  const { notifications, darkMode, language, setNotifications, setDarkMode } = useSettingsStore();
+  const { notifications, darkMode, language, setNotifications, setDarkMode } =
+    useSettingsStore();
 
   const languageNames = {
-    ru: 'Русский',
-    en: 'English',
-    ky: 'Кыргызча'
+    ru: "Русский",
+    en: "English",
+    ky: "Кыргызча",
   };
 
   return (
@@ -19,7 +28,7 @@ export const SettingsPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center h-16">
             <button
-              onClick={() => navigate('/profile')}
+              onClick={() => navigate("/profile")}
               className="p-2 rounded-lg hover:bg-gray-100"
             >
               <ArrowLeft className="h-6 w-6" />
@@ -68,14 +77,16 @@ export const SettingsPage: React.FC = () => {
 
             {/* Язык */}
             <button
-              onClick={() => navigate('/settings/language')}
+              onClick={() => navigate("/settings/language")}
               className="w-full p-4 flex items-center justify-between hover:bg-gray-50"
             >
               <div className="flex items-center space-x-3">
                 <Globe className="h-5 w-5 text-gray-500" />
                 <div className="text-left">
                   <div>Язык приложения</div>
-                  <div className="text-sm text-gray-500">{languageNames[language]}</div>
+                  <div className="text-sm text-gray-500">
+                    {languageNames[language]}
+                  </div>
                 </div>
               </div>
               <ArrowLeft className="h-5 w-5 text-gray-400 rotate-180" />
@@ -83,7 +94,7 @@ export const SettingsPage: React.FC = () => {
 
             {/* О приложении */}
             <button
-              onClick={() => navigate('/settings/about')}
+              onClick={() => navigate("/settings/about")}
               className="w-full p-4 flex items-center justify-between hover:bg-gray-50"
             >
               <div className="flex items-center space-x-3">
@@ -95,7 +106,7 @@ export const SettingsPage: React.FC = () => {
 
             {/* Политика конфиденциальности */}
             <button
-              onClick={() => navigate('/settings/privacy')}
+              onClick={() => navigate("/settings/privacy")}
               className="w-full p-4 flex items-center justify-between hover:bg-gray-50"
             >
               <div className="flex items-center space-x-3">
@@ -107,7 +118,7 @@ export const SettingsPage: React.FC = () => {
 
             {/* Условия использования */}
             <button
-              onClick={() => navigate('/settings/terms')}
+              onClick={() => navigate("/settings/terms")}
               className="w-full p-4 flex items-center justify-between hover:bg-gray-50"
             >
               <div className="flex items-center space-x-3">

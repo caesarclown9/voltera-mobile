@@ -169,7 +169,7 @@ export function StationList({
                 onClick={() => setFilterStatus(status)}
                 className={`flex-shrink-0 px-3 py-1 rounded-full text-sm font-medium transition-colors ${
                   filterStatus === status
-                    ? "bg-green-600 text-white"
+                    ? "bg-primary-600 text-white"
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
               >
@@ -190,7 +190,7 @@ export function StationList({
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-            className="text-sm border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="text-sm border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
             <option value="distance">По расстоянию</option>
             <option value="name">По названию</option>

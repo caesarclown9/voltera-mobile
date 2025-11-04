@@ -60,7 +60,7 @@ export default function PaymentsPage() {
 
       <div className="p-4 space-y-4">
         {/* Текущий баланс */}
-        <div className="bg-gradient-to-r from-green-500 to-cyan-500 rounded-2xl p-6 text-white">
+        <div className="bg-gradient-to-r from-primary-500 to-accent-500 rounded-2xl p-6 text-white">
           <div className="text-sm opacity-90">Текущий баланс</div>
           <div className="text-3xl font-bold mt-1">
             {balance?.balance || 0} сом
@@ -98,7 +98,7 @@ export default function PaymentsPage() {
                 <div
                   className={`w-5 h-5 rounded-full border-2 ${
                     selectedMethod === method.id
-                      ? "bg-green-500 border-green-500"
+                      ? "bg-primary-500 border-primary-500"
                       : "border-gray-300"
                   }`}
                 >
@@ -119,7 +119,7 @@ export default function PaymentsPage() {
 
           {transactionsLoading ? (
             <div className="bg-white rounded-xl p-8 text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500 mx-auto"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500 mx-auto"></div>
               <p className="text-gray-500 mt-2">Загрузка...</p>
             </div>
           ) : paymentHistory.length === 0 ? (
@@ -138,14 +138,14 @@ export default function PaymentsPage() {
                       <div
                         className={`w-10 h-10 rounded-lg flex items-center justify-center ${
                           payment.status === "success"
-                            ? "bg-green-100"
+                            ? "bg-success-100"
                             : payment.status === "pending"
                               ? "bg-yellow-100"
                               : "bg-red-100"
                         }`}
                       >
                         {payment.status === "success" ? (
-                          <CheckCircle className="w-5 h-5 text-green-600" />
+                          <CheckCircle className="w-5 h-5 text-success-600" />
                         ) : payment.status === "pending" ? (
                           <Clock className="w-5 h-5 text-yellow-600" />
                         ) : (
@@ -178,7 +178,7 @@ export default function PaymentsPage() {
                       <div
                         className={`text-xs ${
                           payment.status === "success"
-                            ? "text-green-600"
+                            ? "text-success-600"
                             : payment.status === "pending"
                               ? "text-yellow-600"
                               : "text-red-600"

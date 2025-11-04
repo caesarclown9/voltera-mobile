@@ -95,7 +95,7 @@ export default function MapHome() {
           </p>
           <button
             onClick={() => window.location.reload()}
-            className="bg-gradient-to-r from-green-500 to-cyan-500 text-white px-8 py-3 rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all"
+            className="bg-gradient-to-r from-primary-500 to-accent-500 text-white px-8 py-3 rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all"
           >
             Попробовать снова
           </button>
@@ -115,8 +115,8 @@ export default function MapHome() {
               animate={{ opacity: 1, scale: 1 }}
               className="text-center"
             >
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
               </div>
               <p className="text-gray-600">Загрузка карты...</p>
             </motion.div>
@@ -275,7 +275,7 @@ export default function MapHome() {
           </p>
           <button
             onClick={() => setShowTopup(true)}
-            className="block w-full mt-2 bg-green-500 text-white text-center py-1.5 rounded-lg text-xs font-medium hover:bg-green-600 transition-colors"
+            className="block w-full mt-2 bg-primary-500 text-white text-center py-1.5 rounded-lg text-xs font-medium hover:bg-primary-600 transition-colors"
           >
             Пополнить
           </button>
@@ -287,13 +287,13 @@ export default function MapHome() {
         <div className="absolute bottom-24 right-4 bg-white rounded-full shadow-lg p-4">
           <div className="relative">
             <svg
-              className="w-6 h-6 text-green-600"
+              className="w-6 h-6 text-success-600"
               fill="currentColor"
               viewBox="0 0 24 24"
             >
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z" />
             </svg>
-            <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <div className="absolute -top-1 -right-1 w-2 h-2 bg-success-500 rounded-full animate-pulse"></div>
           </div>
         </div>
       )}

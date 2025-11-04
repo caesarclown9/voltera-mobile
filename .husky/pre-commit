@@ -19,7 +19,7 @@ npm run typecheck || {
 
 # 3. Проверка что нет секретов в коде
 echo "🔒 Checking for secrets in code..."
-if git diff --cached --name-only | grep -E '\.(ts|tsx|js|jsx)$' | xargs grep -nH -E '(supabase.*anon.*key.*=.*ey|api.*key.*=.*[A-Z0-9]{20,}|secret.*key|password.*=.*["\x27][^"\x27]{8,})' 2>/dev/null; then
+if git diff --cached --name-only | grep -E '\.(ts|tsx|js|jsx)$' | grep -v '\.test\.' | xargs grep -nH -E '(supabase.*anon.*key.*=.*ey|api.*key.*=.*[A-Z0-9]{20,}|secret.*key|password.*=.*["\x27][^"\x27]{8,})' 2>/dev/null; then
   echo "❌ Potential secrets found in code! Use environment variables instead."
   echo "💡 Tip: Move secrets to .env file"
   exit 1

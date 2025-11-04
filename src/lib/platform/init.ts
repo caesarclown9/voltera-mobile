@@ -22,21 +22,27 @@ export const initializePlatformServices = async () => {
     if (Capacitor.isNativePlatform()) {
       // Настройка StatusBar для нативных платформ
       try {
-        // На Android настраиваем status bar в правильном порядке
         if (Capacitor.getPlatform() === "android") {
-          // 1. Сначала делаем overlay
-          await StatusBar.setOverlaysWebView({ overlay: true });
-          // 2. Затем прозрачный фон
-          await StatusBar.setBackgroundColor({ color: "#00000000" });
-          // 3. И наконец темные иконки (для светлого контента)
-          await StatusBar.setStyle({ style: Style.Dark });
+          // Android: Edge-to-edge управляется через:
+          // 1. MainActivity.java - современный WindowInsetsController API (без deprecated методов)
+          // 2. capacitor.config.ts - adjustMarginsForEdgeToEdge: 'auto'
+          //
+          // StatusBar плагин НЕ используется на Android, так как:
+          // - setBackgroundColor() использует deprecated window.setStatusBarColor()
+          // - setOverlaysWebView() использует deprecated window.getStatusBarColor()
+          // - setStyle() тоже триггерит deprecated API внутри плагина
+          //
+          // Google Play требует отказаться от этих API для Android 15+ (API 35)
+          // См. https://developer.android.com/about/versions/15/behavior-changes-15#edge-to-edge
+          logger.debug(
+            "Platform: Android edge-to-edge configured via MainActivity + Capacitor config",
+          );
         } else if (Capacitor.getPlatform() === "ios") {
-          // На iOS также используем overlay и темный стиль
+          // iOS: StatusBar плагин работает корректно, deprecated API только на Android
           await StatusBar.setOverlaysWebView({ overlay: true });
           await StatusBar.setStyle({ style: Style.Dark });
+          logger.debug("Platform: iOS StatusBar configured");
         }
-
-        logger.debug("Platform: StatusBar configured");
       } catch (error) {
         logger.warn("Platform: StatusBar configuration failed", error);
       }

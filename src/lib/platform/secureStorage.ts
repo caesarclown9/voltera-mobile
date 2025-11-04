@@ -4,14 +4,14 @@
  * КРИТИЧНО: НЕ используем localStorage для токенов!
  */
 
-import { SecureStoragePlugin } from 'capacitor-secure-storage-plugin';
-import { isNativePlatform, isWebPlatform } from './env';
-import { logger } from '@/shared/utils/logger';
+import { SecureStoragePlugin } from "capacitor-secure-storage-plugin";
+import { isNativePlatform, isWebPlatform } from "./env";
+import { logger } from "@/shared/utils/logger";
 
 // Ключи для хранения
-const AUTH_TOKEN_KEY = 'auth_token';
-const REFRESH_TOKEN_KEY = 'refresh_token';
-const CLIENT_ID_KEY = 'client_id';
+const AUTH_TOKEN_KEY = "auth_token";
+const REFRESH_TOKEN_KEY = "refresh_token";
+const CLIENT_ID_KEY = "client_id";
 
 /**
  * Интерфейс для результата операций с хранилищем
@@ -43,7 +43,9 @@ class SecureStorageService {
         // Используем sessionStorage как более безопасную альтернативу localStorage
         // sessionStorage очищается при закрытии вкладки
         sessionStorage.setItem(key, value);
-        logger.warn(`SecureStorage: using sessionStorage for ${key} (temporary solution)`);
+        logger.warn(
+          `SecureStorage: using sessionStorage for ${key} (temporary solution)`,
+        );
       }
 
       return { success: true };
@@ -51,7 +53,7 @@ class SecureStorageService {
       logger.error(`SecureStorage: failed to save ${key}`, error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : "Unknown error",
       };
     }
   }
@@ -77,21 +79,23 @@ class SecureStorageService {
           if (!value && fallbackValue) {
             sessionStorage.setItem(key, fallbackValue);
             localStorage.removeItem(key);
-            logger.info(`SecureStorage: migrated ${key} from localStorage to sessionStorage`);
+            logger.info(
+              `SecureStorage: migrated ${key} from localStorage to sessionStorage`,
+            );
           }
 
           return { success: true, data: fallbackValue };
         }
 
-        return { success: false, error: 'Value not found' };
+        return { success: false, error: "Value not found" };
       }
 
-      return { success: false, error: 'Platform not supported' };
+      return { success: false, error: "Platform not supported" };
     } catch (error) {
       logger.error(`SecureStorage: failed to get ${key}`, error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : "Unknown error",
       };
     }
   }
@@ -114,7 +118,7 @@ class SecureStorageService {
       logger.error(`SecureStorage: failed to remove ${key}`, error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : "Unknown error",
       };
     }
   }
@@ -129,19 +133,19 @@ class SecureStorageService {
       } else if (isWebPlatform()) {
         // Очищаем только наши ключи, не трогаем другие данные
         const keysToRemove = [AUTH_TOKEN_KEY, REFRESH_TOKEN_KEY, CLIENT_ID_KEY];
-        keysToRemove.forEach(key => {
+        keysToRemove.forEach((key) => {
           sessionStorage.removeItem(key);
           localStorage.removeItem(key);
         });
       }
 
-      logger.debug('SecureStorage: cleared all auth data');
+      logger.debug("SecureStorage: cleared all auth data");
       return { success: true };
     } catch (error) {
-      logger.error('SecureStorage: failed to clear', error);
+      logger.error("SecureStorage: failed to clear", error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : "Unknown error",
       };
     }
   }
@@ -192,5 +196,5 @@ export const authStorage = {
   async clearAll(): Promise<boolean> {
     const result = await secureStorage.clear();
     return result.success;
-  }
+  },
 };

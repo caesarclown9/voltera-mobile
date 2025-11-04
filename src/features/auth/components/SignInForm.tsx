@@ -149,7 +149,7 @@ export function SignInForm({ onSuccess, onSwitchToSignUp }: SignInFormProps) {
       <div className="text-center mb-8">
         <div className="flex items-center justify-center mx-auto mb-4">
           <img
-            src="/icons/voltera-logo-horizontal.png"
+            src="/icons/voltera-logo-horizontal.svg"
             alt="Voltera"
             className="h-16 w-auto"
           />
@@ -175,14 +175,14 @@ export function SignInForm({ onSuccess, onSwitchToSignUp }: SignInFormProps) {
             onChange={(e) => setLoginField(e.target.value)}
             className={`w-full px-4 py-3 rounded-xl border ${
               loginField && !isValidLogin
-                ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                : "border-gray-300 focus:border-green-500 focus:ring-green-500"
+                ? "border-error-300 focus:border-error-500 focus:ring-error-500"
+                : "border-gray-300 focus:border-primary-500 focus:ring-primary-500"
             } focus:outline-none focus:ring-2 text-gray-900 placeholder-gray-400`}
             placeholder="+996 XXX XXX XXX или email@example.com"
             required
           />
           {loginField && !isValidLogin && (
-            <p className="mt-1 text-sm text-red-600">
+            <p className="mt-1 text-sm text-error-600">
               Введите корректный номер телефона или email
             </p>
           )}
@@ -203,8 +203,8 @@ export function SignInForm({ onSuccess, onSwitchToSignUp }: SignInFormProps) {
               onChange={(e) => setPassword(e.target.value)}
               className={`w-full px-4 py-3 rounded-xl border ${
                 password && password.length < 6
-                  ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                  : "border-gray-300 focus:border-green-500 focus:ring-green-500"
+                  ? "border-error-300 focus:border-error-500 focus:ring-error-500"
+                  : "border-gray-300 focus:border-primary-500 focus:ring-primary-500"
               } focus:outline-none focus:ring-2 text-gray-900 placeholder-gray-400 pr-12`}
               placeholder="Введите пароль"
               minLength={6}
@@ -219,7 +219,7 @@ export function SignInForm({ onSuccess, onSwitchToSignUp }: SignInFormProps) {
             </button>
           </div>
           {password && password.length < 6 && (
-            <p className="mt-1 text-sm text-red-600">
+            <p className="mt-1 text-sm text-error-600">
               Пароль должен быть не менее 6 символов
             </p>
           )}
@@ -227,7 +227,7 @@ export function SignInForm({ onSuccess, onSwitchToSignUp }: SignInFormProps) {
 
         <button
           type="submit"
-          className="w-full bg-gradient-to-r from-green-500 to-cyan-500 text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-gradient-primary text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={!isValid || signInMutation.isPending}
         >
           {signInMutation.isPending ? (
@@ -247,7 +247,7 @@ export function SignInForm({ onSuccess, onSwitchToSignUp }: SignInFormProps) {
           <button
             type="button"
             onClick={onSwitchToSignUp}
-            className="text-cyan-600 hover:text-cyan-700 font-medium underline"
+            className="text-primary-600 hover:text-primary-700 font-medium underline"
           >
             Зарегистрироваться
           </button>
@@ -255,8 +255,8 @@ export function SignInForm({ onSuccess, onSwitchToSignUp }: SignInFormProps) {
       </div>
 
       {signInMutation.error && !canRestore && (
-        <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
-          <p className="text-sm text-red-600">
+        <div className="mt-4 p-3 bg-error-50 border border-error-200 rounded-md">
+          <p className="text-sm text-error-600">
             Неверный логин или пароль. Попробуйте еще раз.
           </p>
         </div>
@@ -269,7 +269,7 @@ export function SignInForm({ onSuccess, onSwitchToSignUp }: SignInFormProps) {
             type="button"
             onClick={handleRestore}
             disabled={isRestoring}
-            className="w-full bg-cyan-600 text-white py-2 rounded-lg font-semibold hover:bg-cyan-700 disabled:opacity-50"
+            className="w-full bg-primary-600 text-white py-2 rounded-lg font-semibold hover:bg-primary-700 disabled:opacity-50"
           >
             {isRestoring ? "Восстанавливаем…" : "Восстановить доступ"}
           </button>

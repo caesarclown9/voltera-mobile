@@ -3,9 +3,9 @@
  * Согласно MOBILE_PLAN.md - единый интерфейс для web и native
  */
 
-import { Geolocation } from '@capacitor/geolocation';
-import { isNativePlatform } from './env';
-import { logger } from '@/shared/utils/logger';
+import { Geolocation } from "@capacitor/geolocation";
+import { isNativePlatform } from "./env";
+import { logger } from "@/shared/utils/logger";
 
 /**
  * Интерфейс для координат
@@ -49,13 +49,16 @@ class GeolocationService {
     try {
       if (isNativePlatform()) {
         const permissions = await Geolocation.requestPermissions();
-        return permissions.location === 'granted' || permissions.coarseLocation === 'granted';
+        return (
+          permissions.location === "granted" ||
+          permissions.coarseLocation === "granted"
+        );
       } else {
         // Для веба разрешения запрашиваются автоматически при вызове getCurrentPosition
         return true;
       }
     } catch (error) {
-      logger.error('Geolocation: failed to request permissions', error);
+      logger.error("Geolocation: failed to request permissions", error);
       return false;
     }
   }
@@ -67,17 +70,22 @@ class GeolocationService {
     try {
       if (isNativePlatform()) {
         const permissions = await Geolocation.checkPermissions();
-        return permissions.location === 'granted' || permissions.coarseLocation === 'granted';
+        return (
+          permissions.location === "granted" ||
+          permissions.coarseLocation === "granted"
+        );
       } else {
         // Для веба проверяем через Permissions API
-        if ('permissions' in navigator) {
-          const result = await navigator.permissions.query({ name: 'geolocation' });
-          return result.state === 'granted';
+        if ("permissions" in navigator) {
+          const result = await navigator.permissions.query({
+            name: "geolocation",
+          });
+          return result.state === "granted";
         }
         return true; // Предполагаем, что разрешения будут запрошены
       }
     } catch (error) {
-      logger.error('Geolocation: failed to check permissions', error);
+      logger.error("Geolocation: failed to check permissions", error);
       return false;
     }
   }
@@ -85,7 +93,9 @@ class GeolocationService {
   /**
    * Получает текущую позицию пользователя
    */
-  async getCurrentPosition(options?: GeolocationOptions): Promise<GeolocationResult> {
+  async getCurrentPosition(
+    options?: GeolocationOptions,
+  ): Promise<GeolocationResult> {
     try {
       // Сначала проверяем разрешения
       const hasPermission = await this.checkPermissions();
@@ -94,7 +104,7 @@ class GeolocationService {
         if (!granted) {
           return {
             success: false,
-            error: 'Геолокация не разрешена пользователем'
+            error: "Геолокация не разрешена пользователем",
           };
         }
       }
@@ -103,7 +113,7 @@ class GeolocationService {
         enableHighAccuracy: true,
         timeout: 10000,
         maximumAge: 0,
-        ...options
+        ...options,
       };
 
       if (isNativePlatform()) {
@@ -119,8 +129,8 @@ class GeolocationService {
             altitude: position.coords.altitude,
             altitudeAccuracy: position.coords.altitudeAccuracy,
             heading: position.coords.heading,
-            speed: position.coords.speed
-          }
+            speed: position.coords.speed,
+          },
         };
       } else {
         // Используем Web API для PWA
@@ -136,26 +146,29 @@ class GeolocationService {
                   altitude: position.coords.altitude,
                   altitudeAccuracy: position.coords.altitudeAccuracy,
                   heading: position.coords.heading,
-                  speed: position.coords.speed
-                }
+                  speed: position.coords.speed,
+                },
               });
             },
             (error) => {
-              logger.error('Geolocation: Web API error', error);
+              logger.error("Geolocation: Web API error", error);
               resolve({
                 success: false,
-                error: this.getErrorMessage(error)
+                error: this.getErrorMessage(error),
               });
             },
-            defaultOptions
+            defaultOptions,
           );
         });
       }
     } catch (error) {
-      logger.error('Geolocation: failed to get position', error);
+      logger.error("Geolocation: failed to get position", error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Не удалось определить местоположение'
+        error:
+          error instanceof Error
+            ? error.message
+            : "Не удалось определить местоположение",
       };
     }
   }
@@ -165,38 +178,41 @@ class GeolocationService {
    */
   async watchPosition(
     callback: (position: GeolocationResult) => void,
-    options?: GeolocationOptions
+    options?: GeolocationOptions,
   ): Promise<string | number> {
     const defaultOptions: GeolocationOptions = {
       enableHighAccuracy: true,
       timeout: 10000,
       maximumAge: 0,
-      ...options
+      ...options,
     };
 
     if (isNativePlatform()) {
       // Для нативных платформ используем Capacitor
-      const watchId = await Geolocation.watchPosition(defaultOptions, (position, err) => {
-        if (err) {
-          callback({
-            success: false,
-            error: err.message
-          });
-        } else if (position) {
-          callback({
-            success: true,
-            coords: {
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude,
-              accuracy: position.coords.accuracy,
-              altitude: position.coords.altitude,
-              altitudeAccuracy: position.coords.altitudeAccuracy,
-              heading: position.coords.heading,
-              speed: position.coords.speed
-            }
-          });
-        }
-      });
+      const watchId = await Geolocation.watchPosition(
+        defaultOptions,
+        (position, err) => {
+          if (err) {
+            callback({
+              success: false,
+              error: err.message,
+            });
+          } else if (position) {
+            callback({
+              success: true,
+              coords: {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+                accuracy: position.coords.accuracy,
+                altitude: position.coords.altitude,
+                altitudeAccuracy: position.coords.altitudeAccuracy,
+                heading: position.coords.heading,
+                speed: position.coords.speed,
+              },
+            });
+          }
+        },
+      );
 
       return watchId;
     } else {
@@ -212,17 +228,17 @@ class GeolocationService {
               altitude: position.coords.altitude,
               altitudeAccuracy: position.coords.altitudeAccuracy,
               heading: position.coords.heading,
-              speed: position.coords.speed
-            }
+              speed: position.coords.speed,
+            },
           });
         },
         (error) => {
           callback({
             success: false,
-            error: this.getErrorMessage(error)
+            error: this.getErrorMessage(error),
           });
         },
-        defaultOptions
+        defaultOptions,
       );
 
       return watchId;
@@ -246,13 +262,13 @@ class GeolocationService {
   private getErrorMessage(error: GeolocationPositionError): string {
     switch (error.code) {
       case error.PERMISSION_DENIED:
-        return 'Доступ к геолокации запрещен';
+        return "Доступ к геолокации запрещен";
       case error.POSITION_UNAVAILABLE:
-        return 'Информация о местоположении недоступна';
+        return "Информация о местоположении недоступна";
       case error.TIMEOUT:
-        return 'Превышено время ожидания запроса геолокации';
+        return "Превышено время ожидания запроса геолокации";
       default:
-        return 'Не удалось определить местоположение';
+        return "Не удалось определить местоположение";
     }
   }
 }

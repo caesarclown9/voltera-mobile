@@ -1,13 +1,11 @@
 // Skeleton Loader Components
 
 interface SkeletonProps {
-  className?: string
+  className?: string;
 }
 
-export function Skeleton({ className = '' }: SkeletonProps) {
-  return (
-    <div className={`animate-pulse bg-gray-200 rounded ${className}`} />
-  )
+export function Skeleton({ className = "" }: SkeletonProps) {
+  return <div className={`animate-pulse bg-gray-200 rounded ${className}`} />;
 }
 
 // Card Skeleton
@@ -26,7 +24,7 @@ export function CardSkeleton() {
         <Skeleton className="h-4 w-2/3" />
       </div>
     </div>
-  )
+  );
 }
 
 // Balance Card Skeleton
@@ -43,7 +41,7 @@ export function BalanceCardSkeleton() {
         <Skeleton className="h-10 w-full rounded-lg" />
       </div>
     </div>
-  )
+  );
 }
 
 // Station Card Skeleton
@@ -73,7 +71,7 @@ export function StationCardSkeleton() {
         <Skeleton className="h-10 w-12 rounded-lg" />
       </div>
     </div>
-  )
+  );
 }
 
 // Station List Skeleton
@@ -87,7 +85,7 @@ export function StationListSkeleton() {
         <StationCardSkeleton key={i} />
       ))}
     </div>
-  )
+  );
 }
 
 // Map Skeleton
@@ -99,7 +97,7 @@ export function MapSkeleton() {
         <Skeleton className="h-4 w-32 mx-auto mb-2" />
         <Skeleton className="h-3 w-24 mx-auto" />
       </div>
-      
+
       {/* Floating skeleton elements to simulate map pins */}
       <div className="absolute top-1/4 left-1/4">
         <Skeleton className="w-6 h-6 rounded-full" />
@@ -111,7 +109,7 @@ export function MapSkeleton() {
         <Skeleton className="w-6 h-6 rounded-full" />
       </div>
     </div>
-  )
+  );
 }
 
 // Navigation Skeleton
@@ -120,14 +118,17 @@ export function NavigationSkeleton() {
     <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-2 pb-2 pt-1">
       <div className="flex justify-around items-center max-w-lg mx-auto">
         {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="flex flex-col items-center justify-center min-w-0 flex-1 py-2 px-1">
+          <div
+            key={i}
+            className="flex flex-col items-center justify-center min-w-0 flex-1 py-2 px-1"
+          >
             <Skeleton className="w-6 h-6 mb-1" />
             <Skeleton className="h-3 w-12" />
           </div>
         ))}
       </div>
     </nav>
-  )
+  );
 }
 
 // Profile Skeleton
@@ -164,7 +165,7 @@ export function ProfileSkeleton() {
         ))}
       </main>
     </div>
-  )
+  );
 }
 
 // Generic List Skeleton
@@ -182,7 +183,7 @@ export function ListSkeleton({ count = 5 }: { count?: number }) {
         </div>
       ))}
     </div>
-  )
+  );
 }
 
 // QR Scanner Skeleton
@@ -193,16 +194,16 @@ export function QRScannerSkeleton() {
         <Skeleton className="h-6 w-48 mx-auto mb-2" />
         <Skeleton className="h-4 w-64 mx-auto" />
       </div>
-      
+
       <div className="w-full max-w-sm mx-auto">
         <div className="aspect-square bg-gray-200 rounded-lg flex items-center justify-center animate-pulse">
           <div className="w-16 h-16 border-4 border-gray-300 border-dashed rounded-lg" />
         </div>
       </div>
-      
+
       <Skeleton className="h-10 w-full mt-4 rounded-lg" />
     </div>
-  )
+  );
 }
 
 // Charging Status Skeleton
@@ -236,5 +237,5 @@ export function ChargingStatusSkeleton() {
 
       <Skeleton className="h-12 w-full mt-6 rounded-lg" />
     </div>
-  )
+  );
 }

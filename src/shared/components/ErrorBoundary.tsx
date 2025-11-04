@@ -54,6 +54,11 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
           <div className="max-w-md w-full bg-white rounded-lg shadow-md p-6 text-center">
+            <img
+              src="/icons/voltera-logo-horizontal.svg"
+              alt="Voltera"
+              className="h-12 w-auto mx-auto mb-4 opacity-40"
+            />
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg
                 className="w-8 h-8 text-red-600"

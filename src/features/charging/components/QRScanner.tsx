@@ -123,7 +123,7 @@ export function QRScanner({ onScan, onError, onCancel }: QRScannerProps) {
           <>
             <button
               onClick={handleStartScan}
-              className="px-6 py-3 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition-colors flex items-center gap-2"
+              className="px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors flex items-center gap-2"
             >
               <svg
                 className="w-5 h-5"
@@ -152,7 +152,7 @@ export function QRScanner({ onScan, onError, onCancel }: QRScannerProps) {
           </>
         ) : (
           <div className="flex items-center gap-3">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-500"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
             <span className="text-gray-600">Подготовка камеры...</span>
           </div>
         )}

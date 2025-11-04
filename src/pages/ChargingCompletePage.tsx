@@ -132,7 +132,7 @@ export const ChargingCompletePage = () => {
           <p className="text-xl text-gray-600">Данные сессии не найдены</p>
           <button
             onClick={() => navigate("/stations")}
-            className="mt-4 px-6 py-2 bg-cyan-500 text-white rounded-lg"
+            className="mt-4 px-6 py-2 bg-primary-500 text-white rounded-lg"
           >
             К станциям
           </button>
@@ -142,7 +142,7 @@ export const ChargingCompletePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-50 to-white pb-20">
+    <div className="min-h-screen bg-gradient-to-b from-success-50 to-white pb-20">
       {/* Header */}
       <div className="bg-white shadow-sm sticky-header-safe z-10">
         <div className="flex items-center justify-between px-4 py-3">
@@ -213,12 +213,12 @@ export const ChargingCompletePage = () => {
           </div>
 
           {/* Total Cost - highlighted */}
-          <div className="flex items-center justify-between py-3 bg-cyan-50 -mx-6 px-6 mt-3 rounded-xl">
+          <div className="flex items-center justify-between py-3 bg-primary-50 -mx-6 px-6 mt-3 rounded-xl">
             <div className="flex items-center gap-3">
-              <DollarSign className="w-6 h-6 text-cyan-600" />
+              <DollarSign className="w-6 h-6 text-primary-600" />
               <span className="text-gray-700 font-medium">Итоговая сумма</span>
             </div>
-            <span className="font-bold text-2xl text-cyan-600">
+            <span className="font-bold text-2xl text-primary-600">
               {sessionData.totalCost.toFixed(2)} KGS
             </span>
           </div>
@@ -268,8 +268,8 @@ export const ChargingCompletePage = () => {
 
           <button
             onClick={() => navigate("/stations")}
-            className="flex-1 bg-cyan-500 text-white py-3 rounded-xl font-semibold 
-                     hover:bg-cyan-600 transition-colors flex items-center justify-center gap-2"
+            className="flex-1 bg-primary-500 text-white py-3 rounded-xl font-semibold 
+                     hover:bg-primary-600 transition-colors flex items-center justify-center gap-2"
           >
             <Home className="w-5 h-5" />К станциям
           </button>

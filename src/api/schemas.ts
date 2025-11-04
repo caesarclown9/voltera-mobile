@@ -40,7 +40,7 @@ const zTariff = z.object({
  * !E5<0 4;O summary :>==5:B>@>2
  */
 const zConnectorsSummary = z.object({
-  total: z.number(),
+  total: z.number().optional(), // Backend может не возвращать total, вычисляем из available+occupied+faulted
   available: z.number(),
   occupied: z.number(),
   faulted: z.number(),

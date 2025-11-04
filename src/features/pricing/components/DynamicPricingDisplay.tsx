@@ -172,7 +172,7 @@ export function DynamicPricingDisplay({
       <div className="flex items-center justify-between py-2">
         <div className="flex items-center gap-2">
           <Zap className="w-4 h-4 text-yellow-500" />
-          <span className="text-lg font-bold text-cyan-600">
+          <span className="text-lg font-bold text-primary-600">
             {currentPricing.rate_per_kwh} {currentPricing.currency}/кВт·ч
           </span>
         </div>
@@ -189,14 +189,14 @@ export function DynamicPricingDisplay({
   return (
     <div className="space-y-4">
       {/* Текущий тариф */}
-      <div className="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl p-4">
+      <div className="bg-gradient-to-r from-primary-50 to-primary-100 rounded-xl p-4">
         <div className="flex items-start justify-between mb-3">
           <div>
             <h3 className="text-sm font-medium text-gray-600 mb-1">
               Текущий тариф
             </h3>
             <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-bold text-cyan-600">
+              <span className="text-3xl font-bold text-primary-600">
                 {currentPricing.rate_per_kwh}
               </span>
               <span className="text-lg text-gray-600">
@@ -218,7 +218,7 @@ export function DynamicPricingDisplay({
         {/* Дополнительные сборы */}
         {(currentPricing.session_fee > 0 ||
           currentPricing.rate_per_minute > 0) && (
-          <div className="border-t border-cyan-100 pt-3 mt-3 space-y-1">
+          <div className="border-t border-primary-100 pt-3 mt-3 space-y-1">
             {currentPricing.session_fee > 0 && (
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Плата за сессию:</span>

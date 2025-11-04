@@ -77,7 +77,9 @@ export const useSignUp = () => {
       return result;
     },
     onSuccess: (data, _variables) => {
-      if (data.success && data.client) {
+      // Автоматический login только если есть session (email подтвержден)
+      // Если session === undefined, значит требуется подтверждение email
+      if (data.success && data.client && data.session) {
         // Преобразуем Client в UnifiedUser
         const unifiedUser = {
           id: data.client.id,
@@ -93,6 +95,7 @@ export const useSignUp = () => {
         login(unifiedUser);
         navigate("/", { replace: true });
       }
+      // Если session нет - обработка в компоненте (показ сообщения о подтверждении)
     },
   });
 };

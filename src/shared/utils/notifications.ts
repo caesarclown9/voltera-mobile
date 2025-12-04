@@ -135,7 +135,7 @@ export class NotificationService {
    * Уведомления для зарядки
    */
   static async notifyChargingStarted(stationId: string): Promise<void> {
-    await this.showNotification("⚡ Зарядка началась", {
+    await this.showNotification("Зарядка началась", {
       body: `Зарядка на станции ${stationId} успешно запущена`,
       tag: "charging-started",
       data: { stationId, type: "charging_started" },
@@ -147,8 +147,8 @@ export class NotificationService {
     energy: number,
     cost: number,
   ): Promise<void> {
-    await this.showNotification("✅ Зарядка завершена", {
-      body: `Заряжено ${energy.toFixed(1)} кВт⋅ч на сумму ${cost.toFixed(2)} сом`,
+    await this.showNotification("Зарядка завершена", {
+      body: `Заряжено ${energy.toFixed(1)} кВт·ч на сумму ${cost.toFixed(2)} сом`,
       tag: "charging-complete",
       data: { stationId, energy, cost, type: "charging_complete" },
       requireInteraction: true,
@@ -159,7 +159,7 @@ export class NotificationService {
     stationId: string,
     error: string,
   ): Promise<void> {
-    await this.showNotification("❌ Ошибка зарядки", {
+    await this.showNotification("Ошибка зарядки", {
       body: `Проблема на станции ${stationId}: ${error}`,
       tag: "charging-error",
       data: { stationId, error, type: "charging_error" },
@@ -168,7 +168,7 @@ export class NotificationService {
   }
 
   static async notifyLowBalance(balance: number): Promise<void> {
-    await this.showNotification("💰 Низкий баланс", {
+    await this.showNotification("Низкий баланс", {
       body: `Ваш баланс ${balance.toFixed(2)} сом. Рекомендуем пополнить`,
       tag: "low-balance",
       data: { balance, type: "low_balance" },

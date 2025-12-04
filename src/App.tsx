@@ -10,7 +10,12 @@ import { ToastContainer } from "./shared/hooks/useToast";
 import { createIDBPersister, shouldPersistQuery } from "./lib/queryPersister";
 import { versionManager } from "./lib/versionManager";
 import { LoadingScreen } from "./shared/components/LoadingScreen";
+import { OnboardingScreen, useOnboarding } from "./features/onboarding";
+import { ThemeProvider } from "./features/theme";
 import { logger } from "./shared/utils/logger";
+
+// Инициализация i18n
+import "./i18n";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -39,6 +44,7 @@ const persister = createIDBPersister();
 
 function App() {
   const [isVersionCheckComplete, setIsVersionCheckComplete] = useState(false);
+  const { shouldShowOnboarding, completeOnboarding, isLoading: isOnboardingLoading } = useOnboarding();
 
   // Проверка версии и миграции при старте приложения
   useEffect(() => {
@@ -79,45 +85,52 @@ function App() {
     initializeVersion();
   }, []);
 
-  // Показываем loading screen пока идет проверка версии
-  if (!isVersionCheckComplete) {
+  // Показываем loading screen пока идет проверка версии или onboarding
+  if (!isVersionCheckComplete || isOnboardingLoading) {
     return <LoadingScreen />;
+  }
+
+  // Показываем onboarding для новых пользователей
+  if (shouldShowOnboarding) {
+    return <OnboardingScreen onComplete={completeOnboarding} />;
   }
 
   return (
     <ErrorBoundary>
-      <PersistQueryClientProvider
-        client={queryClient}
-        persistOptions={{
-          persister,
-          maxAge: 1000 * 60 * 60 * 24, // 24 hours
-          dehydrateOptions: {
-            shouldDehydrateQuery: (query: Query) => {
-              // Only persist queries that match our criteria
-              return (
-                query.state.status === "success" &&
-                shouldPersistQuery(query.queryKey)
-              );
+      <ThemeProvider defaultTheme="system">
+        <PersistQueryClientProvider
+          client={queryClient}
+          persistOptions={{
+            persister,
+            maxAge: 1000 * 60 * 60 * 24, // 24 hours
+            dehydrateOptions: {
+              shouldDehydrateQuery: (query: Query) => {
+                // Only persist queries that match our criteria
+                return (
+                  query.state.status === "success" &&
+                  shouldPersistQuery(query.queryKey)
+                );
+              },
             },
-          },
-        }}
-      >
-        <BrowserRouter
-          future={{
-            v7_startTransition: true,
-            v7_relativeSplatPath: true,
           }}
         >
-          <Providers>
-            <div className="min-h-screen bg-gray-50">
-              <Router />
-              {/** Не показываем модалку авторизации на странице /auth, чтобы не дублировать форму */}
-              <AuthModalGate />
-              <ToastContainer />
-            </div>
-          </Providers>
-        </BrowserRouter>
-      </PersistQueryClientProvider>
+          <BrowserRouter
+            future={{
+              v7_startTransition: true,
+              v7_relativeSplatPath: true,
+            }}
+          >
+            <Providers>
+              <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
+                <Router />
+                {/** Не показываем модалку авторизации на странице /auth, чтобы не дублировать форму */}
+                <AuthModalGate />
+                <ToastContainer />
+              </div>
+            </Providers>
+          </BrowserRouter>
+        </PersistQueryClientProvider>
+      </ThemeProvider>
     </ErrorBoundary>
   );
 }

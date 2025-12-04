@@ -9,6 +9,7 @@ import {
 import { ChargingHistoryCard } from "../features/history/components/ChargingHistoryCard";
 import { TransactionCard } from "../features/history/components/TransactionCard";
 import { ExportButton } from "../features/history/components/ExportButton";
+import { HistoryListSkeleton } from "@/shared/components/Skeleton";
 import type { ChargingHistoryItem } from "../features/history/types";
 import { logger } from "@/shared/utils/logger";
 
@@ -149,9 +150,7 @@ export function HistoryPage() {
             )}
 
             {isLoadingCharging ? (
-              <div className="flex justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-              </div>
+              <HistoryListSkeleton count={4} />
             ) : chargingHistory && chargingHistory.length > 0 ? (
               chargingHistory.map((item) => (
                 <ChargingHistoryCard
@@ -188,9 +187,7 @@ export function HistoryPage() {
             )}
 
             {isLoadingTransactions ? (
-              <div className="flex justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-              </div>
+              <HistoryListSkeleton count={4} />
             ) : transactionHistory && transactionHistory.length > 0 ? (
               transactionHistory.map((transaction) => (
                 <TransactionCard

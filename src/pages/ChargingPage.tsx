@@ -5,6 +5,7 @@ import {
   CreditCard,
   Zap,
   BatteryCharging,
+  Plug,
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -328,7 +329,7 @@ export const ChargingPage = () => {
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-3">
             <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
-              <span className="text-2xl">⚡</span>
+              <Zap className="w-6 h-6 text-primary-500" />
             </div>
             <div>
               <h2 className="font-semibold text-lg">{station.name}</h2>
@@ -395,7 +396,7 @@ export const ChargingPage = () => {
                             : "bg-red-100 text-red-600"
                       }`}
                     >
-                      🔌
+                      <Plug className="w-4 h-4" />
                     </div>
                     <div className="text-left">
                       <div className="font-medium">{connector.type}</div>
@@ -408,8 +409,9 @@ export const ChargingPage = () => {
                   <div className="text-right">
                     <div className="flex flex-col items-end">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium">
-                          ⚡ {connector.power || station.power || 0} кВт/ч
+                        <span className="font-medium flex items-center gap-1">
+                          <Zap className="w-3.5 h-3.5" />
+                          {connector.power || station.power || 0} кВт/ч
                         </span>
                         <span className="text-orange-500 font-semibold">
                           {connectorPrices[connector.id] ||
@@ -627,9 +629,10 @@ export const ChargingPage = () => {
                       Запуск зарядки...
                     </>
                   ) : (
-                    <>
-                      ⚡ Начать зарядку ({chargingLimits.amount_som || 100} сом)
-                    </>
+                    <span className="flex items-center gap-2">
+                      <Zap className="w-5 h-5" />
+                      Начать зарядку ({chargingLimits.amount_som || 100} сом)
+                    </span>
                   )}
                 </button>
 

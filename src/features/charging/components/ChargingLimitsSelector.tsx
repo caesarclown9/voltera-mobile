@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Zap, DollarSign, Info } from "lucide-react";
+import { Zap, DollarSign, Info, AlertTriangle } from "lucide-react";
 
 interface ChargingLimitsSelectorProps {
   balance: number;
@@ -425,8 +425,9 @@ export function ChargingLimitsSelector({
           {/* Предупреждение о недостатке средств */}
           {limitType === "energy" && selectedEnergy * pricePerKwh > balance && (
             <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
-              <p className="text-sm text-yellow-800">
-                ⚠️ Недостаточно средств. Требуется ~
+              <p className="text-sm text-yellow-800 flex items-center gap-1">
+                <AlertTriangle className="w-4 h-4" />
+                Недостаточно средств. Требуется ~
                 {(selectedEnergy * pricePerKwh).toFixed(0)} сом
               </p>
             </div>

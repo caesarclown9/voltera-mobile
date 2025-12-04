@@ -11,6 +11,7 @@ import {
   useNavigate,
   useLocation as useRouterLocation,
 } from "react-router-dom";
+import { Circle, Zap, MapPin, AlertTriangle } from "lucide-react";
 
 export default function MapHome() {
   const navigate = useNavigate();
@@ -65,11 +66,11 @@ export default function MapHome() {
     {
       id: "available",
       label: "Доступные",
-      icon: "🟢",
+      icon: <Circle className="w-4 h-4 fill-success-500 text-success-500" />,
       count: availableLocationsCount,
     },
-    { id: "fast", label: "Быстрые", icon: "⚡", count: fastChargersCount },
-    { id: "nearby", label: "Рядом", icon: "📍", count: nearbyLocationsCount },
+    { id: "fast", label: "Быстрые", icon: <Zap className="w-4 h-4" />, count: fastChargersCount },
+    { id: "nearby", label: "Рядом", icon: <MapPin className="w-4 h-4" />, count: nearbyLocationsCount },
   ];
 
   const userLocationCoords: [number, number] | undefined = userLocation
@@ -85,7 +86,7 @@ export default function MapHome() {
           className="text-center"
         >
           <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <span className="text-5xl">⚠️</span>
+            <AlertTriangle className="w-12 h-12 text-red-500" />
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             Ошибка загрузки

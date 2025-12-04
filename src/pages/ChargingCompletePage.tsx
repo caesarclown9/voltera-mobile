@@ -10,6 +10,7 @@ import {
   Home,
   Receipt,
 } from "lucide-react";
+import { motion } from "framer-motion";
 import { evpowerApi } from "../services/evpowerApi";
 
 interface ChargingCompleteData {
@@ -159,22 +160,72 @@ export const ChargingCompletePage = () => {
 
       {/* Main Content */}
       <div className="px-4 py-6 max-w-md mx-auto">
-        {/* Success Icon */}
-        <div className="flex justify-center mb-6">
-          <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center">
-            <CheckCircle className="w-16 h-16 text-green-600" />
-          </div>
-        </div>
+        {/* Animated Success Icon */}
+        <motion.div
+          className="flex justify-center mb-6"
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{
+            type: "spring",
+            stiffness: 200,
+            damping: 15,
+            delay: 0.1,
+          }}
+        >
+          <motion.div
+            className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center"
+            animate={{
+              boxShadow: [
+                "0 0 0 0 rgba(34, 197, 94, 0)",
+                "0 0 0 20px rgba(34, 197, 94, 0.2)",
+                "0 0 0 0 rgba(34, 197, 94, 0)",
+              ],
+            }}
+            transition={{
+              duration: 2,
+              repeat: 2,
+              ease: "easeOut",
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{
+                type: "spring",
+                stiffness: 200,
+                damping: 12,
+                delay: 0.3,
+              }}
+            >
+              <CheckCircle className="w-16 h-16 text-green-600" />
+            </motion.div>
+          </motion.div>
+        </motion.div>
 
-        <h2 className="text-2xl font-bold text-center mb-2">
+        <motion.h2
+          className="text-2xl font-bold text-center mb-2"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+        >
           Зарядка успешно завершена!
-        </h2>
-        <p className="text-gray-600 text-center mb-6">
+        </motion.h2>
+        <motion.p
+          className="text-gray-600 text-center mb-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+        >
           Спасибо за использование Voltera
-        </p>
+        </motion.p>
 
         {/* Session Details Card */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+        <motion.div
+          className="bg-white rounded-2xl shadow-lg p-6 mb-6"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7, type: "spring", stiffness: 200, damping: 20 }}
+        >
           <h3 className="font-semibold text-lg mb-4">Детали сессии</h3>
 
           {/* Battery Level - if available */}
@@ -222,10 +273,15 @@ export const ChargingCompletePage = () => {
               {sessionData.totalCost.toFixed(2)} KGS
             </span>
           </div>
-        </div>
+        </motion.div>
 
         {/* Additional Info */}
-        <div className="bg-gray-50 rounded-xl p-4 mb-6 text-sm">
+        <motion.div
+          className="bg-gray-50 rounded-xl p-4 mb-6 text-sm"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.85 }}
+        >
           <div className="flex justify-between mb-2">
             <span className="text-gray-600">Станция:</span>
             <span className="font-medium">{sessionData.stationId}</span>
@@ -246,11 +302,16 @@ export const ChargingCompletePage = () => {
               </span>
             </div>
           )}
-        </div>
+        </motion.div>
 
         {/* Action Buttons */}
-        <div className="flex gap-3">
-          <button
+        <motion.div
+          className="flex gap-3"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1 }}
+        >
+          <motion.button
             onClick={() =>
               navigate(
                 "/history" +
@@ -259,21 +320,23 @@ export const ChargingCompletePage = () => {
                     : ""),
               )
             }
-            className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl font-semibold 
+            className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl font-semibold
                      hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
+            whileTap={{ scale: 0.95 }}
           >
             <Receipt className="w-5 h-5" />
             История
-          </button>
+          </motion.button>
 
-          <button
+          <motion.button
             onClick={() => navigate("/stations")}
-            className="flex-1 bg-primary-500 text-white py-3 rounded-xl font-semibold 
+            className="flex-1 bg-primary-500 text-white py-3 rounded-xl font-semibold
                      hover:bg-primary-600 transition-colors flex items-center justify-center gap-2"
+            whileTap={{ scale: 0.95 }}
           >
             <Home className="w-5 h-5" />К станциям
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
       </div>
     </div>
   );

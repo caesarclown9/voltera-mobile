@@ -1,12 +1,13 @@
 import { Link, useLocation } from "react-router-dom";
 import { useAuthStatus } from "@/features/auth/hooks/useAuth";
 import { motion } from "framer-motion";
+import { Map, List, Heart, User } from "lucide-react";
+import type { ComponentType } from "react";
 
 interface NavItem {
   path: string;
   label: string;
-  icon: string;
-  color: string;
+  icon: ComponentType<{ size?: number; className?: string; strokeWidth?: number }>;
   authRequired?: boolean;
 }
 
@@ -14,27 +15,23 @@ const navItems: NavItem[] = [
   {
     path: "/",
     label: "Карта",
-    icon: "🗺️",
-    color: "text-primary-500",
+    icon: Map,
   },
   {
     path: "/stations",
     label: "Списком",
-    icon: "📋",
-    color: "text-primary-500",
+    icon: List,
   },
   {
     path: "/favorites",
     label: "Избранное",
-    icon: "❤️",
-    color: "text-primary-500",
+    icon: Heart,
     authRequired: false,
   },
   {
     path: "/profile",
     label: "Профиль",
-    icon: "👤",
-    color: "text-primary-500",
+    icon: User,
   },
 ];
 
@@ -49,7 +46,7 @@ export function BottomNavigation() {
 
   return (
     <nav
-      className="fixed left-0 right-0 bg-white shadow-lg z-50"
+      className="fixed left-0 right-0 bg-white dark:bg-gray-800 shadow-lg dark:shadow-gray-900/30 z-50 transition-colors"
       style={{
         bottom: "0",
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
@@ -71,6 +68,8 @@ export function BottomNavigation() {
                 : `${item.path}?auth=required`
               : item.path;
 
+          const IconComponent = item.icon;
+
           return (
             <Link
               key={item.path}
@@ -80,7 +79,7 @@ export function BottomNavigation() {
               {isActive && (
                 <motion.div
                   layoutId="bottomNav"
-                  className="absolute inset-0 bg-gray-100 rounded-xl"
+                  className="absolute inset-0 bg-primary-50 dark:bg-primary-900/30 rounded-xl"
                   initial={false}
                   transition={{ type: "spring", stiffness: 500, damping: 30 }}
                 />
@@ -89,13 +88,17 @@ export function BottomNavigation() {
                 whileTap={{ scale: 0.95 }}
                 className="relative z-10 flex flex-col items-center"
               >
+                <IconComponent
+                  size={24}
+                  className={`mb-1 transition-colors ${
+                    isActive ? "text-primary-500 dark:text-primary-400" : "text-gray-400 dark:text-gray-500"
+                  }`}
+                  strokeWidth={isActive ? 2.5 : 2}
+                />
                 <span
-                  className={`text-2xl mb-1 ${isActive ? item.color : "opacity-60"}`}
-                >
-                  {item.icon}
-                </span>
-                <span
-                  className={`text-xs font-medium ${isActive ? "text-gray-900" : "text-gray-500"}`}
+                  className={`text-xs font-medium transition-colors ${
+                    isActive ? "text-primary-600 dark:text-primary-400" : "text-gray-500 dark:text-gray-400"
+                  }`}
                 >
                   {item.label}
                 </span>

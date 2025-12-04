@@ -81,6 +81,37 @@ export const routes = {
   AboutPage: createLazyRoute(() =>
     import("../pages/AboutPage").then((m) => ({ default: m.AboutPage })),
   ),
+
+  // Админ-панель
+  AdminDashboard: createLazyRoute(() =>
+    import("../features/admin/pages/AdminDashboard").then((m) => ({
+      default: m.AdminDashboard,
+    })),
+  ),
+
+  AdminStations: createLazyRoute(() =>
+    import("../features/admin/pages/AdminStationsPage").then((m) => ({
+      default: m.AdminStationsPage,
+    })),
+  ),
+
+  AdminStationDetail: createLazyRoute(() =>
+    import("../features/admin/pages/AdminStationDetailPage").then((m) => ({
+      default: m.AdminStationDetailPage,
+    })),
+  ),
+
+  AdminSessions: createLazyRoute(() =>
+    import("../features/admin/pages/AdminSessionsPage").then((m) => ({
+      default: m.AdminSessionsPage,
+    })),
+  ),
+
+  AdminClients: createLazyRoute(() =>
+    import("../features/admin/pages/AdminClientsPage").then((m) => ({
+      default: m.AdminClientsPage,
+    })),
+  ),
 };
 
 // Функция для prefetch критичных роутов

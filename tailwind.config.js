@@ -1,34 +1,35 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  darkMode: "class",
   theme: {
     extend: {
       colors: {
-        // Primary - Электрический синий (основной цвет бренда Voltera)
+        // Primary - Синий (основной цвет бренда Voltera - молния)
         primary: {
           50: "#EFF6FF",
           100: "#DBEAFE",
           200: "#BFDBFE",
           300: "#93C5FD",
           400: "#60A5FA",
-          500: "#3B82F6", // Main brand color - Электрический синий
-          600: "#2563EB",
+          500: "#3B82F6", // Main brand color - Синий
+          600: "#2563EB", // Hover/active state
           700: "#1D4ED8",
           800: "#1E40AF",
           900: "#1E3A8A",
         },
-        // Accent - Фиолетовый (для акцентов и выделения)
+        // Accent - Индиго/Фиолетовый (для акцентов - тёмный фон логотипа)
         accent: {
-          50: "#F5F3FF",
-          100: "#EDE9FE",
-          200: "#DDD6FE",
-          300: "#C4B5FD",
-          400: "#A78BFA",
-          500: "#8B5CF6", // Accent color - Фиолетовый
-          600: "#7C3AED",
-          700: "#6D28D9",
-          800: "#5B21B6",
-          900: "#4C1D95",
+          50: "#EEF2FF",
+          100: "#E0E7FF",
+          200: "#C7D2FE",
+          300: "#A5B4FC",
+          400: "#818CF8",
+          500: "#6366F1", // Accent color - Индиго
+          600: "#4F46E5",
+          700: "#4338CA",
+          800: "#3730A3",
+          900: "#1E1B4B", // Тёмный фиолетовый из логотипа
         },
         // Dark - Темный (из логотипа Voltera)
         dark: {
@@ -82,7 +83,7 @@ export default {
           800: "#991B1B",
           900: "#7F1D1D",
         },
-        // Cyan - Оставляем для совместимости (маппим на primary)
+        // Cyan - Оставляем для совместимости (маппим на primary - синий)
         cyan: {
           50: "#EFF6FF",
           100: "#DBEAFE",
@@ -96,17 +97,19 @@ export default {
           900: "#1E3A8A",
         },
       },
-      // Градиенты
+      // Градиенты (синий/фиолетовый - бренд Voltera)
       backgroundImage: {
         "gradient-lightning":
           "linear-gradient(135deg, #60A5FA 0%, #3B82F6 50%, #2563EB 100%)",
         "gradient-primary": "linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)",
         "gradient-card": "linear-gradient(135deg, #EFF6FF 0%, #FFFFFF 100%)",
-        "gradient-dark": "linear-gradient(135deg, #2B2A29 0%, #374151 100%)",
+        "gradient-dark": "linear-gradient(135deg, #1E1B4B 0%, #312E81 100%)",
         "gradient-energy":
-          "linear-gradient(90deg, #3B82F6 0%, #8B5CF6 50%, #A78BFA 100%)",
+          "linear-gradient(90deg, #3B82F6 0%, #6366F1 50%, #818CF8 100%)",
+        "gradient-brand":
+          "linear-gradient(135deg, #1E3A8A 0%, #3B82F6 50%, #60A5FA 100%)",
       },
-      // Тени с электрическим синим оттенком
+      // Тени с синим оттенком
       boxShadow: {
         sm: "0 1px 2px 0 rgba(59, 130, 246, 0.05)",
         DEFAULT: "0 1px 3px 0 rgba(59, 130, 246, 0.1)",
@@ -115,7 +118,7 @@ export default {
         xl: "0 20px 25px -5px rgba(59, 130, 246, 0.2)",
         "2xl": "0 25px 50px -12px rgba(59, 130, 246, 0.25)",
         "glow-primary": "0 0 20px rgba(59, 130, 246, 0.4)",
-        "glow-accent": "0 0 20px rgba(139, 92, 246, 0.4)",
+        "glow-accent": "0 0 20px rgba(99, 102, 241, 0.4)",
         "glow-energy": "0 0 30px rgba(96, 165, 250, 0.6)",
       },
       // Анимации

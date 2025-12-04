@@ -43,13 +43,14 @@ export const API_ENDPOINTS = {
     webhook: "/api/v1/payment/webhook",
   },
 
-  // Auth endpoints
-  auth: {
-    signIn: "/api/v1/auth/signin",
-    signUp: "/api/v1/auth/signup",
-    signOut: "/api/v1/auth/signout",
-    verify: "/api/v1/auth/verify",
-    refresh: "/api/v1/auth/refresh",
-    profile: "/api/v1/auth/profile",
+  // Profile endpoint (auth is handled by Supabase directly)
+  profile: {
+    get: "/api/v1/profile",
+  },
+
+  // Device registration for push notifications
+  devices: {
+    register: "/api/v1/devices/register",
+    unregister: "/api/v1/devices/unregister",
   },
 } as const;

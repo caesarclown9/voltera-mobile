@@ -366,6 +366,9 @@ class EvPowerApiService {
 
   /**
    * Получить статус зарядки
+   *
+   * Backend возвращает плоскую структуру, mobile ожидает вложенную { session: {...} }
+   * Этот метод трансформирует ответ backend в ожидаемый формат
    */
   async getChargingStatus(
     sessionId: string,
@@ -375,31 +378,71 @@ class EvPowerApiService {
       { method: "GET" },
       zChargingStatus,
     );
-    const session = parsed.session
-      ? {
-          id: parsed.session.id,
-          status: parsed.session.status,
-          station_id: parsed.session.station_id,
-          connector_id: parsed.session.connector_id,
-          start_time: parsed.session.start_time,
-          stop_time: parsed.session.stop_time,
-          energy_consumed: parsed.session.energy_consumed ?? 0,
-          current_cost: parsed.session.current_cost ?? 0,
-          reserved_amount: parsed.session.reserved_amount ?? 0,
-          limit_type: parsed.session.limit_type,
-          limit_value: parsed.session.limit_value,
-          limit_reached: parsed.session.limit_reached ?? false,
-          limit_percentage: parsed.session.limit_percentage ?? 0,
-          rate_per_kwh: parsed.session.rate_per_kwh ?? 0,
-          session_fee: parsed.session.session_fee ?? 0,
-          ocpp_transaction_id: parsed.session.ocpp_transaction_id,
-          meter_start: parsed.session.meter_start,
-          meter_current: parsed.session.meter_current,
-          charging_duration_minutes:
-            parsed.session.charging_duration_minutes ?? 0,
-        }
-      : undefined;
-    return { success: true, session };
+
+    // Backend возвращает плоскую структуру, нужно трансформировать
+    // Проверяем есть ли вложенный session или данные на верхнем уровне
+    const hasNestedSession = parsed.session !== undefined;
+    const hasTopLevelData = parsed.session_id !== undefined || parsed.status !== undefined;
+
+    let session: import("../api/types").ChargingStatus["session"];
+
+    if (hasNestedSession && parsed.session) {
+      // Если backend вернул вложенную структуру (на будущее)
+      session = {
+        id: parsed.session.id ?? parsed.session.session_id ?? sessionId,
+        status: parsed.session.status as "started" | "stopped" | "error",
+        station_id: parsed.session.station_id,
+        connector_id: parsed.session.connector_id ?? 1,
+        start_time: parsed.session.start_time,
+        stop_time: parsed.session.stop_time ?? undefined,
+        energy_consumed: parsed.session.energy_consumed ?? parsed.session.energy_consumed_kwh ?? 0,
+        current_cost: parsed.session.current_cost ?? parsed.session.cost ?? parsed.session.current_amount ?? 0,
+        reserved_amount: parsed.session.reserved_amount ?? 0,
+        limit_type: (parsed.session.limit_type as "energy" | "amount" | "none") ?? "none",
+        limit_value: parsed.session.limit_value,
+        limit_reached: parsed.session.limit_reached ?? false,
+        limit_percentage: parsed.session.limit_percentage ?? parsed.session.progress_percent ?? 0,
+        rate_per_kwh: parsed.session.rate_per_kwh ?? 0,
+        session_fee: parsed.session.session_fee ?? 0,
+        ocpp_transaction_id: parsed.session.ocpp_transaction_id
+          ? Number(parsed.session.ocpp_transaction_id)
+          : undefined,
+        meter_start: parsed.session.meter_start,
+        meter_current: parsed.session.meter_current,
+        charging_duration_minutes:
+          parsed.session.charging_duration_minutes ?? parsed.session.duration_minutes ?? 0,
+      };
+    } else if (hasTopLevelData) {
+      // Backend вернул плоскую структуру (текущее поведение)
+      session = {
+        id: parsed.session_id ?? sessionId,
+        status: (parsed.status as "started" | "stopped" | "error") ?? "started",
+        station_id: parsed.station_id ?? "",
+        connector_id: parsed.connector_id ?? 1,
+        start_time: parsed.start_time ?? new Date().toISOString(),
+        stop_time: parsed.stop_time ?? undefined,
+        energy_consumed: parsed.energy_consumed ?? parsed.energy_consumed_kwh ?? 0,
+        // Backend возвращает "cost", mobile использует "current_cost"
+        current_cost: parsed.current_cost ?? parsed.cost ?? parsed.current_amount ?? 0,
+        reserved_amount: parsed.reserved_amount ?? 0,
+        limit_type: (parsed.limit_type as "energy" | "amount" | "none") ?? "none",
+        limit_value: parsed.limit_value,
+        limit_reached: false,
+        limit_percentage: parsed.progress_percent ?? 0,
+        rate_per_kwh: parsed.rate_per_kwh ?? 0,
+        session_fee: 0,
+        ocpp_transaction_id: parsed.ocpp_transaction_id
+          ? Number(parsed.ocpp_transaction_id)
+          : undefined,
+        meter_start: parsed.meter_start,
+        meter_current: parsed.meter_current,
+        charging_duration_minutes: parsed.duration_minutes ?? 0,
+      };
+    } else {
+      session = undefined;
+    }
+
+    return { success: parsed.success, session };
   }
 
   /**
@@ -789,11 +832,43 @@ class EvPowerApiService {
 
   /**
    * Получить текущий баланс
+   *
+   * Использует API эндпоинт /api/v1/balance/{client_id} вместо прямого
+   * запроса к Supabase для согласованности с backend бизнес-логикой.
+   * Fallback на Supabase если API недоступен.
    */
   async getBalance(): Promise<number> {
     const client_id = await this.getClientId();
 
-    // Источник истины — Supabase. Берем баланс напрямую из БД.
+    try {
+      // Пробуем получить баланс через API (источник истины)
+      const balanceSchema = z.object({
+        success: z.boolean(),
+        balance: z.number().optional(),
+        current_balance: z.number().optional(),
+        client_id: z.string().optional(),
+        error: z.string().optional(),
+      });
+
+      const response = await this.apiRequest(
+        `/balance/${client_id}`,
+        { method: "GET" },
+        balanceSchema,
+      );
+
+      if (response.success) {
+        const balance = response.balance ?? response.current_balance ?? 0;
+        return typeof balance === "number" ? balance : 0;
+      }
+
+      // Если API вернул ошибку, пробуем Supabase
+      logger.warn("[VolteraAPI] Balance API returned error, falling back to Supabase");
+    } catch (apiError) {
+      // API недоступен, используем Supabase как fallback
+      logger.warn("[VolteraAPI] Balance API unavailable, falling back to Supabase:", apiError);
+    }
+
+    // Fallback: Supabase (для обратной совместимости)
     const { data, error } = await supabase
       .from("clients")
       .select("balance")

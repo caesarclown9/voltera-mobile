@@ -5,6 +5,7 @@ import type { Station } from "../../../api/types";
 import type { StationWithLocation } from "../types";
 import { useFavorites } from "../../favorites/hooks/useFavorites";
 import { useAuthStatus } from "../../auth/hooks/useAuth";
+import { AnimatedListItem } from "../../../shared/components/AnimatedList";
 
 interface StationListProps {
   stations: StationWithLocation[];
@@ -228,13 +229,14 @@ export function StationList({
             <div className="text-sm text-gray-600 mb-3">
               Найдено: {filteredAndSortedStations.length} станций
             </div>
-            {filteredAndSortedStations.map((station) => (
-              <StationCard
-                key={station.id}
-                station={station}
-                onSelect={() => onStationSelect?.(station)}
-                showDistance={!!userLocation}
-              />
+            {filteredAndSortedStations.map((station, index) => (
+              <AnimatedListItem key={station.id} index={index}>
+                <StationCard
+                  station={station}
+                  onSelect={() => onStationSelect?.(station)}
+                  showDistance={!!userLocation}
+                />
+              </AnimatedListItem>
             ))}
           </div>
         )}

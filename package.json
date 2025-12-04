@@ -1,7 +1,7 @@
 {
   "name": "voltera-pwa",
   "private": true,
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Voltera - Мобильное приложение для управления зарядкой электромобилей в Кыргызстане. Находите ближайшие станции, начинайте зарядку по QR-коду, управляйте балансом и отслеживайте историю зарядок.",
   "author": "Voltera",
   "homepage": "https://voltera.kg",
@@ -22,6 +22,7 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest watch",
+    "generate:feature": "node scripts/generate-feature-graphic.cjs",
     "pre-release": "bash scripts/pre-release-check.sh",
     "prepare": "husky"
   },
@@ -50,6 +51,8 @@
     "dotenv": "^17.2.2",
     "framer-motion": "^10.18.0",
     "html5-qrcode": "^2.3.8",
+    "i18next": "^25.7.1",
+    "i18next-browser-languagedetector": "^8.2.0",
     "idb": "^8.0.3",
     "idb-keyval": "^6.2.2",
     "jspdf": "^3.0.3",
@@ -58,6 +61,7 @@
     "papaparse": "^5.5.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-i18next": "^16.3.5",
     "react-leaflet-cluster": "^2.1.0",
     "react-router-dom": "^6.8.1",
     "uuid": "^13.0.0",

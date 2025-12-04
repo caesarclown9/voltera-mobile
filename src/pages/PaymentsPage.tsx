@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronLeft, Plus, Clock, CheckCircle, XCircle } from "lucide-react";
+import { ChevronLeft, Plus, Clock, CheckCircle, XCircle, Smartphone } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useBalance } from "@/features/balance/hooks/useBalance";
 import { SimpleTopup } from "@/features/balance/components/SimpleTopup";
@@ -38,7 +38,7 @@ export default function PaymentsPage() {
     {
       id: "wallet",
       name: "Электронный кошелек",
-      icon: "📱",
+      icon: <Smartphone className="w-6 h-6" />,
       description: "MBank, O!Деньги, Элсом",
     },
   ];
@@ -88,7 +88,7 @@ export default function PaymentsPage() {
                   selectedMethod === method.id ? "ring-2 ring-green-500" : ""
                 }`}
               >
-                <div className="text-2xl">{method.icon}</div>
+                <div className="text-primary-500">{method.icon}</div>
                 <div className="flex-1 text-left">
                   <div className="font-medium">{method.name}</div>
                   <div className="text-sm text-gray-500">

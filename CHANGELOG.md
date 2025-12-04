@@ -7,6 +7,111 @@
 
 ---
 
+## [1.1.0] - Build 86 - 2025-12-02 🔔 **Firebase Push Notifications**
+
+### 🎯 Цель: Интеграция Push Notifications через Firebase Cloud Messaging
+
+Добавлена полная поддержка push-уведомлений для Android и iOS через Firebase Cloud Messaging. Backend уже готов к отправке уведомлений.
+
+### ✅ Добавлено
+
+#### 🔔 Firebase Push Notifications (Android)
+
+- ✅ **Firebase конфигурация для Android**
+  - Добавлен `google-services.json` в `android/app/`
+  - Обновлен плагин `com.google.gms:google-services` до версии 4.4.4
+  - Файл: `android/build.gradle:10`
+  - Conditional apply в `android/app/build.gradle:99-106` уже настроен
+  - **Эффект:** Android приложение готово получать push-уведомления
+
+#### 🔔 Firebase Push Notifications (iOS)
+
+- ✅ **Firebase конфигурация для iOS**
+  - Добавлен `GoogleService-Info.plist` в `ios/App/App/`
+  - Добавлены Firebase pods в `Podfile`:
+    - `Firebase/Core`
+    - `Firebase/Messaging`
+  - Файл: `ios/App/Podfile`
+
+- ✅ **AppDelegate с Firebase инициализацией**
+  - Добавлен `import FirebaseCore` и `import FirebaseMessaging`
+  - Вызов `FirebaseApp.configure()` в `didFinishLaunchingWithOptions`
+  - Обработка APNS token через `Messaging.messaging().apnsToken`
+  - Delegate для foreground уведомлений
+  - Файл: `ios/App/App/AppDelegate.swift`
+  - **Эффект:** iOS приложение готово получать push-уведомления
+
+#### 🔧 Backend Integration (Voltera-backend)
+
+- ✅ **Firebase Admin SDK credentials**
+  - Service Account JSON добавлен в `credentials/firebase-adminsdk.json`
+  - Добавлена защита в `.gitignore` для Firebase credentials
+  - Обновлен `.env.example` с переменными Firebase:
+    - `FIREBASE_CREDENTIALS` - путь к файлу (для локальной разработки)
+    - `FIREBASE_CREDENTIALS_JSON` - JSON напрямую (для Docker/Coolify)
+
+### 📝 Версионирование
+
+- **version:** `1.1.0` (package.json)
+- **versionCode:** `86` (android/app/build.gradle)
+- **APP_VERSION:** `1.1.0` (src/lib/versionManager.ts)
+- **APP_BUILD:** `86` (src/lib/versionManager.ts)
+
+### 📂 Измененные файлы
+
+**Android:**
+- `android/build.gradle` - google-services plugin 4.4.4
+- `android/app/google-services.json` - Firebase config (новый)
+
+**iOS:**
+- `ios/App/Podfile` - Firebase pods
+- `ios/App/App/GoogleService-Info.plist` - Firebase config (новый)
+- `ios/App/App/AppDelegate.swift` - Firebase initialization
+
+**Backend (Voltera-backend):**
+- `credentials/firebase-adminsdk.json` - Service Account (новый)
+- `backend/.env.example` - Firebase env variables
+- `.gitignore` - Firebase credentials protection
+
+**Версии:**
+- `package.json` - version 1.1.0
+- `android/app/build.gradle` - versionCode 86, versionName 1.1.0
+- `src/lib/versionManager.ts` - APP_VERSION 1.1.0, APP_BUILD 86
+
+### 🚀 Deployment Notes
+
+**Android (Google Play):**
+1. Собрать release bundle: `cd android && ./gradlew bundleRelease`
+2. AAB будет в `android/app/build/outputs/bundle/release/`
+3. Загрузить в Google Play Console
+
+**iOS (App Store):**
+1. Выполнить `cd ios/App && pod install`
+2. Открыть `App.xcworkspace` в Xcode
+3. Собрать и загрузить в App Store Connect
+
+**Backend (Coolify):**
+1. Добавить `FIREBASE_CREDENTIALS_JSON` в переменные окружения Coolify
+2. Значение: содержимое `firebase-adminsdk.json` одной строкой
+3. Перезапустить контейнер
+
+### 🔗 Архитектура Push Notifications
+
+```
+Mobile App ──> FCM Token ──> Backend API ──> Supabase (device_tokens)
+                                   │
+                                   └──> Firebase Admin SDK ──> FCM ──> Device
+```
+
+**Поток:**
+1. Приложение получает FCM token при старте
+2. Регистрирует token через `POST /api/v1/clients/devices`
+3. Backend сохраняет token в таблицу `device_tokens`
+4. При событии (зарядка завершена и т.д.) backend отправляет push через Firebase Admin SDK
+5. FCM доставляет уведомление на устройство
+
+---
+
 ## [Unreleased] - Build 85 - 2025-11-04 🚀 **Google Play Full Compliance (16KB + Edge-to-Edge + Large Screens)**
 
 ### 🎯 Цель: Решение всех 3 проблем Google Play Console для Android 15+ и планшетов
@@ -1126,9 +1231,9 @@ Http.request({
 
 ## Статус Проекта
 
-**Версия:** 1.0.1
-**Build:** 37
-**Последнее обновление:** 2025-10-15
+**Версия:** 1.1.0
+**Build:** 86
+**Последнее обновление:** 2025-12-02
 
 ### Платформы
 
@@ -1147,12 +1252,11 @@ Http.request({
 
 ## Планы на Будущее
 
-### v1.1.0 (В разработке)
+### v1.1.0 (Текущий релиз) ✅
 
-- [ ] iOS релиз в App Store
-- [ ] Улучшенная offline поддержка
-- [ ] Дополнительные статистики в профиле
-- [ ] Уведомления о специальных предложениях
+- [x] Firebase Push Notifications (Android + iOS)
+- [x] Backend интеграция с Firebase Admin SDK
+- [ ] iOS релиз в App Store (требуется macOS)
 
 ### v1.2.0 (Запланировано)
 

@@ -5,6 +5,7 @@ import { useStations } from "@/features/stations/hooks/useStations";
 import { useFavorites } from "@/features/favorites/hooks/useFavorites";
 import { useAuthStatus } from "@/features/auth/hooks/useAuth";
 import { DynamicPricingDisplay } from "@/features/pricing/components/DynamicPricingDisplay";
+import { StationListSkeleton } from "@/shared/components/Skeleton";
 
 export const StationsList = () => {
   const navigate = useNavigate();
@@ -50,11 +51,17 @@ export const StationsList = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Загружаем станции...</p>
+      <div className="min-h-screen bg-gray-50 pb-20">
+        {/* Header skeleton */}
+        <div className="bg-white shadow-sm p-4">
+          <div className="h-8 bg-gray-200 rounded w-40 mb-4" />
+          <div className="flex gap-2">
+            <div className="h-10 bg-gray-200 rounded-full w-24" />
+            <div className="h-10 bg-gray-200 rounded-full w-20" />
+            <div className="h-10 bg-gray-200 rounded-full w-28" />
+          </div>
         </div>
+        <StationListSkeleton count={4} />
       </div>
     );
   }

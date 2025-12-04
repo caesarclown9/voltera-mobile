@@ -172,37 +172,106 @@ export const zStartChargingResponse = z.object({
 });
 
 /**
- * !E5<0 4;O A5AA88 2=CB@8 ChargingStatus
+ * Схема для сессии внутри ChargingStatus
+ *
+ * ВАЖНО: Backend возвращает "cost", mobile использует "current_cost"
+ * Трансформация происходит в evpowerApi.ts при обработке ответа
  */
 const zChargingSession = z.object({
-  id: z.string(),
+  id: z.string().optional(), // session_id в backend
+  session_id: z.string().optional(), // альтернативное имя
   status: z.enum(["started", "stopped", "error"]),
   station_id: z.string(),
-  connector_id: z.number(),
+  connector_id: z.number().optional(),
   start_time: z.string(), // ISO datetime
-  stop_time: z.string().optional(),
+  stop_time: z.string().nullish(),
   energy_consumed: z.number().optional().default(0),
+  energy_consumed_kwh: z.number().optional(), // Backend alias
+  // Backend возвращает "cost", mobile использует "current_cost"
+  cost: z.number().optional(),
   current_cost: z.number().optional().default(0),
+  current_amount: z.number().optional(), // Backend alias для cost
   reserved_amount: z.number().optional().default(0),
-  limit_type: z.enum(["energy", "amount", "none"]),
+  limit_type: z.enum(["energy", "amount", "none"]).optional().default("none"),
   limit_value: z.number().optional(),
   limit_reached: z.boolean().optional().default(false),
   limit_percentage: z.number().optional().default(0),
+  progress_percent: z.number().optional(), // Backend alias для limit_percentage
   rate_per_kwh: z.number().optional().default(0),
   session_fee: z.number().optional().default(0),
-  ocpp_transaction_id: z.number().optional(),
+  ocpp_transaction_id: z.union([z.number(), z.string()]).optional(),
+  transaction_id: z.string().optional(), // Backend возвращает оба
   meter_start: z.number().optional(),
   meter_current: z.number().optional(),
   charging_duration_minutes: z.number().optional().default(0),
+  duration_minutes: z.number().optional(), // Backend alias
+  // Дополнительные поля из backend
+  charging_power: z.number().optional(),
+  station_current: z.number().optional(),
+  station_voltage: z.number().optional(),
+  ev_battery_soc: z.number().optional(),
+  station_online: z.boolean().optional(),
+  client_id: z.string().optional(),
+  ocpp_status: z.string().optional(),
+  has_meter_data: z.boolean().optional(),
+  message: z.string().optional(),
 });
 
 /**
- * !E5<0 4;O >B25B0 GET /api/v1/charging/status/{session_id}
+ * Схема для ответа GET /api/v1/charging/status/{session_id}
+ *
+ * Backend возвращает плоскую структуру (все поля на верхнем уровне),
+ * но mobile ожидает вложенную структуру { success, session: {...} }.
+ * Трансформация происходит в evpowerApi.ts
  */
-export const zChargingStatus = z.object({
-  success: z.boolean(),
-  session: zChargingSession.optional(),
-});
+export const zChargingStatusRaw = z
+  .object({
+    success: z.boolean(),
+    // Плоские поля от backend (без вложенности)
+    session_id: z.string().optional(),
+    status: z.string().optional(),
+    station_id: z.string().optional(),
+    client_id: z.string().optional(),
+    connector_id: z.number().optional(),
+    start_time: z.string().optional(),
+    stop_time: z.string().nullish(),
+    duration_minutes: z.number().optional(),
+    energy_consumed: z.number().optional(),
+    energy_consumed_kwh: z.number().optional(),
+    cost: z.number().optional(),
+    current_cost: z.number().optional(),
+    current_amount: z.number().optional(),
+    final_amount_som: z.number().optional(),
+    amount_charged_som: z.number().optional(),
+    reserved_amount: z.number().optional(),
+    limit_value: z.number().optional(),
+    limit_type: z.string().optional(),
+    progress_percent: z.number().optional(),
+    charging_power: z.number().optional(),
+    station_current: z.number().optional(),
+    station_voltage: z.number().optional(),
+    ev_battery_soc: z.number().optional(),
+    ev_current: z.number().optional(),
+    ev_voltage: z.number().optional(),
+    temperatures: z.record(z.number()).optional(),
+    meter_start: z.number().optional(),
+    meter_current: z.number().optional(),
+    station_online: z.boolean().optional(),
+    last_update: z.string().nullish(),
+    transaction_id: z.string().optional(),
+    ocpp_transaction_id: z.string().nullish(),
+    rate_per_kwh: z.number().optional(),
+    ocpp_status: z.string().optional(),
+    has_meter_data: z.boolean().optional(),
+    error: z.string().nullish(),
+    message: z.string().nullish(),
+    // Вложенная структура (если backend её вернёт)
+    session: zChargingSession.optional(),
+  })
+  .passthrough(); // Разрешить неизвестные поля
+
+// Для совместимости с существующим кодом
+export const zChargingStatus = zChargingStatusRaw;
 
 /**
  * !E5<0 4;O >B25B0 POST /api/v1/charging/stop

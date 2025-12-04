@@ -240,9 +240,9 @@ export class OfflineQueue {
           },
         });
 
-        logger.debug("✅ Successfully processed offline item:", item.id);
+        logger.debug("[Offline] Successfully processed item:", item.id);
       } catch (error) {
-        logger.error(`❌ Failed to process offline item: ${item.id}`, error);
+        logger.error(`[Offline] Failed to process item: ${item.id}`, error);
 
         item.retryCount++;
 
@@ -250,7 +250,7 @@ export class OfflineQueue {
         if (item.retryCount < 3) {
           failedItems.push(item);
         } else {
-          logger.warn("🗑️ Removing failed item after 3 retries:", item.id);
+          logger.warn("[Offline] Removing failed item after 3 retries:", item.id);
         }
       }
     }

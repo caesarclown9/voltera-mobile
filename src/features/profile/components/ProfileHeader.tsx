@@ -1,0 +1,20 @@
+import { User } from "lucide-react";
+
+interface ProfileHeaderProps {
+  name: string;
+  email?: string;
+}
+
+export function ProfileHeader({ name, email }: ProfileHeaderProps) {
+  return (
+    <div className="flex items-center gap-4 p-4">
+      <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center">
+        <User className="w-8 h-8 text-primary-500" />
+      </div>
+      <div>
+        <h2 className="text-lg font-semibold text-gray-900">{name}</h2>
+        {email && <p className="text-sm text-gray-500">{email}</p>}
+      </div>
+    </div>
+  );
+}

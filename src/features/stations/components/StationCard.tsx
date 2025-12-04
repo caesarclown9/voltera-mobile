@@ -1,8 +1,10 @@
-import { Heart } from "lucide-react";
+import { Heart, Zap, Circle, Wrench } from "lucide-react";
 import type { Station } from "../../../api/types";
 import type { StationWithLocation } from "../types";
 import { useFavorites } from "../../favorites/hooks/useFavorites";
 import { useAuthStatus } from "../../auth/hooks/useAuth";
+
+type StatusIcon = React.ReactNode;
 
 interface StationCardProps {
   station: StationWithLocation;
@@ -17,22 +19,22 @@ export function StationCard({
 }: StationCardProps) {
   const { isAuthenticated } = useAuthStatus();
   const { isFavorite, toggleFavorite, isToggling } = useFavorites();
-  const getStatusConfig = (status: Station["status"]) => {
-    const configs = {
+  const getStatusConfig = (status: Station["status"]): { text: string; color: string; icon: StatusIcon } => {
+    const configs: Record<Station["status"], { text: string; color: string; icon: StatusIcon }> = {
       active: {
         text: "Активна",
         color: "text-success-600 bg-success-50 border-success-200",
-        icon: "⚡",
+        icon: <Zap className="w-3 h-3" />,
       },
       inactive: {
         text: "Неактивна",
         color: "text-gray-600 bg-gray-50 border-gray-200",
-        icon: "⚫",
+        icon: <Circle className="w-3 h-3" />,
       },
       maintenance: {
         text: "Обслуживание",
         color: "text-dark-500 bg-dark-50 border-dark-200",
-        icon: "🔧",
+        icon: <Wrench className="w-3 h-3" />,
       },
     };
     return configs[status] || configs.inactive;
@@ -89,9 +91,10 @@ export function StationCard({
           </p>
         </div>
         <span
-          className={`px-2 py-1 rounded-full text-xs font-medium border ${statusConfig.color}`}
+          className={`px-2 py-1 rounded-full text-xs font-medium border flex items-center gap-1 ${statusConfig.color}`}
         >
-          {statusConfig.icon} {statusConfig.text}
+          {statusConfig.icon}
+          {statusConfig.text}
         </span>
       </div>
 

@@ -57,6 +57,12 @@ export function Router() {
           <Route path="/history" element={<routes.HistoryPage.component />} />
           <Route path="/payments" element={<routes.PaymentsPage.component />} />
           <Route path="/about" element={<routes.AboutPage.component />} />
+          <Route path="/settings" element={<routes.SettingsPage.component />} />
+          <Route
+            path="/settings/notifications"
+            element={<routes.NotificationsSettingsPage.component />}
+          />
+          <Route path="/support" element={<routes.SupportPage.component />} />
 
           {/* Admin Routes */}
           <Route

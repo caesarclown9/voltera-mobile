@@ -65,6 +65,7 @@ const zStation = z.object({
   serial_number: z.string(),
   model: z.string(),
   manufacturer: z.string(),
+  location_id: z.string().optional(), // Может отсутствовать во вложенных станциях - добавляется из родительской локации
   status: z.enum(["available", "occupied", "offline", "maintenance"]),
   power_capacity: z.number(),
   connectors_count: z.number(),

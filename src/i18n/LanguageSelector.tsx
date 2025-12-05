@@ -13,12 +13,17 @@ interface LanguageSelectorProps {
   showLabel?: boolean;
 }
 
-export function LanguageSelector({ compact = false, showLabel = true }: LanguageSelectorProps) {
+export function LanguageSelector({
+  compact = false,
+  showLabel = true,
+}: LanguageSelectorProps) {
   const { i18n } = useTranslation();
   const currentLang = i18n.language?.split("-")[0] || "ru";
 
   const handleChange = (langCode: string) => {
     i18n.changeLanguage(langCode);
+    // Сохраняем в localStorage (i18next-browser-languagedetector использует этот ключ)
+    localStorage.setItem("voltera_language", langCode);
   };
 
   if (compact) {
@@ -49,7 +54,9 @@ export function LanguageSelector({ compact = false, showLabel = true }: Language
   return (
     <div className="space-y-2">
       {showLabel && (
-        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Язык / Language</p>
+        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          Язык / Language
+        </p>
       )}
       <div className="flex gap-2">
         {availableLanguages.map((lang) => {
@@ -84,11 +91,14 @@ export function LanguageSwitch() {
 
   // Циклический переключатель
   const nextLang = () => {
-    const currentIndex = availableLanguages.findIndex((l) => l.code === currentLang);
+    const currentIndex = availableLanguages.findIndex(
+      (l) => l.code === currentLang,
+    );
     const nextIndex = (currentIndex + 1) % availableLanguages.length;
     const nextLanguage = availableLanguages[nextIndex];
     if (nextLanguage) {
       i18n.changeLanguage(nextLanguage.code);
+      localStorage.setItem("voltera_language", nextLanguage.code);
     }
   };
 

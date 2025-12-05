@@ -382,7 +382,8 @@ class EvPowerApiService {
     // Backend возвращает плоскую структуру, нужно трансформировать
     // Проверяем есть ли вложенный session или данные на верхнем уровне
     const hasNestedSession = parsed.session !== undefined;
-    const hasTopLevelData = parsed.session_id !== undefined || parsed.status !== undefined;
+    const hasTopLevelData =
+      parsed.session_id !== undefined || parsed.status !== undefined;
 
     let session: import("../api/types").ChargingStatus["session"];
 
@@ -395,13 +396,24 @@ class EvPowerApiService {
         connector_id: parsed.session.connector_id ?? 1,
         start_time: parsed.session.start_time,
         stop_time: parsed.session.stop_time ?? undefined,
-        energy_consumed: parsed.session.energy_consumed ?? parsed.session.energy_consumed_kwh ?? 0,
-        current_cost: parsed.session.current_cost ?? parsed.session.cost ?? parsed.session.current_amount ?? 0,
+        energy_consumed:
+          parsed.session.energy_consumed ??
+          parsed.session.energy_consumed_kwh ??
+          0,
+        current_cost:
+          parsed.session.current_cost ??
+          parsed.session.cost ??
+          parsed.session.current_amount ??
+          0,
         reserved_amount: parsed.session.reserved_amount ?? 0,
-        limit_type: (parsed.session.limit_type as "energy" | "amount" | "none") ?? "none",
+        limit_type:
+          (parsed.session.limit_type as "energy" | "amount" | "none") ?? "none",
         limit_value: parsed.session.limit_value,
         limit_reached: parsed.session.limit_reached ?? false,
-        limit_percentage: parsed.session.limit_percentage ?? parsed.session.progress_percent ?? 0,
+        limit_percentage:
+          parsed.session.limit_percentage ??
+          parsed.session.progress_percent ??
+          0,
         rate_per_kwh: parsed.session.rate_per_kwh ?? 0,
         session_fee: parsed.session.session_fee ?? 0,
         ocpp_transaction_id: parsed.session.ocpp_transaction_id
@@ -410,7 +422,9 @@ class EvPowerApiService {
         meter_start: parsed.session.meter_start,
         meter_current: parsed.session.meter_current,
         charging_duration_minutes:
-          parsed.session.charging_duration_minutes ?? parsed.session.duration_minutes ?? 0,
+          parsed.session.charging_duration_minutes ??
+          parsed.session.duration_minutes ??
+          0,
       };
     } else if (hasTopLevelData) {
       // Backend вернул плоскую структуру (текущее поведение)
@@ -421,11 +435,14 @@ class EvPowerApiService {
         connector_id: parsed.connector_id ?? 1,
         start_time: parsed.start_time ?? new Date().toISOString(),
         stop_time: parsed.stop_time ?? undefined,
-        energy_consumed: parsed.energy_consumed ?? parsed.energy_consumed_kwh ?? 0,
+        energy_consumed:
+          parsed.energy_consumed ?? parsed.energy_consumed_kwh ?? 0,
         // Backend возвращает "cost", mobile использует "current_cost"
-        current_cost: parsed.current_cost ?? parsed.cost ?? parsed.current_amount ?? 0,
+        current_cost:
+          parsed.current_cost ?? parsed.cost ?? parsed.current_amount ?? 0,
         reserved_amount: parsed.reserved_amount ?? 0,
-        limit_type: (parsed.limit_type as "energy" | "amount" | "none") ?? "none",
+        limit_type:
+          (parsed.limit_type as "energy" | "amount" | "none") ?? "none",
         limit_value: parsed.limit_value,
         limit_reached: false,
         limit_percentage: parsed.progress_percent ?? 0,
@@ -842,11 +859,15 @@ class EvPowerApiService {
 
     try {
       // Пробуем получить баланс через API (источник истины)
+      // Backend возвращает ClientBalanceInfo без success, принимаем оба формата
       const balanceSchema = z.object({
-        success: z.boolean(),
+        success: z.boolean().optional(), // Опционально для совместимости
         balance: z.number().optional(),
         current_balance: z.number().optional(),
         client_id: z.string().optional(),
+        currency: z.string().optional(),
+        last_topup_at: z.string().nullable().optional(),
+        total_spent: z.number().nullable().optional(),
         error: z.string().optional(),
       });
 
@@ -856,16 +877,22 @@ class EvPowerApiService {
         balanceSchema,
       );
 
-      if (response.success) {
+      // Если success явно false - ошибка, иначе считаем успехом
+      if (response.success === false) {
+        logger.warn(
+          "[VolteraAPI] Balance API returned error, falling back to Supabase",
+        );
+      } else {
+        // Успех - берем balance
         const balance = response.balance ?? response.current_balance ?? 0;
         return typeof balance === "number" ? balance : 0;
       }
-
-      // Если API вернул ошибку, пробуем Supabase
-      logger.warn("[VolteraAPI] Balance API returned error, falling back to Supabase");
     } catch (apiError) {
       // API недоступен, используем Supabase как fallback
-      logger.warn("[VolteraAPI] Balance API unavailable, falling back to Supabase:", apiError);
+      logger.warn(
+        "[VolteraAPI] Balance API unavailable, falling back to Supabase:",
+        apiError,
+      );
     }
 
     // Fallback: Supabase (для обратной совместимости)

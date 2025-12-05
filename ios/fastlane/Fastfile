@@ -28,7 +28,7 @@ platform :ios do
       use_automatic_signing: false,
       path: "App/App.xcodeproj",
       team_id: ENV["APPLE_TEAM_ID"],
-      profile_name: "match AppStore kg.evpower.app",
+      profile_name: "match AppStore kg.voltera.app",
       code_sign_identity: "iPhone Distribution"
     )
 
@@ -39,11 +39,11 @@ platform :ios do
       export_method: "app-store",
       export_options: {
         provisioningProfiles: {
-          "kg.evpower.app" => "match AppStore kg.evpower.app"
+          "kg.voltera.app" => "match AppStore kg.voltera.app"
         }
       },
       output_directory: "./build",
-      output_name: "EvPower.ipa"
+      output_name: "Voltera.ipa"
     )
 
     # Upload to TestFlight

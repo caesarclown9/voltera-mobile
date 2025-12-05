@@ -44,7 +44,11 @@ const persister = createIDBPersister();
 
 function App() {
   const [isVersionCheckComplete, setIsVersionCheckComplete] = useState(false);
-  const { shouldShowOnboarding, completeOnboarding, isLoading: isOnboardingLoading } = useOnboarding();
+  const {
+    shouldShowOnboarding,
+    completeOnboarding,
+    isLoading: isOnboardingLoading,
+  } = useOnboarding();
 
   // Проверка версии и миграции при старте приложения
   useEffect(() => {
@@ -97,7 +101,7 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <ThemeProvider defaultTheme="system">
+      <ThemeProvider defaultTheme="light">
         <PersistQueryClientProvider
           client={queryClient}
           persistOptions={{

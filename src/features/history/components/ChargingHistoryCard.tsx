@@ -32,13 +32,13 @@ export function ChargingHistoryCard({
   const getStatusColor = () => {
     switch (item.status) {
       case "completed":
-        return "bg-green-100 text-green-700";
+        return "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400";
       case "stopped":
-        return "bg-orange-100 text-orange-700";
+        return "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400";
       case "failed":
-        return "bg-red-100 text-red-700";
+        return "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400";
       default:
-        return "bg-gray-100 text-gray-700";
+        return "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300";
     }
   };
 
@@ -58,25 +58,29 @@ export function ChargingHistoryCard({
   return (
     <div
       onClick={() => onClick?.(item)}
-      className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow cursor-pointer"
+      className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition-shadow cursor-pointer"
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
-            <Zap className="w-5 h-5 text-primary-600" />
+          <div className="w-10 h-10 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+            <Zap className="w-5 h-5 text-primary-600 dark:text-primary-400" />
           </div>
           <div>
-            <h4 className="font-semibold text-gray-900">{item.stationName}</h4>
-            <p className="text-sm text-gray-500">{item.stationAddress}</p>
+            <h4 className="font-semibold text-gray-900 dark:text-white">
+              {item.stationName}
+            </h4>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {item.stationAddress}
+            </p>
           </div>
         </div>
-        <ChevronRight className="w-5 h-5 text-gray-400" />
+        <ChevronRight className="w-5 h-5 text-gray-400 dark:text-gray-500" />
       </div>
 
       {/* Date and Status */}
       <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2 text-sm text-gray-600">
+        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
           <Calendar className="w-4 h-4" />
           <span>{formatDate(item.startTime)}</span>
         </div>
@@ -91,33 +95,33 @@ export function ChargingHistoryCard({
       <div className="grid grid-cols-3 gap-3">
         {/* Energy */}
         <div className="text-center">
-          <div className="flex items-center justify-center gap-1 text-gray-500 mb-1">
+          <div className="flex items-center justify-center gap-1 text-gray-500 dark:text-gray-400 mb-1">
             <Zap className="w-3 h-3" />
             <span className="text-xs">Энергия</span>
           </div>
-          <p className="font-semibold text-sm">
+          <p className="font-semibold text-sm text-gray-900 dark:text-white">
             {item.energyConsumed.toFixed(1)} кВт·ч
           </p>
         </div>
 
         {/* Duration */}
         <div className="text-center">
-          <div className="flex items-center justify-center gap-1 text-gray-500 mb-1">
+          <div className="flex items-center justify-center gap-1 text-gray-500 dark:text-gray-400 mb-1">
             <Clock className="w-3 h-3" />
             <span className="text-xs">Время</span>
           </div>
-          <p className="font-semibold text-sm">
+          <p className="font-semibold text-sm text-gray-900 dark:text-white">
             {formatDuration(item.duration)}
           </p>
         </div>
 
         {/* Cost */}
         <div className="text-center">
-          <div className="flex items-center justify-center gap-1 text-gray-500 mb-1">
+          <div className="flex items-center justify-center gap-1 text-gray-500 dark:text-gray-400 mb-1">
             <DollarSign className="w-3 h-3" />
             <span className="text-xs">Стоимость</span>
           </div>
-          <p className="font-semibold text-sm">
+          <p className="font-semibold text-sm text-gray-900 dark:text-white">
             {item.totalCost.toFixed(0)} сом
           </p>
         </div>
@@ -125,8 +129,8 @@ export function ChargingHistoryCard({
 
       {/* Limit info if exists */}
       {item.limitType && item.limitType !== "none" && (
-        <div className="mt-3 pt-3 border-t border-gray-100">
-          <p className="text-xs text-gray-500">
+        <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             Лимит:{" "}
             {item.limitType === "energy"
               ? `${item.limitValue} кВт·ч`

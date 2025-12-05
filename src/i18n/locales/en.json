@@ -12,7 +12,14 @@
     "done": "Done",
     "close": "Close",
     "search": "Search",
-    "noData": "No data"
+    "noData": "No data",
+    "som": "KGS",
+    "kw": "kW",
+    "kwh": "kWh",
+    "minutes": "minutes",
+    "sessions": "sessions",
+    "visits": "visits",
+    "user": "User"
   },
   "nav": {
     "map": "Map",
@@ -47,9 +54,13 @@
     "support": "Support",
     "about": "About app",
     "logoutAccount": "Sign out",
+    "loggingOut": "Signing out...",
     "deleteAccount": "Delete account",
+    "deleteRequested": "Request sent",
     "theme": "Theme",
-    "language": "Language"
+    "language": "Language",
+    "loginToAccount": "Sign in to your account",
+    "loginDescription": "To view charging history and manage your balance"
   },
   "theme": {
     "light": "Light",
@@ -123,17 +134,103 @@
     "insufficientFunds": "Insufficient funds",
     "tryAgain": "Please try again"
   },
+  "payments": {
+    "title": "Payments",
+    "currentBalance": "Current balance",
+    "topup": "Top up",
+    "paymentMethods": "Payment methods",
+    "electronicWallet": "Electronic wallet",
+    "paymentHistory": "Payment history",
+    "historyEmpty": "Payment history is empty",
+    "topupToSeeHistory": "Top up your balance to see history",
+    "statusSuccess": "Success",
+    "statusPending": "Processing",
+    "statusFailed": "Failed",
+    "unknown": "Unknown",
+    "topupViaOdengi": "Balance top-up via O!Dengi"
+  },
+  "stationsList": {
+    "title": "Stations list",
+    "favoritesTitle": "Favorite stations",
+    "noFavorites": "No favorite stations",
+    "addFavoritesHint": "Add stations to favorites\nto see them here",
+    "power": "Power",
+    "connectors": "Connectors",
+    "notSpecified": "Not specified",
+    "tariff": "Tariff",
+    "onMaintenance": "On maintenance",
+    "unavailable": "Unavailable",
+    "onMap": "On map",
+    "charge": "Charge"
+  },
+  "about": {
+    "title": "About app",
+    "appVersion": "App version",
+    "privacyPolicy": "Privacy policy",
+    "termsOfUse": "Terms of use",
+    "support": "Support"
+  },
+  "history": {
+    "title": "History",
+    "chargingTitle": "Charging history",
+    "noHistory": "No charging history",
+    "startChargingHint": "Start charging at Voltera stations\nto see your history here",
+    "date": "Date",
+    "station": "Station",
+    "energy": "Energy",
+    "duration": "Duration",
+    "cost": "Cost",
+    "tabs": {
+      "charging": "Charging",
+      "transactions": "Payments",
+      "statistics": "Statistics"
+    },
+    "filters": {
+      "last30days": "Last 30 days",
+      "thisWeek": "This week",
+      "thisMonth": "This month",
+      "selectPeriod": "Select period"
+    },
+    "empty": {
+      "charging": "No charging history",
+      "chargingHint": "Your charging sessions will appear here",
+      "transactions": "No payment history",
+      "transactionsHint": "Your transactions will appear here",
+      "statistics": "No data for statistics",
+      "statisticsHint": "Statistics will appear after your first charge"
+    },
+    "stats": {
+      "totalSessions": "Total sessions",
+      "totalEnergy": "Total energy",
+      "totalSpent": "Total spent",
+      "chargingTime": "Charging time",
+      "averages": "Averages",
+      "energyPerSession": "Energy per session",
+      "costPerSession": "Cost per session",
+      "durationPerSession": "Duration per session",
+      "favoriteStation": "Favorite station",
+      "byMonth": "By month"
+    }
+  },
   "onboarding": {
     "skip": "Skip",
     "next": "Next",
     "start": "Start",
     "slide1Title": "Find a station",
-    "slide1Desc": "Use the map or list to find nearby charging stations",
-    "slide2Title": "Scan QR code",
-    "slide2Desc": "Scan the QR code on the station for quick connection",
-    "slide3Title": "Top up balance",
-    "slide3Desc": "Convenient balance top-up via card or e-wallet",
-    "slide4Title": "Start charging!",
-    "slide4Desc": "Select a connector and start charging with one tap"
+    "slide1Desc": "Open the map and select the nearest Voltera charging station",
+    "slide2Title": "Top up balance",
+    "slide2Desc": "Convenient top-up via O!Dengi or bank card",
+    "slide3Title": "Start charging!",
+    "slide3Desc": "Select a station, connect the cable and start charging"
+  },
+  "settings": {
+    "title": "Settings",
+    "appearance": "Appearance",
+    "languageLabel": "Language",
+    "notifications": "Notifications",
+    "information": "Information",
+    "aboutApp": "About app",
+    "privacyPolicy": "Privacy policy",
+    "termsOfUse": "Terms of use"
   }
 }

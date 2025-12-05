@@ -1,5 +1,6 @@
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Battery,
   Zap,
@@ -26,6 +27,7 @@ import { logAndHandleError } from "../shared/utils/errorHandling";
 export const ChargingProcessPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
   const { sessionId } = useParams();
   const localSessionId = sessionId || "";
 
@@ -147,45 +149,43 @@ export const ChargingProcessPage = () => {
       <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-12 h-12 animate-spin text-primary-600 mx-auto" />
-          <p className="mt-4 text-gray-600">Загружаем данные зарядки...</p>
+          <p className="mt-4 text-gray-600">{t("common.loading")}</p>
         </div>
       </div>
     );
   }
 
-  // Ошибка загрузки данных
+  // Error loading data
   if (error && !chargingData) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white flex items-center justify-center">
         <div className="text-center">
           <WifiOff className="w-16 h-16 text-orange-500 mx-auto" />
-          <p className="mt-4 text-xl text-gray-800">Ошибка получения данных</p>
+          <p className="mt-4 text-xl text-gray-800">{t("errors.network")}</p>
           <p className="mt-2 text-sm text-gray-600">{error.message}</p>
           <button
             onClick={() => navigate("/stations")}
             className="mt-6 px-6 py-3 bg-primary-500 text-white rounded-lg"
           >
-            К станциям
+            {t("charging.toStations")}
           </button>
         </div>
       </div>
     );
   }
 
-  // Нет данных
+  // No data
   if (!chargingData && !isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white flex items-center justify-center">
         <div className="text-center">
           <XCircle className="w-16 h-16 text-red-500 mx-auto" />
-          <p className="mt-4 text-xl text-gray-800">
-            Сессия зарядки не найдена
-          </p>
+          <p className="mt-4 text-xl text-gray-800">{t("errors.notFound")}</p>
           <button
             onClick={() => navigate("/stations")}
             className="mt-6 px-6 py-3 bg-primary-500 text-white rounded-lg"
           >
-            К станциям
+            {t("charging.toStations")}
           </button>
         </div>
       </div>
@@ -212,7 +212,7 @@ export const ChargingProcessPage = () => {
           >
             <ChevronLeft className="w-6 h-6" />
           </button>
-          <h1 className="text-xl font-semibold">Процесс зарядки</h1>
+          <h1 className="text-xl font-semibold">{t("charging.inProgress")}</h1>
           <div className="w-10" />
         </div>
       </div>
@@ -226,7 +226,9 @@ export const ChargingProcessPage = () => {
               <h2 className="text-lg font-semibold">
                 {chargingData?.stationId || stationId}
               </h2>
-              <p className="text-sm text-gray-500">Коннектор #1</p>
+              <p className="text-sm text-gray-500">
+                {t("charging.connector")} #1
+              </p>
             </div>
             <div
               className={`px-3 py-1 rounded-full text-sm font-medium ${
@@ -247,17 +249,17 @@ export const ChargingProcessPage = () => {
             >
               {chargingData?.status === ChargingStates.STARTED ||
               chargingData?.status === ChargingStates.CHARGING
-                ? "Заряжается"
+                ? t("charging.inProgress")
                 : chargingData?.status === ChargingStates.PREPARING
-                  ? "Подготовка"
+                  ? t("common.loading")
                   : chargingData?.status === ChargingStates.FINISHING
-                    ? "Завершение"
+                    ? t("charging.completed")
                     : chargingData?.status === ChargingStates.STOPPED ||
                         chargingData?.status === ChargingStates.COMPLETED
-                      ? "Завершено"
+                      ? t("charging.completed")
                       : chargingData?.status === ChargingStates.ERROR
-                        ? "Ошибка"
-                        : chargingData?.status || "Ожидание"}
+                        ? t("common.error")
+                        : chargingData?.status || t("common.loading")}
             </div>
           </div>
 
@@ -293,8 +295,8 @@ export const ChargingProcessPage = () => {
               </span>
               <span className="text-xs text-gray-500 text-center">
                 {chargingData?.evBatterySoc !== undefined
-                  ? "Заряд авто"
-                  : "Прогресс"}
+                  ? t("charging.batteryLevel")
+                  : "%"}
               </span>
             </div>
           </div>
@@ -305,25 +307,29 @@ export const ChargingProcessPage = () => {
             <div className="bg-gray-50 rounded-xl p-4">
               <div className="flex items-center gap-2 mb-2">
                 <Zap className="w-5 h-5 text-yellow-500" />
-                <span className="text-sm text-gray-600">Мощность</span>
+                <span className="text-sm text-gray-600">
+                  {t("station.power")}
+                </span>
               </div>
               <p className="text-2xl font-bold">
                 {(chargingData?.chargingPower || 0).toFixed(1)}
               </p>
-              <p className="text-xs text-gray-500">кВт</p>
+              <p className="text-xs text-gray-500">{t("common.kw")}</p>
             </div>
 
             {/* Energy */}
             <div className="bg-gray-50 rounded-xl p-4">
               <div className="flex items-center gap-2 mb-2">
                 <Activity className="w-5 h-5 text-success-500" />
-                <span className="text-sm text-gray-600">Получено</span>
+                <span className="text-sm text-gray-600">
+                  {t("charging.energyDelivered")}
+                </span>
               </div>
               <p className="text-2xl font-bold">
                 {(chargingData?.energyConsumedKwh || 0).toFixed(2)}
               </p>
               <p className="text-xs text-gray-500">
-                кВт⋅ч
+                {t("common.kwh")}
                 {chargingLimits?.type === "energy" &&
                   chargingLimits.energy_kwh && (
                     <span className="text-gray-400">
@@ -338,25 +344,29 @@ export const ChargingProcessPage = () => {
             <div className="bg-gray-50 rounded-xl p-4">
               <div className="flex items-center gap-2 mb-2">
                 <Clock className="w-5 h-5 text-blue-500" />
-                <span className="text-sm text-gray-600">Время</span>
+                <span className="text-sm text-gray-600">
+                  {t("charging.chargingTime")}
+                </span>
               </div>
               <p className="text-2xl font-bold">
                 {formatTimeWithSeconds(chargingData?.duration || 0)}
               </p>
-              <p className="text-xs text-gray-500">чч:мм:сс</p>
+              <p className="text-xs text-gray-500">hh:mm:ss</p>
             </div>
 
             {/* Cost */}
             <div className="bg-gray-50 rounded-xl p-4">
               <div className="flex items-center gap-2 mb-2">
                 <DollarSign className="w-5 h-5 text-primary-500" />
-                <span className="text-sm text-gray-600">Стоимость</span>
+                <span className="text-sm text-gray-600">
+                  {t("charging.totalCost")}
+                </span>
               </div>
               <p className="text-2xl font-bold">
                 {(chargingData?.currentAmount || 0).toFixed(2)}
               </p>
               <p className="text-xs text-gray-500">
-                KGS
+                {t("common.som")}
                 {chargingLimits?.type === "amount" &&
                   chargingLimits.amount_som && (
                     <span className="text-gray-400">
@@ -372,20 +382,15 @@ export const ChargingProcessPage = () => {
           {chargingLimits && (
             <div className="mt-4 p-3 bg-blue-50 rounded-xl">
               <div className="flex items-center gap-2 text-sm text-blue-700">
-                <span className="font-medium">Тип зарядки:</span>
+                <span className="font-medium">{t("charging.title")}:</span>
                 <span>
-                  {chargingLimits.type === "none" && "Полный бак"}
+                  {chargingLimits.type === "none" && t("charging.fullCharge")}
                   {chargingLimits.type === "amount" &&
-                    `Лимит ${chargingLimits.amount_som} сом`}
+                    `${chargingLimits.amount_som} ${t("common.som")}`}
                   {chargingLimits.type === "energy" &&
-                    `Лимит ${chargingLimits.energy_kwh} кВт·ч`}
+                    `${chargingLimits.energy_kwh} ${t("common.kwh")}`}
                 </span>
               </div>
-              {chargingLimits.type !== "none" && (
-                <div className="text-xs text-blue-600 mt-1">
-                  Зарядка остановится автоматически при достижении лимита
-                </div>
-              )}
             </div>
           )}
         </div>
@@ -409,17 +414,18 @@ export const ChargingProcessPage = () => {
               chargingData?.stationOnline ? "bg-green-500" : "bg-yellow-500"
             }`}
           />
-          <span>
-            {isPolling ? "Обновление каждые 15 секунд" : "Ожидание данных..."}
-            {!chargingData?.stationOnline && " (станция офлайн)"}
-          </span>
+          <span>{isPolling ? "..." : t("common.loading")}</span>
         </div>
 
         {/* Completion Message */}
         {chargingData?.status === ChargingStates.COMPLETED && (
           <div className="bg-success-50 border border-success-200 rounded-xl p-4 text-center">
-            <p className="text-success-700 font-semibold">Зарядка завершена!</p>
-            <p className="text-sm text-success-600 mt-1">Перенаправление...</p>
+            <p className="text-success-700 font-semibold">
+              {t("charging.success")}
+            </p>
+            <p className="text-sm text-success-600 mt-1">
+              {t("common.loading")}
+            </p>
           </div>
         )}
       </div>
@@ -431,20 +437,20 @@ export const ChargingProcessPage = () => {
             <button
               onClick={handleStopCharging}
               disabled={isStoppingCharging}
-              className="w-full bg-red-500 text-white py-4 rounded-xl font-semibold 
-                       hover:bg-red-600 transition-colors disabled:opacity-50 
+              className="w-full bg-red-500 text-white py-4 rounded-xl font-semibold
+                       hover:bg-red-600 transition-colors disabled:opacity-50
                        disabled:cursor-not-allowed flex items-center justify-center gap-2
                        shadow-lg"
             >
               {isStoppingCharging ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  Останавливаем...
+                  {t("common.loading")}
                 </>
               ) : (
                 <>
                   <XCircle className="w-5 h-5" />
-                  Остановить зарядку
+                  {t("charging.stopCharging")}
                 </>
               )}
             </button>

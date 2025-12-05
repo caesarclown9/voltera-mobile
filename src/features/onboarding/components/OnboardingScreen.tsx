@@ -3,45 +3,39 @@
  * Показывается один раз при первом запуске приложения
  */
 
-import { useState, useCallback, type ComponentType } from "react";
+import { useState, useCallback, useMemo, type ComponentType } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, QrCode, Wallet, Zap, ChevronRight } from "lucide-react";
+import { MapPin, Wallet, Zap, ChevronRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface OnboardingSlide {
   id: number;
   icon: ComponentType<{ size?: number; className?: string }>;
-  title: string;
-  description: string;
+  titleKey: string;
+  descriptionKey: string;
   gradient: string;
 }
 
-const slides: OnboardingSlide[] = [
+const slidesConfig: OnboardingSlide[] = [
   {
     id: 1,
     icon: MapPin,
-    title: "Найдите станцию",
-    description: "Откройте карту и найдите ближайшую зарядную станцию Voltera",
+    titleKey: "onboarding.slide1Title",
+    descriptionKey: "onboarding.slide1Desc",
     gradient: "from-primary-400 to-primary-600",
   },
   {
     id: 2,
-    icon: QrCode,
-    title: "Сканируйте QR-код",
-    description: "Отсканируйте QR-код на станции для быстрого подключения",
-    gradient: "from-accent-400 to-accent-600",
-  },
-  {
-    id: 3,
     icon: Wallet,
-    title: "Пополняйте баланс",
-    description: "Удобное пополнение через O!Деньги или банковскую карту",
+    titleKey: "onboarding.slide2Title",
+    descriptionKey: "onboarding.slide2Desc",
     gradient: "from-success-400 to-success-600",
   },
   {
-    id: 4,
+    id: 3,
     icon: Zap,
-    title: "Начните зарядку!",
-    description: "Всё готово для комфортной зарядки вашего электромобиля",
+    titleKey: "onboarding.slide3Title",
+    descriptionKey: "onboarding.slide3Desc",
     gradient: "from-primary-500 to-accent-500",
   },
 ];
@@ -51,8 +45,19 @@ interface OnboardingScreenProps {
 }
 
 export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
+  const { t } = useTranslation();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [direction, setDirection] = useState(0);
+
+  const slides = useMemo(
+    () =>
+      slidesConfig.map((slide) => ({
+        ...slide,
+        title: t(slide.titleKey),
+        description: t(slide.descriptionKey),
+      })),
+    [t],
+  );
 
   const isLastSlide = currentSlide === slides.length - 1;
 
@@ -65,10 +70,13 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
     }
   }, [isLastSlide, onComplete]);
 
-  const goToSlide = useCallback((index: number) => {
-    setDirection(index > currentSlide ? 1 : -1);
-    setCurrentSlide(index);
-  }, [currentSlide]);
+  const goToSlide = useCallback(
+    (index: number) => {
+      setDirection(index > currentSlide ? 1 : -1);
+      setCurrentSlide(index);
+    },
+    [currentSlide],
+  );
 
   const handleSkip = useCallback(() => {
     onComplete();
@@ -99,14 +107,14 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-white z-50 flex flex-col">
+    <div className="fixed inset-0 bg-white z-50 flex flex-col safe-area-inset">
       {/* Header with skip button */}
-      <div className="flex justify-end p-4 pt-safe">
+      <div className="flex justify-end p-4 pt-12">
         <button
           onClick={handleSkip}
           className="text-gray-400 hover:text-gray-600 text-sm font-medium transition-colors"
         >
-          Пропустить
+          {t("onboarding.skip")}
         </button>
       </div>
 
@@ -173,7 +181,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
       </div>
 
       {/* Next/Start button */}
-      <div className="px-6 pb-8 pb-safe">
+      <div className="px-6 pb-6 mb-4">
         <motion.button
           onClick={nextSlide}
           whileTap={{ scale: 0.98 }}
@@ -184,10 +192,10 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
           }`}
         >
           {isLastSlide ? (
-            "Начать"
+            t("onboarding.start")
           ) : (
             <>
-              Далее
+              {t("onboarding.next")}
               <ChevronRight size={20} />
             </>
           )}

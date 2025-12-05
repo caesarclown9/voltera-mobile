@@ -24,6 +24,9 @@ export function enrichStationWithLocation(
 ): StationWithLocation {
   const enriched: StationWithLocation = {
     ...station,
+    // Важно: добавляем location_id из родительской локации,
+    // так как бэкенд не возвращает это поле во вложенных станциях
+    location_id: station.location_id || location.id,
     locationName: location.name,
     locationAddress: location.address,
     city: location.city,

@@ -2,35 +2,40 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuthStatus } from "@/features/auth/hooks/useAuth";
 import { motion } from "framer-motion";
 import { Map, List, Heart, User } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import type { ComponentType } from "react";
 
 interface NavItem {
   path: string;
-  label: string;
-  icon: ComponentType<{ size?: number; className?: string; strokeWidth?: number }>;
+  labelKey: string;
+  icon: ComponentType<{
+    size?: number;
+    className?: string;
+    strokeWidth?: number;
+  }>;
   authRequired?: boolean;
 }
 
 const navItems: NavItem[] = [
   {
     path: "/",
-    label: "Карта",
+    labelKey: "nav.map",
     icon: Map,
   },
   {
     path: "/stations",
-    label: "Списком",
+    labelKey: "nav.list",
     icon: List,
   },
   {
     path: "/favorites",
-    label: "Избранное",
+    labelKey: "nav.favorites",
     icon: Heart,
     authRequired: false,
   },
   {
     path: "/profile",
-    label: "Профиль",
+    labelKey: "nav.profile",
     icon: User,
   },
 ];
@@ -38,6 +43,7 @@ const navItems: NavItem[] = [
 export function BottomNavigation() {
   const location = useLocation();
   const { isAuthenticated } = useAuthStatus();
+  const { t } = useTranslation();
 
   // Hide navigation on auth pages
   if (location.pathname.startsWith("/auth")) {
@@ -91,16 +97,20 @@ export function BottomNavigation() {
                 <IconComponent
                   size={24}
                   className={`mb-1 transition-colors ${
-                    isActive ? "text-primary-500 dark:text-primary-400" : "text-gray-400 dark:text-gray-500"
+                    isActive
+                      ? "text-primary-500 dark:text-primary-400"
+                      : "text-gray-400 dark:text-gray-500"
                   }`}
                   strokeWidth={isActive ? 2.5 : 2}
                 />
                 <span
                   className={`text-xs font-medium transition-colors ${
-                    isActive ? "text-primary-600 dark:text-primary-400" : "text-gray-500 dark:text-gray-400"
+                    isActive
+                      ? "text-primary-600 dark:text-primary-400"
+                      : "text-gray-500 dark:text-gray-400"
                   }`}
                 >
-                  {item.label}
+                  {t(item.labelKey)}
                 </span>
               </motion.div>
             </Link>

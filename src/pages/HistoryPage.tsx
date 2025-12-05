@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ChevronLeft, Zap, CreditCard, TrendingUp, Filter } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   useChargingHistory,
   useTransactionHistory,
@@ -17,6 +18,7 @@ type TabType = "charging" | "transactions" | "statistics";
 
 export function HistoryPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<TabType>("charging");
   const [showFilters, setShowFilters] = useState(false);
 
@@ -36,15 +38,15 @@ export function HistoryPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20 transition-colors">
       {/* Header */}
-      <div className="bg-white shadow-sm sticky-header-safe z-10">
+      <div className="bg-white dark:bg-gray-800 shadow-sm sticky-header-safe z-10">
         <div className="flex items-center justify-between px-4 py-3">
           <button
             onClick={() => navigate(-1)}
-            className="p-2 -ml-2 rounded-full hover:bg-gray-100 transition-colors"
+            className="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
-            <ChevronLeft className="w-6 h-6" />
+            <ChevronLeft className="w-6 h-6 text-gray-600 dark:text-gray-300" />
           </button>
           <div className="flex items-center gap-2">
             <img
@@ -52,32 +54,34 @@ export function HistoryPage() {
               alt=""
               className="h-6 w-auto"
             />
-            <h1 className="text-xl font-semibold">История</h1>
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+              {t("history.title")}
+            </h1>
           </div>
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="p-2 -mr-2 rounded-full hover:bg-gray-100 transition-colors"
+            className="p-2 -mr-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
-            <Filter className="w-5 h-5" />
+            <Filter className="w-5 h-5 text-gray-600 dark:text-gray-300" />
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-gray-200">
+        <div className="flex border-b border-gray-200 dark:border-gray-700">
           <button
             onClick={() => setActiveTab("charging")}
             className={`flex-1 py-3 px-4 text-sm font-medium transition-colors relative ${
               activeTab === "charging"
-                ? "text-primary-600"
-                : "text-gray-600 hover:text-gray-900"
+                ? "text-primary-600 dark:text-primary-400"
+                : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
             }`}
           >
             <div className="flex items-center justify-center gap-2">
               <Zap className="w-4 h-4" />
-              <span>Зарядки</span>
+              <span>{t("history.tabs.charging")}</span>
             </div>
             {activeTab === "charging" && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-600" />
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-600 dark:bg-primary-400" />
             )}
           </button>
 
@@ -85,16 +89,16 @@ export function HistoryPage() {
             onClick={() => setActiveTab("transactions")}
             className={`flex-1 py-3 px-4 text-sm font-medium transition-colors relative ${
               activeTab === "transactions"
-                ? "text-primary-600"
-                : "text-gray-600 hover:text-gray-900"
+                ? "text-primary-600 dark:text-primary-400"
+                : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
             }`}
           >
             <div className="flex items-center justify-center gap-2">
               <CreditCard className="w-4 h-4" />
-              <span>Платежи</span>
+              <span>{t("history.tabs.transactions")}</span>
             </div>
             {activeTab === "transactions" && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-600" />
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-600 dark:bg-primary-400" />
             )}
           </button>
 
@@ -102,36 +106,36 @@ export function HistoryPage() {
             onClick={() => setActiveTab("statistics")}
             className={`flex-1 py-3 px-4 text-sm font-medium transition-colors relative ${
               activeTab === "statistics"
-                ? "text-primary-600"
-                : "text-gray-600 hover:text-gray-900"
+                ? "text-primary-600 dark:text-primary-400"
+                : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
             }`}
           >
             <div className="flex items-center justify-center gap-2">
               <TrendingUp className="w-4 h-4" />
-              <span>Статистика</span>
+              <span>{t("history.tabs.statistics")}</span>
             </div>
             {activeTab === "statistics" && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-600" />
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-600 dark:bg-primary-400" />
             )}
           </button>
         </div>
       </div>
 
-      {/* Filters (показываем если нажата кнопка фильтра) */}
+      {/* Filters */}
       {showFilters && (
-        <div className="bg-white border-b border-gray-200 px-4 py-3">
+        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3">
           <div className="flex items-center gap-2 overflow-x-auto">
-            <button className="px-3 py-1.5 bg-primary-100 text-primary-700 rounded-full text-sm font-medium whitespace-nowrap">
-              Последние 30 дней
+            <button className="px-3 py-1.5 bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300 rounded-full text-sm font-medium whitespace-nowrap">
+              {t("history.filters.last30days")}
             </button>
-            <button className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full text-sm font-medium whitespace-nowrap hover:bg-gray-200">
-              Эта неделя
+            <button className="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-sm font-medium whitespace-nowrap hover:bg-gray-200 dark:hover:bg-gray-600">
+              {t("history.filters.thisWeek")}
             </button>
-            <button className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full text-sm font-medium whitespace-nowrap hover:bg-gray-200">
-              Этот месяц
+            <button className="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-sm font-medium whitespace-nowrap hover:bg-gray-200 dark:hover:bg-gray-600">
+              {t("history.filters.thisMonth")}
             </button>
-            <button className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-full text-sm font-medium whitespace-nowrap hover:bg-gray-200">
-              Выбрать период
+            <button className="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-sm font-medium whitespace-nowrap hover:bg-gray-200 dark:hover:bg-gray-600">
+              {t("history.filters.selectPeriod")}
             </button>
           </div>
         </div>
@@ -166,10 +170,12 @@ export function HistoryPage() {
                   alt=""
                   className="h-16 w-auto mx-auto mb-3 opacity-20"
                 />
-                <Zap className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500">История зарядок пуста</p>
-                <p className="text-sm text-gray-400 mt-1">
-                  Здесь будут отображаться ваши зарядные сессии
+                <Zap className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
+                <p className="text-gray-500 dark:text-gray-400">
+                  {t("history.empty.charging")}
+                </p>
+                <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+                  {t("history.empty.chargingHint")}
                 </p>
               </div>
             )}
@@ -202,10 +208,12 @@ export function HistoryPage() {
                   alt=""
                   className="h-16 w-auto mx-auto mb-3 opacity-20"
                 />
-                <CreditCard className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500">История платежей пуста</p>
-                <p className="text-sm text-gray-400 mt-1">
-                  Здесь будут отображаться ваши транзакции
+                <CreditCard className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
+                <p className="text-gray-500 dark:text-gray-400">
+                  {t("history.empty.transactions")}
+                </p>
+                <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+                  {t("history.empty.transactionsHint")}
                 </p>
               </div>
             )}
@@ -217,71 +225,86 @@ export function HistoryPage() {
           <div className="space-y-4">
             {isLoadingStats ? (
               <div className="flex justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 dark:border-primary-400"></div>
               </div>
             ) : statistics ? (
               <>
                 {/* Overview Cards */}
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-white rounded-lg p-4 border border-gray-200">
-                    <p className="text-sm text-gray-600 mb-1">Всего сессий</p>
-                    <p className="text-2xl font-bold text-gray-900">
+                  <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                      {t("history.stats.totalSessions")}
+                    </p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
                       {statistics.totalSessions}
                     </p>
                   </div>
-                  <div className="bg-white rounded-lg p-4 border border-gray-200">
-                    <p className="text-sm text-gray-600 mb-1">Всего энергии</p>
-                    <p className="text-2xl font-bold text-gray-900">
+                  <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                      {t("history.stats.totalEnergy")}
+                    </p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
                       {statistics.totalEnergy.toFixed(1)}
                     </p>
-                    <p className="text-xs text-gray-500">кВт·ч</p>
-                  </div>
-                  <div className="bg-white rounded-lg p-4 border border-gray-200">
-                    <p className="text-sm text-gray-600 mb-1">
-                      Всего потрачено
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {t("common.kwh")}
                     </p>
-                    <p className="text-2xl font-bold text-gray-900">
+                  </div>
+                  <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                      {t("history.stats.totalSpent")}
+                    </p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
                       {formatCurrency(statistics.totalCost)}
                     </p>
-                    <p className="text-xs text-gray-500">сом</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {t("common.som")}
+                    </p>
                   </div>
-                  <div className="bg-white rounded-lg p-4 border border-gray-200">
-                    <p className="text-sm text-gray-600 mb-1">Время зарядки</p>
-                    <p className="text-2xl font-bold text-gray-900">
+                  <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                      {t("history.stats.chargingTime")}
+                    </p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
                       {Math.round(statistics.totalDuration)}
                     </p>
-                    <p className="text-xs text-gray-500">минут</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {t("common.minutes")}
+                    </p>
                   </div>
                 </div>
 
                 {/* Average Stats */}
-                <div className="bg-white rounded-lg p-4 border border-gray-200">
-                  <h3 className="font-semibold text-gray-900 mb-3">
-                    Средние показатели
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
+                    {t("history.stats.averages")}
                   </h3>
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">
-                        Энергия за сессию
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        {t("history.stats.energyPerSession")}
                       </span>
-                      <span className="font-medium">
-                        {statistics.averageSessionEnergy.toFixed(1)} кВт·ч
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">
-                        Стоимость сессии
-                      </span>
-                      <span className="font-medium">
-                        {formatCurrency(statistics.averageSessionCost)} сом
+                      <span className="font-medium text-gray-900 dark:text-white">
+                        {statistics.averageSessionEnergy.toFixed(1)}{" "}
+                        {t("common.kwh")}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">
-                        Длительность сессии
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        {t("history.stats.costPerSession")}
                       </span>
-                      <span className="font-medium">
-                        {Math.round(statistics.averageSessionDuration)} мин
+                      <span className="font-medium text-gray-900 dark:text-white">
+                        {formatCurrency(statistics.averageSessionCost)}{" "}
+                        {t("common.som")}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        {t("history.stats.durationPerSession")}
+                      </span>
+                      <span className="font-medium text-gray-900 dark:text-white">
+                        {Math.round(statistics.averageSessionDuration)}{" "}
+                        {t("common.minutes")}
                       </span>
                     </div>
                   </div>
@@ -289,20 +312,21 @@ export function HistoryPage() {
 
                 {/* Favorite Station */}
                 {statistics.favoriteStation && (
-                  <div className="bg-white rounded-lg p-4 border border-gray-200">
-                    <h3 className="font-semibold text-gray-900 mb-3">
-                      Любимая станция
+                  <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                    <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
+                      {t("history.stats.favoriteStation")}
                     </h3>
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
-                        <Zap className="w-5 h-5 text-primary-600" />
+                      <div className="w-10 h-10 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                        <Zap className="w-5 h-5 text-primary-600 dark:text-primary-400" />
                       </div>
                       <div className="flex-1">
-                        <p className="font-medium text-gray-900">
+                        <p className="font-medium text-gray-900 dark:text-white">
                           {statistics.favoriteStation.name}
                         </p>
-                        <p className="text-sm text-gray-500">
-                          {statistics.favoriteStation.visitsCount} посещений
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          {statistics.favoriteStation.visitsCount}{" "}
+                          {t("common.visits")}
                         </p>
                       </div>
                     </div>
@@ -312,35 +336,35 @@ export function HistoryPage() {
                 {/* Monthly Chart */}
                 {statistics.monthlyData &&
                   statistics.monthlyData.length > 0 && (
-                    <div className="bg-white rounded-lg p-4 border border-gray-200">
-                      <h3 className="font-semibold text-gray-900 mb-3">
-                        По месяцам
+                    <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                      <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
+                        {t("history.stats.byMonth")}
                       </h3>
                       <div className="space-y-3">
                         {statistics.monthlyData.map((month) => (
                           <div key={month.month}>
                             <div className="flex justify-between items-center mb-1">
-                              <span className="text-sm font-medium text-gray-700">
+                              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                 {month.month}
                               </span>
-                              <span className="text-sm text-gray-500">
-                                {month.sessions} сессий
+                              <span className="text-sm text-gray-500 dark:text-gray-400">
+                                {month.sessions} {t("common.sessions")}
                               </span>
                             </div>
-                            <div className="bg-gray-200 rounded-full h-2">
+                            <div className="bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                               <div
-                                className="bg-primary-500 h-2 rounded-full"
+                                className="bg-primary-500 dark:bg-primary-400 h-2 rounded-full"
                                 style={{
                                   width: `${(month.energy / Math.max(...statistics.monthlyData.map((m) => m.energy))) * 100}%`,
                                 }}
                               />
                             </div>
                             <div className="flex justify-between mt-1">
-                              <span className="text-xs text-gray-500">
-                                {month.energy.toFixed(1)} кВт·ч
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                {month.energy.toFixed(1)} {t("common.kwh")}
                               </span>
-                              <span className="text-xs text-gray-500">
-                                {formatCurrency(month.cost)} сом
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                {formatCurrency(month.cost)} {t("common.som")}
                               </span>
                             </div>
                           </div>
@@ -356,10 +380,12 @@ export function HistoryPage() {
                   alt=""
                   className="h-16 w-auto mx-auto mb-3 opacity-20"
                 />
-                <TrendingUp className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500">Нет данных для статистики</p>
-                <p className="text-sm text-gray-400 mt-1">
-                  Статистика появится после первой зарядки
+                <TrendingUp className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
+                <p className="text-gray-500 dark:text-gray-400">
+                  {t("history.empty.statistics")}
+                </p>
+                <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+                  {t("history.empty.statisticsHint")}
                 </p>
               </div>
             )}

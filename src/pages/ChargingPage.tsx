@@ -8,6 +8,7 @@ import {
   Plug,
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   useStationStatus,
   useLocationUpdates,
@@ -25,6 +26,7 @@ import { logger } from "@/shared/utils/logger";
 
 export const ChargingPage = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { stationId } = useParams();
   const [showTopup, setShowTopup] = useState(false);
   const [selectedConnector, setSelectedConnector] = useState<string | null>(
@@ -245,7 +247,7 @@ export const ChargingPage = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Загружаем станцию...</p>
+          <p className="mt-4 text-gray-600">{t("common.loading")}</p>
         </div>
       </div>
     );
@@ -255,12 +257,12 @@ export const ChargingPage = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-xl text-gray-600">Станция не найдена</p>
+          <p className="text-xl text-gray-600">{t("errors.notFound")}</p>
           <button
             onClick={() => navigate("/")}
             className="mt-4 px-6 py-2 bg-primary-500 text-white rounded-lg"
           >
-            На главную
+            {t("charging.toStations")}
           </button>
         </div>
       </div>
@@ -284,14 +286,14 @@ export const ChargingPage = () => {
               alt=""
               className="h-6 w-auto"
             />
-            <h1 className="text-xl font-semibold">Зарядка</h1>
+            <h1 className="text-xl font-semibold">{t("charging.title")}</h1>
           </div>
           <div className="text-right">
             <div className="text-sm">
               <p className="font-semibold">
                 {(balance?.balance ?? 0).toFixed(2)} KGS
               </p>
-              <p className="text-xs text-gray-500">Баланс</p>
+              <p className="text-xs text-gray-500">{t("profile.balance")}</p>
             </div>
           </div>
         </div>
@@ -306,9 +308,9 @@ export const ChargingPage = () => {
                 <BatteryCharging className="w-6 h-6 text-white animate-pulse" />
               </div>
               <div className="text-white">
-                <p className="font-semibold">Зарядка в процессе</p>
+                <p className="font-semibold">{t("charging.inProgress")}</p>
                 <p className="text-sm text-white/90">
-                  У вас есть активная сессия зарядки
+                  {t("charging.activeSession")}
                 </p>
               </div>
             </div>
@@ -318,7 +320,7 @@ export const ChargingPage = () => {
               }}
               className="px-4 py-2 bg-white text-success-600 rounded-lg font-medium hover:bg-gray-50 transition-colors"
             >
-              Вернуться
+              {t("charging.return")}
             </button>
           </div>
         </div>
@@ -367,7 +369,7 @@ export const ChargingPage = () => {
         {/* Connectors Selection */}
         <div className="mt-3 space-y-2">
           <h3 className="text-sm font-medium text-gray-700 mb-2">
-            Выберите коннектор:
+            {t("charging.selectConnector")}:
           </h3>
           {station &&
             station.connectors.map((connector) => (
@@ -401,7 +403,8 @@ export const ChargingPage = () => {
                     <div className="text-left">
                       <div className="font-medium">{connector.type}</div>
                       <div className="text-sm text-gray-500">
-                        Коннектор №{connector.id.split("-").pop()}
+                        {t("charging.connector")} №
+                        {connector.id.split("-").pop()}
                       </div>
                     </div>
                   </div>
@@ -411,13 +414,14 @@ export const ChargingPage = () => {
                       <div className="flex items-center gap-2">
                         <span className="font-medium flex items-center gap-1">
                           <Zap className="w-3.5 h-3.5" />
-                          {connector.power || station.power || 0} кВт/ч
+                          {connector.power || station.power || 0}{" "}
+                          {t("common.kwh")}
                         </span>
                         <span className="text-orange-500 font-semibold">
                           {connectorPrices[connector.id] ||
                             station.price ||
                             13.5}{" "}
-                          сом/кВт
+                          {t("common.som")}/{t("common.kw")}
                         </span>
                       </div>
                       <div
@@ -430,10 +434,10 @@ export const ChargingPage = () => {
                         }`}
                       >
                         {connector.status === "available"
-                          ? "Работает"
+                          ? t("station.available")
                           : connector.status === "occupied"
-                            ? "Занят"
-                            : "Неисправен"}
+                            ? t("station.occupied")
+                            : t("station.error")}
                       </div>
                     </div>
                   </div>
@@ -453,14 +457,14 @@ export const ChargingPage = () => {
                 <p className="text-2xl font-bold">
                   {(balance?.balance ?? 0).toFixed(2)} KGS
                 </p>
-                <p className="text-sm text-gray-500">Баланс</p>
+                <p className="text-sm text-gray-500">{t("profile.balance")}</p>
               </div>
             </div>
             <button
               onClick={() => setShowTopup(true)}
               className="px-4 py-2 bg-gray-100 rounded-lg font-medium hover:bg-gray-200"
             >
-              + Пополнить
+              + {t("profile.topup")}
             </button>
           </div>
         </div>
@@ -492,7 +496,7 @@ export const ChargingPage = () => {
 
             {/* Две основные кнопки */}
             <div className="space-y-3">
-              {/* Кнопка: Полный заряд */}
+              {/* Full charge button */}
               <button
                 className="w-full bg-primary-500 text-white py-4 rounded-xl font-semibold hover:bg-primary-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 onClick={() => {
@@ -504,29 +508,31 @@ export const ChargingPage = () => {
                 {chargingLoading && chargingLimits.type === "none" ? (
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    Запуск зарядки...
+                    {t("charging.startCharging")}...
                   </>
                 ) : (
                   <>
                     <Zap className="w-5 h-5" />
-                    Полный заряд
+                    {t("charging.fullCharge")}
                   </>
                 )}
               </button>
 
-              {/* Кнопка: Зарядить на сумму (с ползунком) */}
+              {/* Charge by amount section */}
               <div className="space-y-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                <h4 className="font-medium text-gray-900">Зарядить на сумму</h4>
+                <h4 className="font-medium text-gray-900">
+                  {t("charging.chargeByAmount")}
+                </h4>
 
-                {/* Ползунок для выбора суммы */}
+                {/* Amount slider */}
                 {currentPrice && station && (
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-600">
-                        Сумма зарядки
+                        {t("balance.amount")}
                       </span>
                       <span className="text-lg font-bold text-primary-600">
-                        {chargingLimits.amount_som || 100} сом
+                        {chargingLimits.amount_som || 100} {t("common.som")}
                       </span>
                     </div>
 
@@ -570,26 +576,31 @@ export const ChargingPage = () => {
                     />
 
                     <div className="flex justify-between text-xs text-gray-500">
-                      <span>50 сом</span>
+                      <span>50 {t("common.som")}</span>
                       <span>
-                        {Math.min(2000, balance?.balance || 0)} сом (макс)
+                        {Math.min(2000, balance?.balance || 0)}{" "}
+                        {t("common.som")} (max)
                       </span>
                     </div>
 
-                    {/* Расчётная информация */}
+                    {/* Estimated info */}
                     <div className="p-3 bg-white border border-gray-200 rounded-lg space-y-1 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Получите энергии:</span>
+                        <span className="text-gray-600">
+                          {t("charging.estimatedEnergy")}:
+                        </span>
                         <span className="font-semibold">
                           ~
                           {(
                             (chargingLimits.amount_som || 100) / currentPrice
                           ).toFixed(2)}{" "}
-                          кВт·ч
+                          {t("common.kwh")}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Время зарядки:</span>
+                        <span className="text-gray-600">
+                          {t("charging.estimatedTime")}:
+                        </span>
                         <span className="font-semibold">
                           ~
                           {Math.round(
@@ -602,7 +613,7 @@ export const ChargingPage = () => {
                                 22)) *
                               60,
                           )}{" "}
-                          мин
+                          {t("common.minutes")}
                         </span>
                       </div>
                     </div>
@@ -626,12 +637,13 @@ export const ChargingPage = () => {
                   {chargingLoading && chargingLimits.type === "amount" ? (
                     <>
                       <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                      Запуск зарядки...
+                      {t("charging.startCharging")}...
                     </>
                   ) : (
                     <span className="flex items-center gap-2">
                       <Zap className="w-5 h-5" />
-                      Начать зарядку ({chargingLimits.amount_som || 100} сом)
+                      {t("charging.startCharging")} (
+                      {chargingLimits.amount_som || 100} {t("common.som")})
                     </span>
                   )}
                 </button>
@@ -639,7 +651,7 @@ export const ChargingPage = () => {
                 {(balance?.balance || 0) <
                   (chargingLimits.amount_som || 100) && (
                   <p className="text-sm text-red-600 text-center">
-                    Недостаточно средств на балансе
+                    {t("errors.insufficientFunds")}
                   </p>
                 )}
               </div>
@@ -649,7 +661,7 @@ export const ChargingPage = () => {
 
         {!selectedConnector && (
           <div className="mt-4 pt-3 border-t border-gray-100 text-center text-gray-600">
-            Выберите коннектор для начала зарядки
+            {t("charging.selectConnector")}
           </div>
         )}
       </div>

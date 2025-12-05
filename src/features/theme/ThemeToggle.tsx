@@ -2,7 +2,7 @@
  * ThemeToggle - компонент переключения темы
  */
 
-import { Sun, Moon, Monitor } from "lucide-react";
+import { Sun, Moon } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 
 interface ThemeToggleProps {
@@ -12,13 +12,15 @@ interface ThemeToggleProps {
   compact?: boolean;
 }
 
-export function ThemeToggle({ showLabels = true, compact = false }: ThemeToggleProps) {
+export function ThemeToggle({
+  showLabels = true,
+  compact = false,
+}: ThemeToggleProps) {
   const { theme, setTheme } = useTheme();
 
   const options = [
     { value: "light" as const, icon: Sun, label: "Светлая" },
     { value: "dark" as const, icon: Moon, label: "Тёмная" },
-    { value: "system" as const, icon: Monitor, label: "Системная" },
   ];
 
   if (compact) {
@@ -50,7 +52,9 @@ export function ThemeToggle({ showLabels = true, compact = false }: ThemeToggleP
   return (
     <div className="space-y-2">
       {showLabels && (
-        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Тема оформления</p>
+        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          Тема оформления
+        </p>
       )}
       <div className="flex gap-2">
         {options.map((option) => {
@@ -87,7 +91,11 @@ export function ThemeSwitch() {
     <button
       onClick={toggleTheme}
       className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-      title={resolvedTheme === "light" ? "Включить тёмную тему" : "Включить светлую тему"}
+      title={
+        resolvedTheme === "light"
+          ? "Включить тёмную тему"
+          : "Включить светлую тему"
+      }
     >
       {resolvedTheme === "light" ? (
         <Moon className="w-5 h-5" />

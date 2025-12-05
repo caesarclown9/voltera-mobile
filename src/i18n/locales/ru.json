@@ -12,7 +12,14 @@
     "done": "Готово",
     "close": "Закрыть",
     "search": "Поиск",
-    "noData": "Нет данных"
+    "noData": "Нет данных",
+    "som": "сом",
+    "kw": "кВт",
+    "kwh": "кВт·ч",
+    "minutes": "минут",
+    "sessions": "сессий",
+    "visits": "посещений",
+    "user": "Пользователь"
   },
   "nav": {
     "map": "Карта",
@@ -47,9 +54,13 @@
     "support": "Поддержка",
     "about": "О приложении",
     "logoutAccount": "Выйти из аккаунта",
+    "loggingOut": "Выход...",
     "deleteAccount": "Удалить аккаунт",
+    "deleteRequested": "Запрос отправлен",
     "theme": "Тема оформления",
-    "language": "Язык"
+    "language": "Язык",
+    "loginToAccount": "Войдите в аккаунт",
+    "loginDescription": "Чтобы просматривать историю зарядок и управлять балансом"
   },
   "theme": {
     "light": "Светлая",
@@ -123,17 +134,103 @@
     "insufficientFunds": "Недостаточно средств на балансе",
     "tryAgain": "Попробуйте снова"
   },
+  "payments": {
+    "title": "Платежи",
+    "currentBalance": "Текущий баланс",
+    "topup": "Пополнить",
+    "paymentMethods": "Способы оплаты",
+    "electronicWallet": "Электронный кошелек",
+    "paymentHistory": "История платежей",
+    "historyEmpty": "История платежей пуста",
+    "topupToSeeHistory": "Пополните баланс, чтобы увидеть историю",
+    "statusSuccess": "Успешно",
+    "statusPending": "В обработке",
+    "statusFailed": "Отклонено",
+    "unknown": "Неизвестно",
+    "topupViaOdengi": "Пополнение баланса через O!Dengi"
+  },
+  "stationsList": {
+    "title": "Станции списком",
+    "favoritesTitle": "Избранные станции",
+    "noFavorites": "Нет избранных станций",
+    "addFavoritesHint": "Добавьте станции в избранное,\nчтобы они появились здесь",
+    "power": "Мощность",
+    "connectors": "Разъемы",
+    "notSpecified": "Не указаны",
+    "tariff": "Тариф",
+    "onMaintenance": "На обслуживании",
+    "unavailable": "Недоступна",
+    "onMap": "На карте",
+    "charge": "Зарядить"
+  },
+  "about": {
+    "title": "О приложении",
+    "appVersion": "Версия приложения",
+    "privacyPolicy": "Политика конфиденциальности",
+    "termsOfUse": "Условия использования",
+    "support": "Поддержка"
+  },
+  "history": {
+    "title": "История",
+    "chargingTitle": "История зарядок",
+    "noHistory": "Нет истории зарядок",
+    "startChargingHint": "Начните заряжаться на станциях Voltera,\nчтобы увидеть историю здесь",
+    "date": "Дата",
+    "station": "Станция",
+    "energy": "Энергия",
+    "duration": "Время",
+    "cost": "Стоимость",
+    "tabs": {
+      "charging": "Зарядки",
+      "transactions": "Платежи",
+      "statistics": "Статистика"
+    },
+    "filters": {
+      "last30days": "Последние 30 дней",
+      "thisWeek": "Эта неделя",
+      "thisMonth": "Этот месяц",
+      "selectPeriod": "Выбрать период"
+    },
+    "empty": {
+      "charging": "История зарядок пуста",
+      "chargingHint": "Здесь будут отображаться ваши зарядные сессии",
+      "transactions": "История платежей пуста",
+      "transactionsHint": "Здесь будут отображаться ваши транзакции",
+      "statistics": "Нет данных для статистики",
+      "statisticsHint": "Статистика появится после первой зарядки"
+    },
+    "stats": {
+      "totalSessions": "Всего сессий",
+      "totalEnergy": "Всего энергии",
+      "totalSpent": "Всего потрачено",
+      "chargingTime": "Время зарядки",
+      "averages": "Средние показатели",
+      "energyPerSession": "Энергия за сессию",
+      "costPerSession": "Стоимость сессии",
+      "durationPerSession": "Длительность сессии",
+      "favoriteStation": "Любимая станция",
+      "byMonth": "По месяцам"
+    }
+  },
   "onboarding": {
     "skip": "Пропустить",
     "next": "Далее",
     "start": "Начать",
     "slide1Title": "Найдите станцию",
-    "slide1Desc": "Используйте карту или список для поиска ближайших зарядных станций",
-    "slide2Title": "Сканируйте QR-код",
-    "slide2Desc": "Отсканируйте QR-код на станции для быстрого подключения",
-    "slide3Title": "Пополняйте баланс",
-    "slide3Desc": "Удобное пополнение баланса с карты или электронного кошелька",
-    "slide4Title": "Начните зарядку!",
-    "slide4Desc": "Выберите коннектор и запустите зарядку одним нажатием"
+    "slide1Desc": "Откройте карту и выберите ближайшую зарядную станцию Voltera",
+    "slide2Title": "Пополняйте баланс",
+    "slide2Desc": "Удобное пополнение через O!Деньги или банковскую карту",
+    "slide3Title": "Начните зарядку!",
+    "slide3Desc": "Выберите станцию, подключите кабель и начните зарядку"
+  },
+  "settings": {
+    "title": "Настройки",
+    "appearance": "Внешний вид",
+    "languageLabel": "Язык / Language",
+    "notifications": "Уведомления",
+    "information": "Информация",
+    "aboutApp": "О приложении",
+    "privacyPolicy": "Политика конфиденциальности",
+    "termsOfUse": "Условия использования"
   }
 }

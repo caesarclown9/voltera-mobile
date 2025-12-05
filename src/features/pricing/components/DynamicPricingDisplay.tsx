@@ -155,7 +155,7 @@ export function DynamicPricingDisplay({
   if (isLoading) {
     return (
       <div className="animate-pulse">
-        <div className="h-20 bg-gray-200 rounded-lg"></div>
+        <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
       </div>
     );
   }
@@ -171,13 +171,13 @@ export function DynamicPricingDisplay({
     return (
       <div className="flex items-center justify-between py-2">
         <div className="flex items-center gap-2">
-          <Zap className="w-4 h-4 text-yellow-500" />
-          <span className="text-lg font-bold text-primary-600">
+          <Zap className="w-4 h-4 text-primary-500 dark:text-primary-400" />
+          <span className="text-lg font-bold text-primary-600 dark:text-primary-400">
             {currentPricing.rate_per_kwh} {currentPricing.currency}/кВт·ч
           </span>
         </div>
         {currentPricing.is_client_tariff && (
-          <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
+          <span className="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 px-2 py-1 rounded-full">
             VIP
           </span>
         )}
@@ -189,28 +189,28 @@ export function DynamicPricingDisplay({
   return (
     <div className="space-y-4">
       {/* Текущий тариф */}
-      <div className="bg-gradient-to-r from-primary-50 to-primary-100 rounded-xl p-4">
+      <div className="bg-gradient-to-r from-primary-50 to-primary-100 dark:from-primary-900/30 dark:to-primary-800/30 rounded-xl p-4">
         <div className="flex items-start justify-between mb-3">
           <div>
-            <h3 className="text-sm font-medium text-gray-600 mb-1">
+            <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
               Текущий тариф
             </h3>
             <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-bold text-primary-600">
+              <span className="text-3xl font-bold text-primary-600 dark:text-primary-400">
                 {currentPricing.rate_per_kwh}
               </span>
-              <span className="text-lg text-gray-600">
+              <span className="text-lg text-gray-600 dark:text-gray-400">
                 {currentPricing.currency}/кВт·ч
               </span>
             </div>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               {currentPricing.active_rule}
             </p>
           </div>
 
           {currentPricing.is_client_tariff && (
-            <div className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-medium">
-              ✨ Ваш специальный тариф
+            <div className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 px-3 py-1 rounded-full text-sm font-medium">
+              Ваш специальный тариф
             </div>
           )}
         </div>
@@ -218,19 +218,23 @@ export function DynamicPricingDisplay({
         {/* Дополнительные сборы */}
         {(currentPricing.session_fee > 0 ||
           currentPricing.rate_per_minute > 0) && (
-          <div className="border-t border-primary-100 pt-3 mt-3 space-y-1">
+          <div className="border-t border-primary-100 dark:border-primary-800 pt-3 mt-3 space-y-1">
             {currentPricing.session_fee > 0 && (
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Плата за сессию:</span>
-                <span className="font-medium">
+                <span className="text-gray-600 dark:text-gray-400">
+                  Плата за сессию:
+                </span>
+                <span className="font-medium text-gray-900 dark:text-white">
                   {currentPricing.session_fee} {currentPricing.currency}
                 </span>
               </div>
             )}
             {currentPricing.rate_per_minute > 0 && (
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Поминутная тарификация:</span>
-                <span className="font-medium">
+                <span className="text-gray-600 dark:text-gray-400">
+                  Поминутная тарификация:
+                </span>
+                <span className="font-medium text-gray-900 dark:text-white">
                   {currentPricing.rate_per_minute} {currentPricing.currency}/мин
                 </span>
               </div>
@@ -240,9 +244,9 @@ export function DynamicPricingDisplay({
 
         {/* Время до изменения тарифа */}
         {currentPricing.time_based && nextChangeIn && (
-          <div className="flex items-center gap-2 mt-3 p-2 bg-white/50 rounded-lg">
-            <Clock className="w-4 h-4 text-gray-500" />
-            <span className="text-sm text-gray-600">
+          <div className="flex items-center gap-2 mt-3 p-2 bg-white/50 dark:bg-gray-800/50 rounded-lg">
+            <Clock className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+            <span className="text-sm text-gray-600 dark:text-gray-300">
               Тариф изменится через: <strong>{nextChangeIn}</strong>
             </span>
           </div>
@@ -252,21 +256,23 @@ export function DynamicPricingDisplay({
         {trend && (
           <div
             className={`flex items-center gap-2 mt-3 p-2 rounded-lg ${
-              trend.type === "up" ? "bg-orange-50" : "bg-green-50"
+              trend.type === "up"
+                ? "bg-orange-50 dark:bg-orange-900/30"
+                : "bg-green-50 dark:bg-green-900/30"
             }`}
           >
             {trend.type === "up" ? (
               <>
-                <TrendingUp className="w-4 h-4 text-orange-500" />
-                <span className="text-sm text-orange-700">
+                <TrendingUp className="w-4 h-4 text-orange-500 dark:text-orange-400" />
+                <span className="text-sm text-orange-700 dark:text-orange-300">
                   Цена повысится до {trend.rate} {currentPricing.currency} в{" "}
                   {trend.time}
                 </span>
               </>
             ) : (
               <>
-                <TrendingDown className="w-4 h-4 text-green-500" />
-                <span className="text-sm text-green-700">
+                <TrendingDown className="w-4 h-4 text-green-500 dark:text-green-400" />
+                <span className="text-sm text-green-700 dark:text-green-300">
                   Цена снизится до {trend.rate} {currentPricing.currency} в{" "}
                   {trend.time}
                 </span>
@@ -277,9 +283,9 @@ export function DynamicPricingDisplay({
       </div>
 
       {/* Информация о динамических тарифах */}
-      <div className="p-3 bg-blue-50 rounded-lg flex items-start gap-2">
-        <Info className="w-4 h-4 text-blue-500 mt-0.5" />
-        <p className="text-sm text-blue-700">
+      <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg flex items-start gap-2">
+        <Info className="w-4 h-4 text-blue-500 dark:text-blue-400 mt-0.5" />
+        <p className="text-sm text-blue-700 dark:text-blue-300">
           Тарифы могут изменяться в зависимости от времени суток и дня недели.
           Заряжайте в периоды низких цен для экономии!
         </p>

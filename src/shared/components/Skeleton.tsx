@@ -25,7 +25,7 @@ export function Skeleton({
   className = "",
   lines = 1,
 }: SkeletonProps) {
-  const baseClasses = "bg-gray-200 overflow-hidden";
+  const baseClasses = "bg-gray-200 dark:bg-gray-700 overflow-hidden";
 
   const shimmerAnimation = {
     initial: { x: "-100%" },
@@ -49,7 +49,7 @@ export function Skeleton({
             }}
           >
             <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 dark:via-white/10 to-transparent"
               {...shimmerAnimation}
             />
           </div>
@@ -75,7 +75,7 @@ export function Skeleton({
       style={style}
     >
       <motion.div
-        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
+        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 dark:via-white/10 to-transparent"
         {...shimmerAnimation}
       />
     </div>
@@ -87,7 +87,7 @@ export function Skeleton({
  */
 export function StationCardSkeleton() {
   return (
-    <div className="bg-white rounded-xl p-4 shadow-sm">
+    <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
       <div className="flex gap-4">
         {/* Иконка */}
         <Skeleton variant="circular" width={48} height={48} />
@@ -101,8 +101,18 @@ export function StationCardSkeleton() {
 
           {/* Статус и коннекторы */}
           <div className="flex gap-2">
-            <Skeleton variant="rectangular" width={80} height={24} className="rounded-full" />
-            <Skeleton variant="rectangular" width={60} height={24} className="rounded-full" />
+            <Skeleton
+              variant="rectangular"
+              width={80}
+              height={24}
+              className="rounded-full"
+            />
+            <Skeleton
+              variant="rectangular"
+              width={60}
+              height={24}
+              className="rounded-full"
+            />
           </div>
         </div>
       </div>
@@ -139,7 +149,11 @@ export function ProfileSkeleton() {
       </div>
 
       {/* Balance card */}
-      <Skeleton variant="rectangular" height={100} className="rounded-xl mb-6" />
+      <Skeleton
+        variant="rectangular"
+        height={100}
+        className="rounded-xl mb-6"
+      />
 
       {/* Menu items */}
       <div className="space-y-3">
@@ -159,7 +173,7 @@ export function ProfileSkeleton() {
  */
 export function HistoryItemSkeleton() {
   return (
-    <div className="bg-white rounded-xl p-4 shadow-sm">
+    <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
       <div className="flex justify-between items-start mb-3">
         <Skeleton variant="text" width="60%" height={18} />
         <Skeleton variant="text" width={60} height={18} />

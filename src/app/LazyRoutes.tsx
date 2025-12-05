@@ -82,6 +82,16 @@ export const routes = {
     import("../pages/AboutPage").then((m) => ({ default: m.AboutPage })),
   ),
 
+  SupportPage: createLazyRoute(() =>
+    import("../pages/SupportPage").then((m) => ({ default: m.SupportPage })),
+  ),
+
+  NotificationsSettingsPage: createLazyRoute(() =>
+    import("../pages/NotificationsSettingsPage").then((m) => ({
+      default: m.NotificationsSettingsPage,
+    })),
+  ),
+
   // Админ-панель
   AdminDashboard: createLazyRoute(() =>
     import("../features/admin/pages/AdminDashboard").then((m) => ({

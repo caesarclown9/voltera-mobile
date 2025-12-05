@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ChevronLeft, Heart, Zap, Navigation } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useStations } from "@/features/stations/hooks/useStations";
 import { useFavorites } from "@/features/favorites/hooks/useFavorites";
 import { useAuthStatus } from "@/features/auth/hooks/useAuth";
@@ -10,6 +11,7 @@ import { StationListSkeleton } from "@/shared/components/Skeleton";
 export const StationsList = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
   const { user } = useAuthStatus();
   const isFavoritesPage = location.pathname === "/favorites";
   const { toggleFavorite: toggleFavoriteApi, isFavorite } = useFavorites();
@@ -51,14 +53,14 @@ export const StationsList = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 pb-20">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20 transition-colors">
         {/* Header skeleton */}
-        <div className="bg-white shadow-sm p-4">
-          <div className="h-8 bg-gray-200 rounded w-40 mb-4" />
+        <div className="bg-white dark:bg-gray-800 shadow-sm p-4">
+          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-40 mb-4" />
           <div className="flex gap-2">
-            <div className="h-10 bg-gray-200 rounded-full w-24" />
-            <div className="h-10 bg-gray-200 rounded-full w-20" />
-            <div className="h-10 bg-gray-200 rounded-full w-28" />
+            <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded-full w-24" />
+            <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded-full w-20" />
+            <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded-full w-28" />
           </div>
         </div>
         <StationListSkeleton count={4} />
@@ -67,24 +69,26 @@ export const StationsList = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20 transition-colors">
       {/* Header с safe-area */}
-      <div className="bg-white shadow-sm sticky-header-safe z-10">
+      <div className="bg-white dark:bg-gray-800 shadow-sm sticky-header-safe z-10">
         <div className="flex items-center px-4 pb-4">
           <button
             onClick={() => navigate(-1)}
-            className="p-2 -ml-2 rounded-lg hover:bg-gray-100"
+            className="p-2 -ml-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
-            <ChevronLeft className="w-6 h-6" />
+            <ChevronLeft className="w-6 h-6 text-gray-600 dark:text-gray-300" />
           </button>
           <div className="flex items-center gap-2 ml-2">
             <img
               src="/icons/voltera-logo-square.svg"
               alt=""
-              className="h-6 w-auto"
+              className="h-6 w-auto dark:invert dark:brightness-200"
             />
-            <h1 className="text-xl font-semibold">
-              {isFavoritesPage ? "Избранные станции" : "Станции списком"}
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+              {isFavoritesPage
+                ? t("stationsList.favoritesTitle")
+                : t("stationsList.title")}
             </h1>
           </div>
         </div>
@@ -99,8 +103,8 @@ export const StationsList = () => {
                   onClick={() => setSelectedCity(city ?? null)}
                   className={`px-4 py-2 rounded-full whitespace-nowrap transition-colors ${
                     selectedCity === city
-                      ? "bg-primary-100 text-primary-700 font-medium"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      ? "bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300 font-medium"
+                      : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
                   }`}
                 >
                   {city}
@@ -118,14 +122,14 @@ export const StationsList = () => {
             <img
               src="/icons/voltera-logo-square.svg"
               alt=""
-              className="h-16 w-auto mx-auto mb-3 opacity-20"
+              className="h-16 w-auto mx-auto mb-3 opacity-20 dark:invert dark:brightness-200"
             />
-            <Heart className="w-12 h-12 mx-auto text-gray-300 mb-4" />
-            <p className="text-gray-500 text-lg">Нет избранных станций</p>
-            <p className="text-gray-400 text-sm mt-2">
-              Добавьте станции в избранное,
-              <br />
-              чтобы они появились здесь
+            <Heart className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+            <p className="text-gray-500 dark:text-gray-400 text-lg">
+              {t("stationsList.noFavorites")}
+            </p>
+            <p className="text-gray-400 dark:text-gray-500 text-sm mt-2 whitespace-pre-line">
+              {t("stationsList.addFavoritesHint")}
             </p>
           </div>
         ) : (
@@ -135,7 +139,7 @@ export const StationsList = () => {
             return (
               <div
                 key={station.id}
-                className="bg-white rounded-2xl p-4 shadow-sm"
+                className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm"
               >
                 {/* Station Header */}
                 <div className="flex items-start justify-between mb-3">
@@ -143,15 +147,15 @@ export const StationsList = () => {
                     <div
                       className={`w-12 h-12 rounded-lg flex items-center justify-center ${
                         station.status === "active"
-                          ? "bg-success-100"
-                          : "bg-gray-100"
+                          ? "bg-success-100 dark:bg-success-900/30"
+                          : "bg-gray-100 dark:bg-gray-700"
                       }`}
                     >
                       <Zap
                         className={`w-6 h-6 ${
                           station.status === "active"
-                            ? "text-success-600"
-                            : "text-gray-400"
+                            ? "text-success-600 dark:text-success-400"
+                            : "text-gray-400 dark:text-gray-500"
                         }`}
                       />
                     </div>
@@ -159,22 +163,22 @@ export const StationsList = () => {
                       <h3
                         className={`font-semibold ${
                           station.status === "active"
-                            ? "text-gray-900"
-                            : "text-gray-500"
+                            ? "text-gray-900 dark:text-white"
+                            : "text-gray-500 dark:text-gray-400"
                         }`}
                       >
                         {station.locationName || station.model}
                         {station.status !== "active" && (
-                          <span className="ml-2 text-xs text-red-500">
+                          <span className="ml-2 text-xs text-red-500 dark:text-red-400">
                             (
                             {station.status === "maintenance"
-                              ? "На обслуживании"
-                              : "Недоступна"}
+                              ? t("stationsList.onMaintenance")
+                              : t("stationsList.unavailable")}
                             )
                           </span>
                         )}
                       </h3>
-                      <p className="text-sm text-gray-500 flex items-center gap-1 mt-1">
+                      <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1 mt-1">
                         <span>{station.locationAddress}</span>
                       </p>
                     </div>
@@ -187,7 +191,7 @@ export const StationsList = () => {
                       className={`w-5 h-5 transition-colors ${
                         isFavoriteStation
                           ? "fill-red-500 text-red-500"
-                          : "text-gray-400"
+                          : "text-gray-400 dark:text-gray-500"
                       }`}
                     />
                   </button>
@@ -197,23 +201,26 @@ export const StationsList = () => {
                 <div className="space-y-2 mb-3">
                   <div className="flex items-center gap-4 text-sm">
                     <div className="flex items-center gap-2">
-                      <Zap className="w-4 h-4 text-gray-400" />
-                      <span className="text-gray-600">
-                        Мощность: {station.power_capacity} кВт
+                      <Zap className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                      <span className="text-gray-600 dark:text-gray-300">
+                        {t("stationsList.power")}: {station.power_capacity}{" "}
+                        {t("common.kw")}
                       </span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                     <span>
-                      Разъемы:{" "}
-                      {station.connector_types?.join(", ") || "Не указаны"}
+                      {t("stationsList.connectors")}:{" "}
+                      {station.connector_types?.join(", ") ||
+                        t("stationsList.notSpecified")}
                     </span>
-                    <span className="text-gray-400">
-                      ({station.connectors_count || 0} шт.)
+                    <span className="text-gray-400 dark:text-gray-500">
+                      ({station.connectors_count || 0})
                     </span>
                   </div>
-                  <div className="text-sm text-gray-600">
-                    Тариф: {station.price_per_kwh ?? 0} сом/кВт·ч
+                  <div className="text-sm text-gray-600 dark:text-gray-300">
+                    {t("stationsList.tariff")}: {station.price_per_kwh ?? 0}{" "}
+                    {t("common.som")}/{t("common.kwh")}
                   </div>
                 </div>
 
@@ -240,10 +247,10 @@ export const StationsList = () => {
                         },
                       });
                     }}
-                    className="flex-1 bg-gray-100 text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
+                    className="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 py-2 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-2"
                   >
                     <Navigation className="w-4 h-4" />
-                    На карте
+                    {t("stationsList.onMap")}
                   </button>
                   <button
                     onClick={() => {
@@ -252,11 +259,13 @@ export const StationsList = () => {
                     disabled={station.status !== "active"}
                     className={`flex-1 py-2 rounded-lg font-medium transition-colors ${
                       station.status === "active"
-                        ? "bg-primary-500 text-white hover:bg-primary-600"
-                        : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                        ? "bg-primary-500 dark:bg-primary-600 text-white hover:bg-primary-600 dark:hover:bg-primary-500"
+                        : "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
                     }`}
                   >
-                    {station.status === "active" ? "Зарядить" : "Недоступна"}
+                    {station.status === "active"
+                      ? t("stationsList.charge")
+                      : t("stationsList.unavailable")}
                   </button>
                 </div>
               </div>

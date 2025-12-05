@@ -19,11 +19,17 @@ export function TransactionCard({ transaction }: TransactionCardProps) {
   const getIcon = () => {
     switch (transaction.type) {
       case "topup":
-        return <ArrowDownCircle className="w-6 h-6 text-green-600" />;
+        return (
+          <ArrowDownCircle className="w-6 h-6 text-green-600 dark:text-green-400" />
+        );
       case "charge":
-        return <ArrowUpCircle className="w-6 h-6 text-red-600" />;
+        return (
+          <ArrowUpCircle className="w-6 h-6 text-red-600 dark:text-red-400" />
+        );
       case "refund":
-        return <RefreshCw className="w-6 h-6 text-blue-600" />;
+        return (
+          <RefreshCw className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+        );
     }
   };
 
@@ -31,9 +37,9 @@ export function TransactionCard({ transaction }: TransactionCardProps) {
     switch (transaction.type) {
       case "topup":
       case "refund":
-        return "text-green-600";
+        return "text-green-600 dark:text-green-400";
       case "charge":
-        return "text-red-600";
+        return "text-red-600 dark:text-red-400";
     }
   };
 
@@ -51,7 +57,7 @@ export function TransactionCard({ transaction }: TransactionCardProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-sm transition-shadow">
+    <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 hover:shadow-sm transition-shadow">
       <div className="flex items-start gap-3">
         {/* Icon */}
         <div className="flex-shrink-0">{getIcon()}</div>
@@ -60,14 +66,14 @@ export function TransactionCard({ transaction }: TransactionCardProps) {
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <p className="font-medium text-gray-900">
+              <p className="font-medium text-gray-900 dark:text-white">
                 {transaction.description}
               </p>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                 {formatDate(transaction.timestamp)}
               </p>
               {transaction.paymentMethod && (
-                <p className="text-xs text-gray-400 mt-1">
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                   {getPaymentMethodText()}
                 </p>
               )}
@@ -79,7 +85,7 @@ export function TransactionCard({ transaction }: TransactionCardProps) {
                 {transaction.amount > 0 ? "+" : ""}
                 {transaction.amount.toFixed(2)} сом
               </p>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 Баланс: {transaction.balance_after.toFixed(2)}
               </p>
             </div>
@@ -93,8 +99,8 @@ export function TransactionCard({ transaction }: TransactionCardProps) {
           <span
             className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
               transaction.status === "pending"
-                ? "bg-yellow-100 text-yellow-700"
-                : "bg-red-100 text-red-700"
+                ? "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400"
+                : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
             }`}
           >
             {transaction.status === "pending" ? "В обработке" : "Ошибка"}

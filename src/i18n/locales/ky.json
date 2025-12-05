@@ -12,7 +12,14 @@
     "done": "Даяр",
     "close": "Жабуу",
     "search": "Издөө",
-    "noData": "Маалымат жок"
+    "noData": "Маалымат жок",
+    "som": "сом",
+    "kw": "кВт",
+    "kwh": "кВт·ч",
+    "minutes": "мүнөт",
+    "sessions": "сессия",
+    "visits": "жолугуу",
+    "user": "Колдонуучу"
   },
   "nav": {
     "map": "Карта",
@@ -47,9 +54,13 @@
     "support": "Колдоо",
     "about": "Колдонмо жөнүндө",
     "logoutAccount": "Аккаунттан чыгуу",
+    "loggingOut": "Чыгууда...",
     "deleteAccount": "Аккаунтту өчүрүү",
+    "deleteRequested": "Өтүнүч жиберилди",
     "theme": "Тема",
-    "language": "Тил"
+    "language": "Тил",
+    "loginToAccount": "Аккаунтка кириңиз",
+    "loginDescription": "Заряддоо тарыхын көрүү жана балансты башкаруу үчүн"
   },
   "theme": {
     "light": "Жарык",
@@ -123,17 +134,103 @@
     "insufficientFunds": "Балансда жетишсиз каражат",
     "tryAgain": "Кайра аракет кылыңыз"
   },
+  "payments": {
+    "title": "Төлөмдөр",
+    "currentBalance": "Учурдагы баланс",
+    "topup": "Толтуруу",
+    "paymentMethods": "Төлөм ыкмалары",
+    "electronicWallet": "Электрондук капчык",
+    "paymentHistory": "Төлөм тарыхы",
+    "historyEmpty": "Төлөм тарыхы бош",
+    "topupToSeeHistory": "Тарыхты көрүү үчүн балансты толтуруңуз",
+    "statusSuccess": "Ийгиликтүү",
+    "statusPending": "Иштетүүдө",
+    "statusFailed": "Баш тартылды",
+    "unknown": "Белгисиз",
+    "topupViaOdengi": "O!Dengi аркылуу балансты толтуруу"
+  },
+  "stationsList": {
+    "title": "Станциялар тизмеси",
+    "favoritesTitle": "Тандалган станциялар",
+    "noFavorites": "Тандалган станциялар жок",
+    "addFavoritesHint": "Станцияларды тандалгандарга кошуңуз,\nалар бул жерде пайда болот",
+    "power": "Кубаттуулук",
+    "connectors": "Туташтыргычтар",
+    "notSpecified": "Көрсөтүлгөн эмес",
+    "tariff": "Тариф",
+    "onMaintenance": "Тейлөөдө",
+    "unavailable": "Жеткиликтүү эмес",
+    "onMap": "Картада",
+    "charge": "Заряддоо"
+  },
+  "about": {
+    "title": "Колдонмо жөнүндө",
+    "appVersion": "Колдонмо версиясы",
+    "privacyPolicy": "Купуялуулук саясаты",
+    "termsOfUse": "Колдонуу шарттары",
+    "support": "Колдоо"
+  },
+  "history": {
+    "title": "Тарых",
+    "chargingTitle": "Заряддоо тарыхы",
+    "noHistory": "Заряддоо тарыхы жок",
+    "startChargingHint": "Voltera станцияларында заряддоону баштаңыз,\nтарыхты бул жерден көрөсүз",
+    "date": "Күн",
+    "station": "Станция",
+    "energy": "Энергия",
+    "duration": "Убакыт",
+    "cost": "Баасы",
+    "tabs": {
+      "charging": "Заряддоо",
+      "transactions": "Төлөмдөр",
+      "statistics": "Статистика"
+    },
+    "filters": {
+      "last30days": "Акыркы 30 күн",
+      "thisWeek": "Бул жума",
+      "thisMonth": "Бул ай",
+      "selectPeriod": "Мезгилди тандоо"
+    },
+    "empty": {
+      "charging": "Заряддоо тарыхы бош",
+      "chargingHint": "Заряддоо сессияларыңыз бул жерде көрүнөт",
+      "transactions": "Төлөм тарыхы бош",
+      "transactionsHint": "Транзакцияларыңыз бул жерде көрүнөт",
+      "statistics": "Статистика үчүн маалымат жок",
+      "statisticsHint": "Биринчи заряддоодон кийин статистика пайда болот"
+    },
+    "stats": {
+      "totalSessions": "Жалпы сессиялар",
+      "totalEnergy": "Жалпы энергия",
+      "totalSpent": "Жалпы чыгым",
+      "chargingTime": "Заряддоо убактысы",
+      "averages": "Орточо көрсөткүчтөр",
+      "energyPerSession": "Сессияга энергия",
+      "costPerSession": "Сессиянын баасы",
+      "durationPerSession": "Сессиянын узактыгы",
+      "favoriteStation": "Сүйүктүү станция",
+      "byMonth": "Айлар боюнча"
+    }
+  },
   "onboarding": {
     "skip": "Өткөрүп жиберүү",
     "next": "Кийинки",
     "start": "Баштоо",
     "slide1Title": "Станцияны табыңыз",
-    "slide1Desc": "Жакынкы заряддоо станцияларын издөө үчүн картаны же тизмени колдонуңуз",
-    "slide2Title": "QR-кодду сканерлеңиз",
-    "slide2Desc": "Тез туташуу үчүн станциядагы QR-кодду сканерлеңиз",
-    "slide3Title": "Балансты толтуруңуз",
-    "slide3Desc": "Карта же электрондук капчык менен ыңгайлуу толтуруу",
-    "slide4Title": "Заряддоону баштаңыз!",
-    "slide4Desc": "Туташтыргычты тандап, бир басуу менен заряддоону баштаңыз"
+    "slide1Desc": "Картаны ачып, жакынкы Voltera заряддоо станциясын тандаңыз",
+    "slide2Title": "Балансты толтуруңуз",
+    "slide2Desc": "O!Dengi же банк картасы аркылуу ыңгайлуу толтуруу",
+    "slide3Title": "Заряддоону баштаңыз!",
+    "slide3Desc": "Станцияны тандап, кабелди туташтырып, заряддоону баштаңыз"
+  },
+  "settings": {
+    "title": "Жөндөөлөр",
+    "appearance": "Көрүнүш",
+    "languageLabel": "Тил",
+    "notifications": "Билдирмелер",
+    "information": "Маалымат",
+    "aboutApp": "Колдонмо жөнүндө",
+    "privacyPolicy": "Купуялуулук саясаты",
+    "termsOfUse": "Колдонуу шарттары"
   }
 }

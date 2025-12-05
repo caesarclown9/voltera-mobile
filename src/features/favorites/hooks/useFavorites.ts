@@ -50,7 +50,40 @@ export const useFavorites = () => {
       if (!user?.id) throw new Error("User not authenticated");
       return favoriteService.toggleFavorite(user.id, stationId);
     },
-    onSuccess: () => {
+    onMutate: async (stationId: string) => {
+      // Отменяем любые исходящие запросы к избранным
+      await queryClient.cancelQueries({ queryKey: ["favorites", user?.id] });
+
+      // Сохраняем предыдущее значение
+      const previousFavorites = queryClient.getQueryData<string[]>([
+        "favorites",
+        user?.id,
+      ]);
+
+      // Оптимистично обновляем кэш
+      queryClient.setQueryData<string[]>(
+        ["favorites", user?.id],
+        (old = []) => {
+          if (old.includes(stationId)) {
+            return old.filter((id) => id !== stationId);
+          }
+          return [...old, stationId];
+        },
+      );
+
+      return { previousFavorites };
+    },
+    onError: (_err, _stationId, context) => {
+      // При ошибке откатываем к предыдущему значению
+      if (context?.previousFavorites) {
+        queryClient.setQueryData(
+          ["favorites", user?.id],
+          context.previousFavorites,
+        );
+      }
+    },
+    onSettled: () => {
+      // После завершения (успех или ошибка) перезагружаем данные
       queryClient.invalidateQueries({ queryKey: ["favorites", user?.id] });
     },
   });

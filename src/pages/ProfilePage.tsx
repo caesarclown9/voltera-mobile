@@ -9,8 +9,10 @@ import {
   Info,
   Trash2,
   Palette,
+  Globe,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuthStatus, useLogout } from "../features/auth/hooks/useAuth";
 import { useBalance } from "../features/balance/hooks/useBalance";
 import { useEffect, useState } from "react";
@@ -28,6 +30,7 @@ import { LanguageSelector } from "@/i18n/LanguageSelector";
 
 export const ProfilePage = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { user } = useAuthStatus();
   const { data: balanceData, isLoading: isBalanceLoading } = useBalance();
   const [deleteRequested, setDeleteRequested] = useState(false);
@@ -71,7 +74,7 @@ export const ProfilePage = () => {
     try {
       await evpowerApi.requestAccountDeletion();
       alert(
-        "Запрос на удаление отправлен. Мы обработаем его в ближайшее время."
+        "Запрос на удаление отправлен. Мы обработаем его в ближайшее время.",
       );
       setDeleteRequested(true);
       await handleLogout();
@@ -88,7 +91,9 @@ export const ProfilePage = () => {
         {/* Header */}
         <div className="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
           <div className="flex items-center justify-center p-4">
-            <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Профиль</h1>
+            <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+              {t("profile.title")}
+            </h1>
           </div>
         </div>
 
@@ -97,21 +102,21 @@ export const ProfilePage = () => {
             <Info className="w-10 h-10 text-gray-400 dark:text-gray-500" />
           </div>
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-            Войдите в аккаунт
+            {t("profile.loginToAccount")}
           </h2>
           <p className="text-gray-500 dark:text-gray-400 text-center mb-6">
-            Чтобы просматривать историю зарядок и управлять балансом
+            {t("profile.loginDescription")}
           </p>
           <button
             onClick={() => navigate("/auth")}
             className="w-full max-w-xs bg-primary-500 text-white py-3 rounded-xl font-semibold hover:bg-primary-600 transition-colors"
           >
-            Войти
+            {t("auth.login")}
           </button>
         </div>
 
         {/* Тема и язык для неавторизованных */}
-        <ProfileSection title="Настройки">
+        <ProfileSection title={t("profile.settings")}>
           <div className="px-4 py-3 flex items-center gap-3 border-b border-gray-100 dark:border-gray-800">
             <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
               <Palette className="w-5 h-5 text-gray-600 dark:text-gray-400" />
@@ -122,7 +127,7 @@ export const ProfilePage = () => {
           </div>
           <div className="px-4 py-3 flex items-center gap-3 border-b border-gray-100 dark:border-gray-800 last:border-b-0">
             <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-              <span className="text-lg">🌐</span>
+              <Globe className="w-5 h-5 text-gray-600 dark:text-gray-400" />
             </div>
             <div className="flex-1">
               <LanguageSelector compact showLabel={false} />
@@ -131,15 +136,15 @@ export const ProfilePage = () => {
         </ProfileSection>
 
         {/* Информация */}
-        <ProfileSection title="Информация">
+        <ProfileSection title={t("profile.info")}>
           <ProfileMenuItem
             icon={HelpCircle}
-            label="Поддержка"
+            label={t("profile.support")}
             onClick={() => navigate("/support")}
           />
           <ProfileMenuItem
             icon={Info}
-            label="О приложении"
+            label={t("profile.about")}
             onClick={() => navigate("/about")}
           />
         </ProfileSection>
@@ -158,7 +163,9 @@ export const ProfilePage = () => {
           >
             <ChevronLeft className="w-6 h-6 text-gray-600 dark:text-gray-400" />
           </button>
-          <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Профиль</h1>
+          <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+            {t("profile.title")}
+          </h1>
           <div className="w-10" />
         </div>
       </div>
@@ -166,7 +173,7 @@ export const ProfilePage = () => {
       {/* Profile Header */}
       <div className="bg-white dark:bg-gray-800">
         <ProfileHeader
-          name={user.name || user.email?.split("@")[0] || "Пользователь"}
+          name={user.name || user.email?.split("@")[0] || t("common.user")}
           email={user.email ?? undefined}
         />
       </div>
@@ -182,29 +189,29 @@ export const ProfilePage = () => {
       </div>
 
       {/* История */}
-      <ProfileSection title="История">
+      <ProfileSection title={t("profile.history")}>
         <ProfileMenuItem
           icon={Clock}
-          label="История зарядок"
+          label={t("profile.chargingHistory")}
           onClick={() => navigate("/history")}
         />
         <ProfileMenuItem
           icon={CreditCard}
-          label="История платежей"
+          label={t("profile.paymentHistory")}
           onClick={() => navigate("/payments")}
         />
       </ProfileSection>
 
       {/* Настройки */}
-      <ProfileSection title="Настройки">
+      <ProfileSection title={t("profile.settings")}>
         <ProfileMenuItem
           icon={Bell}
-          label="Уведомления"
+          label={t("profile.notifications")}
           onClick={() => navigate("/settings/notifications")}
         />
         <ProfileMenuItem
           icon={Settings}
-          label="Настройки приложения"
+          label={t("profile.appSettings")}
           onClick={() => navigate("/settings")}
         />
         {/* Тема оформления */}
@@ -219,7 +226,7 @@ export const ProfilePage = () => {
         {/* Язык */}
         <div className="px-4 py-3 flex items-center gap-3 border-b border-gray-100 dark:border-gray-800 last:border-b-0">
           <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-            <span className="text-lg">🌐</span>
+            <Globe className="w-5 h-5 text-gray-600 dark:text-gray-400" />
           </div>
           <div className="flex-1">
             <LanguageSelector compact showLabel={false} />
@@ -228,15 +235,15 @@ export const ProfilePage = () => {
       </ProfileSection>
 
       {/* Информация */}
-      <ProfileSection title="Информация">
+      <ProfileSection title={t("profile.info")}>
         <ProfileMenuItem
           icon={HelpCircle}
-          label="Поддержка"
+          label={t("profile.support")}
           onClick={() => navigate("/support")}
         />
         <ProfileMenuItem
           icon={Info}
-          label="О приложении"
+          label={t("profile.about")}
           onClick={() => navigate("/about")}
         />
       </ProfileSection>
@@ -245,13 +252,21 @@ export const ProfilePage = () => {
       <div className="mt-6 bg-white dark:bg-gray-800">
         <ProfileMenuItem
           icon={LogOut}
-          label={logoutMutation.isPending ? "Выход..." : "Выйти из аккаунта"}
+          label={
+            logoutMutation.isPending
+              ? t("profile.loggingOut")
+              : t("profile.logoutAccount")
+          }
           onClick={handleLogout}
           showChevron={false}
         />
         <ProfileMenuItem
           icon={Trash2}
-          label={deleteRequested ? "Запрос отправлен" : "Удалить аккаунт"}
+          label={
+            deleteRequested
+              ? t("profile.deleteRequested")
+              : t("profile.deleteAccount")
+          }
           onClick={handleDeleteAccount}
           variant="danger"
           showChevron={false}
@@ -259,9 +274,7 @@ export const ProfilePage = () => {
       </div>
 
       {/* Topup Modal */}
-      {showTopup && (
-        <SimpleTopup onClose={() => setShowTopup(false)} />
-      )}
+      {showTopup && <SimpleTopup onClose={() => setShowTopup(false)} />}
     </div>
   );
 };

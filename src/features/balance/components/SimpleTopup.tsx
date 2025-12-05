@@ -4,6 +4,7 @@ import { evpowerApi } from "@/services/evpowerApi";
 import { useQueryClient } from "@tanstack/react-query";
 import { safeParseInt } from "../../../shared/utils/parsers";
 import { logger } from "@/shared/utils/logger";
+import { X, Check } from "lucide-react";
 import type { NormalizedTopupQRResponse } from "../services/balanceService";
 
 interface SimpleTopupProps {
@@ -149,11 +150,11 @@ export function SimpleTopup({ onClose }: SimpleTopupProps) {
   const numAmount = safeParseInt(amount, 0);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-xl max-w-md w-full">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white dark:bg-gray-800 rounded-xl max-w-md w-full shadow-xl">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
             {step === "amount"
               ? "Пополнение баланса"
               : step === "qr"
@@ -162,21 +163,9 @@ export function SimpleTopup({ onClose }: SimpleTopupProps) {
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
+            <X className="w-5 h-5" />
           </button>
         </div>
 
@@ -184,38 +173,42 @@ export function SimpleTopup({ onClose }: SimpleTopupProps) {
           {step === "amount" ? (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Введите сумму пополнения
                 </label>
                 <input
                   type="text"
                   value={amount}
                   onChange={handleAmountChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400"
                   placeholder="Сумма в сомах"
                   autoFocus
                 />
               </div>
 
               {numAmount > 0 && (
-                <div className="bg-gray-50 rounded-lg p-3 text-center">
-                  <span className="text-sm text-gray-600">К пополнению: </span>
-                  <span className="text-lg font-bold text-primary-600">
+                <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 text-center">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    К пополнению:{" "}
+                  </span>
+                  <span className="text-lg font-bold text-primary-600 dark:text-primary-400">
                     {numAmount} сом
                   </span>
                 </div>
               )}
 
               {error && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                  <p className="text-red-600 text-sm">{error}</p>
+                <div className="bg-error-50 dark:bg-error-900/30 border border-error-200 dark:border-error-800 rounded-lg p-3">
+                  <p className="text-error-600 dark:text-error-400 text-sm">
+                    {error}
+                  </p>
                 </div>
               )}
 
               <button
                 onClick={handleGenerateQR}
                 disabled={numAmount < 1 || loading}
-                className="w-full bg-primary-500 text-white py-2 rounded-lg font-medium hover:bg-primary-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                className="w-full bg-primary-500 dark:bg-primary-600 text-white py-2.5 rounded-lg font-medium hover:bg-primary-600 dark:hover:bg-primary-500 disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors"
               >
                 {loading ? "Генерация QR..." : "Создать QR код"}
               </button>
@@ -232,26 +225,31 @@ export function SimpleTopup({ onClose }: SimpleTopupProps) {
                         : `data:image/png;base64,${qrData.qrCode}`
                     }
                     alt="QR код"
-                    className="w-48 h-48 mx-auto border-2 border-gray-200 rounded-lg p-2"
+                    className="w-48 h-48 mx-auto border-2 border-gray-200 dark:border-gray-600 rounded-lg p-2 bg-white"
                   />
                 ) : (
-                  <div className="w-48 h-48 mx-auto bg-gray-100 rounded-lg flex items-center justify-center">
-                    <span className="text-gray-400">QR код недоступен</span>
+                  <div className="w-48 h-48 mx-auto bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                    <span className="text-gray-400 dark:text-gray-500">
+                      QR код недоступен
+                    </span>
                   </div>
                 )}
 
-                <p className="mt-3 text-sm text-gray-600">
-                  Сумма: <span className="font-semibold">{numAmount} сом</span>
+                <p className="mt-3 text-sm text-gray-600 dark:text-gray-400">
+                  Сумма:{" "}
+                  <span className="font-semibold text-gray-900 dark:text-white">
+                    {numAmount} сом
+                  </span>
                 </p>
-                <p className="mt-2 text-xs text-gray-500">
+                <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
                   Сканируйте QR код в приложении O!Dengi
                 </p>
 
                 {/* Payment status indicator */}
                 {checkingPayment && (
                   <div className="mt-3 flex items-center justify-center gap-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-600"></div>
-                    <span className="text-sm text-gray-600">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-600 dark:border-primary-400"></div>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
                       Ожидаем подтверждение платежа...
                     </span>
                   </div>
@@ -259,8 +257,10 @@ export function SimpleTopup({ onClose }: SimpleTopupProps) {
 
                 {/* Error message */}
                 {error && step === "qr" && (
-                  <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded-lg">
-                    <p className="text-red-600 text-xs">{error}</p>
+                  <div className="mt-3 p-2 bg-error-50 dark:bg-error-900/30 border border-error-200 dark:border-error-800 rounded-lg">
+                    <p className="text-error-600 dark:text-error-400 text-xs">
+                      {error}
+                    </p>
                   </div>
                 )}
 
@@ -275,9 +275,9 @@ export function SimpleTopup({ onClose }: SimpleTopupProps) {
                       }
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-primary-600 hover:text-primary-700 underline text-sm font-medium"
+                      className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 underline text-sm font-medium"
                     >
-                      Открыть в O!Dengi →
+                      Открыть в O!Dengi
                     </a>
                   </div>
                 )}
@@ -290,7 +290,7 @@ export function SimpleTopup({ onClose }: SimpleTopupProps) {
                     setError(null);
                     stopPolling();
                   }}
-                  className="flex-1 py-2 border border-gray-300 rounded-lg font-medium hover:bg-gray-50"
+                  className="flex-1 py-2 border border-gray-300 dark:border-gray-600 rounded-lg font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                 >
                   Изменить сумму
                 </button>
@@ -299,7 +299,7 @@ export function SimpleTopup({ onClose }: SimpleTopupProps) {
                     stopPolling();
                     onClose();
                   }}
-                  className="flex-1 py-2 bg-primary-500 text-white rounded-lg font-medium hover:bg-primary-600"
+                  className="flex-1 py-2 bg-primary-500 dark:bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-600 dark:hover:bg-primary-500 transition-colors"
                 >
                   Закрыть
                 </button>
@@ -309,34 +309,22 @@ export function SimpleTopup({ onClose }: SimpleTopupProps) {
             /* Success Screen */
             <div className="space-y-4">
               <div className="text-center py-8">
-                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg
-                    className="w-10 h-10 text-green-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
+                <div className="w-20 h-20 bg-success-100 dark:bg-success-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Check className="w-10 h-10 text-success-600 dark:text-success-400" />
                 </div>
 
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
                   Баланс успешно пополнен!
                 </h3>
 
-                <p className="text-lg text-gray-600">
+                <p className="text-lg text-gray-600 dark:text-gray-400">
                   На сумму:{" "}
-                  <span className="font-bold text-primary-600">
+                  <span className="font-bold text-primary-600 dark:text-primary-400">
                     {numAmount} сом
                   </span>
                 </p>
 
-                <p className="mt-3 text-sm text-gray-500">
+                <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
                   Окно закроется автоматически...
                 </p>
               </div>

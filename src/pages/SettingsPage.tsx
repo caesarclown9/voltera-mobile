@@ -1,133 +1,133 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
-  ArrowLeft,
+  ChevronLeft,
   Bell,
-  Moon,
-  Globe,
   Info,
   Shield,
   FileText,
+  ChevronRight,
 } from "lucide-react";
-import { useSettingsStore } from "../features/settings/stores/settingsStore";
+import { ThemeToggle } from "@/features/theme";
+import { LanguageSelector } from "@/i18n/LanguageSelector";
 
-export const SettingsPage: React.FC = () => {
+export const SettingsPage = () => {
   const navigate = useNavigate();
-  const { notifications, darkMode, language, setNotifications, setDarkMode } =
-    useSettingsStore();
-
-  const languageNames = {
-    ru: "Русский",
-    en: "English",
-    ky: "Кыргызча",
-  };
+  const { t } = useTranslation();
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center h-16">
-            <button
-              onClick={() => navigate("/profile")}
-              className="p-2 rounded-lg hover:bg-gray-100"
-            >
-              <ArrowLeft className="h-6 w-6" />
-            </button>
-            <h1 className="ml-4 text-xl font-semibold">Настройки</h1>
-          </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20 transition-colors">
+      {/* Header */}
+      <header className="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+        <div className="flex items-center justify-between p-4">
+          <button
+            onClick={() => navigate(-1)}
+            className="p-2 -ml-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          >
+            <ChevronLeft className="w-6 h-6 text-gray-600 dark:text-gray-400" />
+          </button>
+          <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+            {t("settings.title")}
+          </h1>
+          <div className="w-10" />
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-lg shadow">
-          <div className="divide-y">
-            {/* Push уведомления */}
-            <div className="p-4 flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <Bell className="h-5 w-5 text-gray-500" />
-                <span>Push-уведомления</span>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="sr-only peer"
-                  checked={notifications}
-                  onChange={(e) => setNotifications(e.target.checked)}
-                />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
-              </label>
-            </div>
-
-            {/* Темная тема */}
-            <div className="p-4 flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <Moon className="h-5 w-5 text-gray-500" />
-                <span>Темная тема</span>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="sr-only peer"
-                  checked={darkMode}
-                  onChange={(e) => setDarkMode(e.target.checked)}
-                />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
-              </label>
-            </div>
-
-            {/* Язык */}
-            <button
-              onClick={() => navigate("/settings/language")}
-              className="w-full p-4 flex items-center justify-between hover:bg-gray-50"
-            >
-              <div className="flex items-center space-x-3">
-                <Globe className="h-5 w-5 text-gray-500" />
-                <div className="text-left">
-                  <div>Язык приложения</div>
-                  <div className="text-sm text-gray-500">
-                    {languageNames[language]}
-                  </div>
-                </div>
-              </div>
-              <ArrowLeft className="h-5 w-5 text-gray-400 rotate-180" />
-            </button>
-
-            {/* О приложении */}
-            <button
-              onClick={() => navigate("/settings/about")}
-              className="w-full p-4 flex items-center justify-between hover:bg-gray-50"
-            >
-              <div className="flex items-center space-x-3">
-                <Info className="h-5 w-5 text-gray-500" />
-                <span>О приложении</span>
-              </div>
-              <ArrowLeft className="h-5 w-5 text-gray-400 rotate-180" />
-            </button>
-
-            {/* Политика конфиденциальности */}
-            <button
-              onClick={() => navigate("/settings/privacy")}
-              className="w-full p-4 flex items-center justify-between hover:bg-gray-50"
-            >
-              <div className="flex items-center space-x-3">
-                <Shield className="h-5 w-5 text-gray-500" />
-                <span>Политика конфиденциальности</span>
-              </div>
-              <ArrowLeft className="h-5 w-5 text-gray-400 rotate-180" />
-            </button>
-
-            {/* Условия использования */}
-            <button
-              onClick={() => navigate("/settings/terms")}
-              className="w-full p-4 flex items-center justify-between hover:bg-gray-50"
-            >
-              <div className="flex items-center space-x-3">
-                <FileText className="h-5 w-5 text-gray-500" />
-                <span>Условия использования</span>
-              </div>
-              <ArrowLeft className="h-5 w-5 text-gray-400 rotate-180" />
-            </button>
+      <main className="p-4 space-y-4">
+        {/* Тема оформления */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden">
+          <div className="p-4 border-b border-gray-100 dark:border-gray-700">
+            <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+              {t("settings.appearance")}
+            </h2>
           </div>
+          <div className="p-4">
+            <ThemeToggle showLabels={true} />
+          </div>
+        </div>
+
+        {/* Язык */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden">
+          <div className="p-4 border-b border-gray-100 dark:border-gray-700">
+            <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+              {t("settings.languageLabel")}
+            </h2>
+          </div>
+          <div className="p-4">
+            <LanguageSelector showLabel={false} />
+          </div>
+        </div>
+
+        {/* Уведомления */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden">
+          <button
+            onClick={() => navigate("/settings/notifications")}
+            className="w-full p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                <Bell className="w-5 h-5 text-primary-600 dark:text-primary-400" />
+              </div>
+              <span className="font-medium text-gray-900 dark:text-white">
+                {t("settings.notifications")}
+              </span>
+            </div>
+            <ChevronRight className="w-5 h-5 text-gray-400" />
+          </button>
+        </div>
+
+        {/* Информация */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden">
+          <div className="p-4 border-b border-gray-100 dark:border-gray-700">
+            <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+              {t("settings.information")}
+            </h2>
+          </div>
+
+          <button
+            onClick={() => navigate("/about")}
+            className="w-full p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                <Info className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+              </div>
+              <span className="font-medium text-gray-900 dark:text-white">
+                {t("settings.aboutApp")}
+              </span>
+            </div>
+            <ChevronRight className="w-5 h-5 text-gray-400" />
+          </button>
+
+          <button
+            onClick={() => window.open("https://voltera.kg/privacy", "_blank")}
+            className="w-full p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                <Shield className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+              </div>
+              <span className="font-medium text-gray-900 dark:text-white">
+                {t("settings.privacyPolicy")}
+              </span>
+            </div>
+            <ChevronRight className="w-5 h-5 text-gray-400" />
+          </button>
+
+          <button
+            onClick={() => window.open("https://voltera.kg/terms", "_blank")}
+            className="w-full p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                <FileText className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+              </div>
+              <span className="font-medium text-gray-900 dark:text-white">
+                {t("settings.termsOfUse")}
+              </span>
+            </div>
+            <ChevronRight className="w-5 h-5 text-gray-400" />
+          </button>
         </div>
       </main>
     </div>

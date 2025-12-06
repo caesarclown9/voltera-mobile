@@ -53,9 +53,7 @@ export const ChargingProcessPage = () => {
       onComplete: (data) => {
         // Сохраняем финальные данные для страницы завершения
         sessionStorage.setItem("lastChargingData", JSON.stringify(data));
-        setTimeout(() => {
-          navigate(`/charging-complete/${localSessionId}`);
-        }, 2000);
+        navigate(`/charging-complete/${localSessionId}`);
       },
       onError: (_err) => {
         // Логируем только если это не начальная ошибка связывания

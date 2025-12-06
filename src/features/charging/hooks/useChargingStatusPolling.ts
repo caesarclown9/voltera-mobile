@@ -54,7 +54,7 @@ interface UseChargingStatusPollingOptions {
   initialStationId?: string; // Добавляем для передачи stationId из ChargingPage
 }
 
-const POLL_INTERVAL = 15000; // 15 секунд - для предотвращения rate limiting
+const POLL_INTERVAL = 5000; // 5 секунд - оптимальный баланс между отзывчивостью и нагрузкой
 
 export const useChargingStatusPolling = (
   sessionId: string | null,
@@ -221,16 +221,11 @@ export const useChargingStatusPolling = (
     });
     setIsLoading(false);
 
-    // Первый запрос с задержкой 2 секунды (даем время backend связать OCPP)
-    const timeoutId = setTimeout(() => {
-      pollFunction();
-
-      // Запускаем polling после первого запроса
-      intervalRef.current = setInterval(pollFunction, pollInterval);
-    }, 2000);
+    // Первый запрос сразу, затем polling
+    pollFunction();
+    intervalRef.current = setInterval(pollFunction, pollInterval);
 
     return () => {
-      clearTimeout(timeoutId);
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;

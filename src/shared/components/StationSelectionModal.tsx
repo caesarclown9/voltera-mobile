@@ -21,7 +21,13 @@ export function StationSelectionModal({
 
   const handleStationSelect = (station: Station) => {
     // Проверяем доступность станции
-    if (station.status !== "active" || !station.is_available) {
+    // API возвращает вычисленный статус: available, occupied, offline, maintenance
+    // Станция работает если статус 'available' или 'occupied' (коннекторы заняты, но станция онлайн)
+    const calculatedStatus = station.status;
+    const isStationAvailable =
+      calculatedStatus === "available" || calculatedStatus === "occupied";
+
+    if (!isStationAvailable) {
       // Станция недоступна - не переходим
       return;
     }
@@ -57,14 +63,15 @@ export function StationSelectionModal({
         {/* Station List */}
         <div className="overflow-y-auto max-h-[calc(60vh-80px)]">
           {stations.map((station) => {
-            const connectorStatus = station.ocpp_status?.connector_status || [];
-            const availableConnectors = connectorStatus.filter(
-              (c) => c.status === "Available",
-            ).length;
+            // Используем connectors_summary из API (новый формат)
+            const connectorsSummary = (station as any).connectors_summary;
+            const availableConnectors = connectorsSummary?.available ?? 0;
             const totalConnectors =
-              connectorStatus.length || station.connectors_count;
+              connectorsSummary?.total || station.connectors_count || 0;
+            // API возвращает вычисленный статус: available, occupied, offline, maintenance
+            const calculatedStatus = station.status;
             const isAvailable =
-              station.status === "active" && station.is_available;
+              calculatedStatus === "available" || calculatedStatus === "occupied";
 
             return (
               <div
@@ -86,25 +93,16 @@ export function StationSelectionModal({
                       <h3 className="font-medium">{station.serial_number}</h3>
                       <p className="text-sm text-gray-600">{station.model}</p>
                       <div className="flex items-center space-x-2 mt-1">
-                        {connectorStatus.map((connector) => (
-                          <div
-                            key={connector.connector_id}
-                            className="flex items-center space-x-1"
-                          >
-                            <span
-                              className={`w-2 h-2 rounded-full ${
-                                connector.status === "Available"
-                                  ? "bg-green-500"
-                                  : connector.status === "Charging"
-                                    ? "bg-orange-500"
-                                    : "bg-red-500"
-                              }`}
-                            />
-                            <span className="text-xs text-gray-600">
-                              Коннектор {connector.connector_id}
-                            </span>
-                          </div>
-                        ))}
+                        <span
+                          className={`w-2 h-2 rounded-full ${
+                            availableConnectors > 0
+                              ? "bg-green-500"
+                              : "bg-red-500"
+                          }`}
+                        />
+                        <span className="text-xs text-gray-600">
+                          {availableConnectors > 0 ? "Доступно" : "Занято"}
+                        </span>
                       </div>
                     </div>
                   </div>

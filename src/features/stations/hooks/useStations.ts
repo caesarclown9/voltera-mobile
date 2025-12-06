@@ -23,9 +23,12 @@ export const useStations = (
           userLocation,
         );
 
-        // Фильтруем только активные станции если требуется
+        // Фильтруем только доступные станции если требуется
+        // Бэкенд возвращает вычисленный статус: 'available', 'occupied', 'offline', 'maintenance'
         const filteredStations = onlyAvailable
-          ? allStations.filter((s) => s.status === "active")
+          ? allStations.filter(
+              (s) => s.status === "available" || s.status === "occupied",
+            )
           : allStations;
 
         return filteredStations;
@@ -83,13 +86,15 @@ export const useStationSearch = (
 };
 
 // Хук для получения статистики станций
+// Бэкенд возвращает вычисленный статус: 'available', 'occupied', 'offline', 'maintenance'
 export const useStationsStats = () => {
   const { data: stations } = useStations(false); // Получаем все станции для статистики
 
   const stats = {
     total: stations?.length || 0,
-    active: stations?.filter((s) => s.status === "active").length || 0,
-    inactive: stations?.filter((s) => s.status === "inactive").length || 0,
+    available: stations?.filter((s) => s.status === "available").length || 0,
+    occupied: stations?.filter((s) => s.status === "occupied").length || 0,
+    offline: stations?.filter((s) => s.status === "offline").length || 0,
     maintenance:
       stations?.filter((s) => s.status === "maintenance").length || 0,
     totalConnectors:

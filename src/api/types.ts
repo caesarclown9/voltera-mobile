@@ -45,7 +45,7 @@ export interface Station {
   location_id: string;
   power_capacity: number; // кВт
   connector_types: string[]; // ["Type2", "CCS"]
-  status: "active" | "inactive" | "maintenance";
+  status: "available" | "occupied" | "offline" | "maintenance"; // Вычисленный статус от бэкенда (не admin_status из БД!)
   connectors_count: number;
   price_per_kwh: number; // Базовая цена в сомах
   session_fee: number; // Фиксированная плата за сессию

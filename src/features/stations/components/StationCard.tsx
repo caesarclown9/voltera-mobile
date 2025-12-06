@@ -19,15 +19,21 @@ export function StationCard({
 }: StationCardProps) {
   const { isAuthenticated } = useAuthStatus();
   const { isFavorite, toggleFavorite, isToggling } = useFavorites();
+  // Бэкенд возвращает вычисленный статус: 'available', 'occupied', 'offline', 'maintenance'
   const getStatusConfig = (status: Station["status"]): { text: string; color: string; icon: StatusIcon } => {
     const configs: Record<Station["status"], { text: string; color: string; icon: StatusIcon }> = {
-      active: {
-        text: "Активна",
+      available: {
+        text: "Доступна",
         color: "text-success-600 bg-success-50 border-success-200",
         icon: <Zap className="w-3 h-3" />,
       },
-      inactive: {
-        text: "Неактивна",
+      occupied: {
+        text: "Занята",
+        color: "text-warning-600 bg-warning-50 border-warning-200",
+        icon: <Circle className="w-3 h-3" />,
+      },
+      offline: {
+        text: "Офлайн",
         color: "text-gray-600 bg-gray-50 border-gray-200",
         icon: <Circle className="w-3 h-3" />,
       },
@@ -37,7 +43,7 @@ export function StationCard({
         icon: <Wrench className="w-3 h-3" />,
       },
     };
-    return configs[status] || configs.inactive;
+    return configs[status] || configs.offline;
   };
 
   const statusConfig = getStatusConfig(station.status);
@@ -192,15 +198,17 @@ export function StationCard({
         <button
           onClick={onSelect}
           disabled={
-            station.status === "inactive" || station.status === "maintenance"
+            station.status === "offline" || station.status === "maintenance"
           }
           className={`flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-colors ${
-            station.status === "inactive" || station.status === "maintenance"
+            station.status === "offline" || station.status === "maintenance"
               ? "bg-gray-100 text-gray-400 cursor-not-allowed"
               : "bg-success-600 text-white hover:bg-success-700 focus:outline-none focus:ring-2 focus:ring-success-500 focus:ring-offset-2"
           }`}
         >
-          {station.status === "active" ? "Выбрать станцию" : "Недоступна"}
+          {station.status === "available" || station.status === "occupied"
+            ? "Выбрать станцию"
+            : "Недоступна"}
         </button>
 
         <button
@@ -231,7 +239,7 @@ export function StationCard({
       </div>
 
       {/* Дополнительная информация для разных статусов */}
-      {station.status !== "active" && (
+      {(station.status === "offline" || station.status === "maintenance") && (
         <div
           className={`mt-3 p-2 rounded-lg ${
             station.status === "maintenance" ? "bg-purple-50" : "bg-gray-50"
@@ -246,7 +254,7 @@ export function StationCard({
           >
             {station.status === "maintenance" &&
               "Станция временно недоступна из-за технических работ"}
-            {station.status === "inactive" &&
+            {station.status === "offline" &&
               "Станция не отвечает. Обратитесь в службу поддержки"}
           </p>
         </div>

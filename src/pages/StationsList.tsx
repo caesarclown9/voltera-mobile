@@ -8,6 +8,16 @@ import { useAuthStatus } from "@/features/auth/hooks/useAuth";
 import { DynamicPricingDisplay } from "@/features/pricing/components/DynamicPricingDisplay";
 import { StationListSkeleton } from "@/shared/components/Skeleton";
 
+/**
+ * Проверяет, доступна ли станция для зарядки.
+ * Backend возвращает вычисленный статус: 'available', 'occupied', 'offline', 'maintenance'
+ * Станция доступна если статус 'available' или 'occupied' (коннекторы заняты, но станция работает)
+ * Для совместимости также принимает admin status 'active'
+ */
+function isStationAvailable(status: string): boolean {
+  return status === "available" || status === "occupied" || status === "active";
+}
+
 export const StationsList = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -146,14 +156,14 @@ export const StationsList = () => {
                   <div className="flex items-start gap-3">
                     <div
                       className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-                        station.status === "active"
+                        isStationAvailable(station.status)
                           ? "bg-success-100 dark:bg-success-900/30"
                           : "bg-gray-100 dark:bg-gray-700"
                       }`}
                     >
                       <Zap
                         className={`w-6 h-6 ${
-                          station.status === "active"
+                          isStationAvailable(station.status)
                             ? "text-success-600 dark:text-success-400"
                             : "text-gray-400 dark:text-gray-500"
                         }`}
@@ -162,13 +172,13 @@ export const StationsList = () => {
                     <div>
                       <h3
                         className={`font-semibold ${
-                          station.status === "active"
+                          isStationAvailable(station.status)
                             ? "text-gray-900 dark:text-white"
                             : "text-gray-500 dark:text-gray-400"
                         }`}
                       >
                         {station.locationName || station.model}
-                        {station.status !== "active" && (
+                        {!isStationAvailable(station.status) && (
                           <span className="ml-2 text-xs text-red-500 dark:text-red-400">
                             (
                             {station.status === "maintenance"
@@ -256,14 +266,14 @@ export const StationsList = () => {
                     onClick={() => {
                       navigate(`/charging/${station.serial_number}`);
                     }}
-                    disabled={station.status !== "active"}
+                    disabled={!isStationAvailable(station.status)}
                     className={`flex-1 py-2 rounded-lg font-medium transition-colors ${
-                      station.status === "active"
+                      isStationAvailable(station.status)
                         ? "bg-primary-500 dark:bg-primary-600 text-white hover:bg-primary-600 dark:hover:bg-primary-500"
                         : "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
                     }`}
                   >
-                    {station.status === "active"
+                    {isStationAvailable(station.status)
                       ? t("stationsList.charge")
                       : t("stationsList.unavailable")}
                   </button>

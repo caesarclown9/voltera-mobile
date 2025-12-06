@@ -102,7 +102,13 @@ export function StationList({
             "ru",
           );
         case "status": {
-          const statusOrder = { active: 0, maintenance: 1, inactive: 2 };
+          // Бэкенд возвращает вычисленный статус: available, occupied, offline, maintenance
+          const statusOrder: Record<Station["status"], number> = {
+            available: 0,
+            occupied: 1,
+            maintenance: 2,
+            offline: 3,
+          };
           return statusOrder[a.status] - statusOrder[b.status];
         }
         default:
@@ -125,11 +131,13 @@ export function StationList({
       .length;
   };
 
+  // Бэкенд возвращает вычисленный статус: available, occupied, offline, maintenance
   const getStatusText = (status: Station["status"] | "all") => {
     const statusMap: Record<Station["status"] | "all", string> = {
       all: "Все",
-      active: "Активные",
-      inactive: "Неактивные",
+      available: "Доступные",
+      occupied: "Занятые",
+      offline: "Офлайн",
       maintenance: "Обслуживание",
     };
     return statusMap[status];
@@ -161,9 +169,9 @@ export function StationList({
           </button>
         )}
 
-        {/* Фильтр по статусу */}
+        {/* Фильтр по статусу - бэкенд возвращает: available, occupied, offline, maintenance */}
         <div className="flex space-x-2 overflow-x-auto">
-          {(["all", "active", "inactive", "maintenance"] as const).map(
+          {(["all", "available", "occupied", "offline", "maintenance"] as const).map(
             (status) => (
               <button
                 key={status}

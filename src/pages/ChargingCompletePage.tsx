@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { evpowerApi } from "../services/evpowerApi";
+import { useAuthStatus } from "@/features/auth/hooks/useAuth";
 
 interface ChargingCompleteData {
   sessionId: string;
@@ -27,6 +28,7 @@ interface ChargingCompleteData {
 export const ChargingCompletePage = () => {
   const navigate = useNavigate();
   const { sessionId } = useParams();
+  const { isAuthenticated } = useAuthStatus();
   const [sessionData, setSessionData] = useState<ChargingCompleteData | null>(
     null,
   );
@@ -313,12 +315,7 @@ export const ChargingCompletePage = () => {
         >
           <motion.button
             onClick={() =>
-              navigate(
-                "/history" +
-                  (!sessionStorage.getItem("auth_token")
-                    ? "?auth=required"
-                    : ""),
-              )
+              navigate("/history" + (!isAuthenticated ? "?auth=required" : ""))
             }
             className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl font-semibold
                      hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"

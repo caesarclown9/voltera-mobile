@@ -1,8 +1,10 @@
 import { Heart, Zap, Circle, Wrench } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import type { Station } from "../../../api/types";
 import type { StationWithLocation } from "../types";
 import { useFavorites } from "../../favorites/hooks/useFavorites";
 import { useAuthStatus } from "../../auth/hooks/useAuth";
+import { evpowerApi } from "@/services/evpowerApi";
 
 type StatusIcon = React.ReactNode;
 
@@ -19,6 +21,16 @@ export function StationCard({
 }: StationCardProps) {
   const { isAuthenticated } = useAuthStatus();
   const { isFavorite, toggleFavorite, isToggling } = useFavorites();
+  const queryClient = useQueryClient();
+
+  // Prefetch station status on hover for faster page load
+  const handleMouseEnter = () => {
+    queryClient.prefetchQuery({
+      queryKey: ["station-status", station.serial_number],
+      queryFn: () => evpowerApi.getStationStatus(station.serial_number),
+      staleTime: 1000 * 30,
+    });
+  };
   // Бэкенд возвращает вычисленный статус: 'available', 'occupied', 'offline', 'maintenance'
   const getStatusConfig = (status: Station["status"]): { text: string; color: string; icon: StatusIcon } => {
     const configs: Record<Station["status"], { text: string; color: string; icon: StatusIcon }> = {
@@ -63,7 +75,10 @@ export function StationCard({
   };
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
+    <div
+      className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow"
+      onMouseEnter={handleMouseEnter}
+    >
       {/* Заголовок */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">

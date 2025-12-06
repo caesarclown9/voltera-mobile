@@ -139,19 +139,26 @@ export function useLocation(
 
 /**
  * Хук для получения статуса станции
- * Кэшируем на 10 секунд чтобы избежать дублирующих запросов при переходах
+ * Кэшируем на 30 секунд чтобы избежать дублирующих запросов при переходах
+ * Используем placeholderData для мгновенного отображения кэшированных данных
  */
 export function useStationStatus(stationId: string) {
+  const queryClient = useQueryClient();
+
   return useQuery({
     queryKey: ["station-status", stationId],
     queryFn: async (): Promise<StationStatusResponse> => {
       return await evpowerApi.getStationStatus(stationId);
     },
     enabled: !!stationId,
-    staleTime: 1000 * 10, // 10 секунд - данные считаются свежими
-    gcTime: 1000 * 60, // 1 минута - храним в кеше
-    refetchInterval: 1000 * 10, // Poll every 10 seconds when in view
+    staleTime: 1000 * 30, // 30 секунд - данные считаются свежими (увеличено для скорости)
+    gcTime: 1000 * 60 * 5, // 5 минут - храним в кеше дольше
+    refetchInterval: 1000 * 30, // Обновляем в фоне каждые 30 секунд
     refetchOnWindowFocus: true,
+    // Используем кэшированные данные для мгновенного отображения
+    placeholderData: () => {
+      return queryClient.getQueryData(["station-status", stationId]) as StationStatusResponse | undefined;
+    },
   });
 }
 

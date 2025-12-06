@@ -127,15 +127,10 @@ export const ChargingProcessPage = () => {
         );
       }
 
-      // Редиректим обратно на страницу станции вместо charging-complete
-      // Это более логично - пользователь возвращается туда, откуда начал зарядку
-      if (stationId && stationId !== "EVI-0011") {
-        toast.success("Зарядка успешно остановлена");
-        navigate(`/station/${stationId}`);
-      } else {
-        // Fallback: если stationId недоступен, показываем страницу завершения
-        navigate(`/charging-complete/${localSessionId}`);
-      }
+      // Редиректим на страницу завершения с данными о сессии
+      // Роут /station/:id не существует - используем /charging-complete
+      toast.success("Зарядка успешно остановлена");
+      navigate(`/charging-complete/${localSessionId}`);
     } else {
       // Показываем ошибку пользователю
       toast.error(result.message || "Не удалось остановить зарядку");

@@ -200,8 +200,8 @@ const zChargingSession = z.object({
   progress_percent: z.number().optional(), // Backend alias для limit_percentage
   rate_per_kwh: z.number().optional().default(0),
   session_fee: z.number().optional().default(0),
-  ocpp_transaction_id: z.union([z.number(), z.string()]).optional(),
-  transaction_id: z.string().optional(), // Backend возвращает оба
+  ocpp_transaction_id: z.union([z.number(), z.string()]).nullish(), // Backend может вернуть null
+  transaction_id: z.string().nullish(), // Backend может вернуть null
   meter_start: z.number().optional(),
   meter_current: z.number().optional(),
   charging_duration_minutes: z.number().optional().default(0),
@@ -213,7 +213,7 @@ const zChargingSession = z.object({
   ev_battery_soc: z.number().optional(),
   station_online: z.boolean().optional(),
   client_id: z.string().optional(),
-  ocpp_status: z.string().optional(),
+  ocpp_status: z.string().nullish(), // Backend может вернуть null
   has_meter_data: z.boolean().optional(),
   message: z.string().optional(),
 });
@@ -259,10 +259,10 @@ export const zChargingStatusRaw = z
     meter_current: z.number().optional(),
     station_online: z.boolean().optional(),
     last_update: z.string().nullish(),
-    transaction_id: z.string().optional(),
+    transaction_id: z.string().nullish(), // Backend может вернуть null
     ocpp_transaction_id: z.string().nullish(),
     rate_per_kwh: z.number().optional(),
-    ocpp_status: z.string().optional(),
+    ocpp_status: z.string().nullish(), // Backend может вернуть null
     has_meter_data: z.boolean().optional(),
     error: z.string().nullish(),
     message: z.string().nullish(),

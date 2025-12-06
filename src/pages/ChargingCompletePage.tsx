@@ -150,7 +150,7 @@ export const ChargingCompletePage = () => {
       <div className="bg-white shadow-sm sticky-header-safe z-10">
         <div className="flex items-center justify-between px-4 py-3">
           <button
-            onClick={() => navigate(`/station/${sessionData?.stationId || ""}`)}
+            onClick={() => navigate(sessionData?.stationId ? `/charging/${sessionData.stationId}` : "/")}
             className="p-2 -ml-2 rounded-full hover:bg-gray-100"
           >
             <ChevronLeft className="w-6 h-6" />

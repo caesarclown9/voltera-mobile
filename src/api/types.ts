@@ -57,6 +57,12 @@ export interface Station {
   longitude?: number;
   locationName?: string; // Название локации
   locationAddress?: string; // Адрес локации
+  connectors_summary?: {
+    total: number;
+    available: number;
+    occupied: number;
+    faulted: number;
+  };
   ocpp_status?: {
     is_online: boolean;
     last_heartbeat: string;

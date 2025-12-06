@@ -64,10 +64,9 @@ export function StationSelectionModal({
         <div className="overflow-y-auto max-h-[calc(60vh-80px)]">
           {stations.map((station) => {
             // Используем connectors_summary из API (новый формат)
-            const connectorsSummary = (station as any).connectors_summary;
-            const availableConnectors = connectorsSummary?.available ?? 0;
+            const availableConnectors = station.connectors_summary?.available ?? 0;
             const totalConnectors =
-              connectorsSummary?.total || station.connectors_count || 0;
+              station.connectors_summary?.total || station.connectors_count || 0;
             // API возвращает вычисленный статус: available, occupied, offline, maintenance
             const calculatedStatus = station.status;
             const isAvailable =

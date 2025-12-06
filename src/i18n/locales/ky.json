@@ -116,7 +116,10 @@
     "energyDelivered": "Берилген энергия",
     "chargingTime": "Заряддоо убактысы",
     "totalCost": "Жалпы сумма",
-    "toStations": "Станцияларга"
+    "toStations": "Станцияларга",
+    "startingCharging": "Заряддоо башталууда",
+    "pleaseWait": "Күтө туруңуз, станцияга туташууда...",
+    "connectingToStation": "Станцияга туташуу"
   },
   "balance": {
     "current": "Учурдагы баланс",

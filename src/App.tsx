@@ -12,6 +12,7 @@ import { versionManager } from "./lib/versionManager";
 import { LoadingScreen } from "./shared/components/LoadingScreen";
 import { OnboardingScreen, useOnboarding } from "./features/onboarding";
 import { ThemeProvider } from "./features/theme";
+import { DataPrefetcher } from "./shared/components/DataPrefetcher";
 import { logger } from "./shared/utils/logger";
 
 // Инициализация i18n
@@ -126,6 +127,7 @@ function App() {
           >
             <Providers>
               <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
+                <DataPrefetcher />
                 <Router />
                 {/** Не показываем модалку авторизации на странице /auth, чтобы не дублировать форму */}
                 <AuthModalGate />

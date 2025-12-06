@@ -4,8 +4,8 @@
 
 **Мобильное приложение для поиска и оплаты зарядки электромобилей в Кыргызстане**
 
-[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/caesarclown9/evpower-mobile-app)
-[![Build](https://img.shields.io/badge/build-86-green.svg)](https://github.com/caesarclown9/evpower-mobile-app)
+[![Version](https://img.shields.io/badge/version-1.1.2-blue.svg)](https://github.com/caesarclown9/evpower-mobile-app)
+[![Build](https://img.shields.io/badge/build-88-green.svg)](https://github.com/caesarclown9/evpower-mobile-app)
 [![License](https://img.shields.io/badge/license-Proprietary-red.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Android%20%7C%20iOS-lightgrey.svg)](https://capacitorjs.com)
 [![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue.svg)](https://www.typescriptlang.org/)
@@ -348,7 +348,7 @@ npm run test:coverage
 
 ## 📊 Статус проекта
 
-**Версия:** 1.1.0 | **Build:** 86 | **Последнее обновление:** 2025-12-02
+**Версия:** 1.1.2 | **Build:** 88 | **Последнее обновление:** 2025-12-06
 
 ### ✅ Production Ready!
 
@@ -360,27 +360,26 @@ npm run test:coverage
 - ✅ **Production Build** - успешно (~188KB gzip)
 - ✅ **Security** - все уязвимости устранены
 
-### Что нового в v1.1.0 (Build 86)
+### Что нового в v1.1.2 (Build 88)
 
-**🔔 Firebase Push Notifications:**
+**🚀 Оптимизация производительности:**
 
-- ✅ Firebase Cloud Messaging для Android
-- ✅ Firebase Cloud Messaging для iOS
-- ✅ Firebase Admin SDK для Backend
-- ✅ Полная интеграция с Supabase (таблица device_tokens)
+- ✅ Loading overlay при запуске зарядки - пользователь сразу видит процесс
+- ✅ Ленивая загрузка вкладок в истории - на 66% меньше запросов
+- ✅ Кэширование статуса станции - мгновенные переходы
+- ✅ DataPrefetcher - предзагрузка данных в фоне
+- ✅ Оптимизация StationsList - убраны лишние API запросы
 
-**Интеграция с бэкендом:**
+**UX улучшения:**
 
-- ✅ Idempotency-Key для всех критичных операций (UUID v4)
-- ✅ FCM device registration через API
-- ✅ Error codes обработка (39 кодов ошибок с русскими сообщениями)
-- ✅ Offline indicator (Capacitor Network API)
+- ✅ Красивый оверлей "Запуск зарядки" с анимацией
+- ✅ Локализация на 3 языка (RU, EN, KY)
 
 **Качество кода:**
 
 - ✅ TypeScript strict mode: 0 ошибок
-- ✅ ESLint: критичные ошибки исправлены
-- ✅ Безопасность: 0 уязвимостей в зависимостях
+- ✅ Production build: успешно
+- ✅ PWA: 79 entries precached
 
 📄 **Подробнее:** [CHANGELOG.md](./CHANGELOG.md)
 
@@ -396,12 +395,25 @@ npm run test:coverage
 
 ## 📝 Changelog
 
+### v1.1.2 (2025-12-06)
+
+- ✅ Loading overlay при запуске зарядки
+- ✅ Ленивая загрузка вкладок в HistoryPage
+- ✅ Кэширование статуса станции
+- ✅ DataPrefetcher для предзагрузки данных
+- ✅ Оптимизация StationsList
+- ✅ Новые переводы (RU, EN, KY)
+
+### v1.1.1 (2025-12-06)
+
+- ✅ Исправление авторизации на ChargingCompletePage
+- ✅ Синхронизация статусов станций между картой и списком
+
 ### v1.1.0 (2025-12-02)
 
 - ✅ Firebase Push Notifications (Android + iOS)
 - ✅ Firebase Admin SDK интеграция (Backend)
 - ✅ Google Play Full Compliance (16KB, Edge-to-Edge, Large Screens)
-- ✅ Версия синхронизирована: 1.1.0 / Build 86
 
 ### v1.0.0 (2025-10-02)
 

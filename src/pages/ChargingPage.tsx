@@ -45,9 +45,12 @@ export const ChargingPage = () => {
 
   const { user } = useAuthStatus();
   const { data: balance } = useBalance();
-  const { startCharging } = useCharging();
+  const { startCharging, isStarting } = useCharging();
   const { toggleFavorite: toggleFavoriteApi, isFavorite } = useFavorites();
-  const chargingLoading = false;
+  const [isStartingCharging, setIsStartingCharging] = useState(false);
+
+  // Объединяем состояние загрузки: либо мутация в процессе, либо локальное состояние
+  const chargingLoading = isStarting || isStartingCharging;
 
   // Загружаем статус станции через новый API
   const { data: stationStatus, isLoading } = useStationStatus(stationId || "");
@@ -171,12 +174,14 @@ export const ChargingPage = () => {
     }
 
     setChargingError(null);
+    setIsStartingCharging(true); // Показываем состояние загрузки СРАЗУ
 
     // В dev режиме без настроенного API показываем предупреждение
     if (import.meta.env.DEV && !import.meta.env["VITE_API_URL"]) {
       setChargingError(
         "Запуск зарядки недоступен в режиме разработки. Настройте VITE_API_URL для тестирования.",
       );
+      setIsStartingCharging(false);
       return;
     }
 
@@ -230,15 +235,18 @@ export const ChargingPage = () => {
         setChargingError(
           result.message || "Не удалось запустить зарядку. Попробуйте снова.",
         );
+        setIsStartingCharging(false);
       } else {
         // Неожиданный случай - result undefined
         setChargingError(
           "Произошла ошибка при запуске зарядки. Попробуйте снова.",
         );
+        setIsStartingCharging(false);
       }
     } catch (error) {
       const errorMessage = handleApiError(error);
       setChargingError(errorMessage);
+      setIsStartingCharging(false);
     }
   };
 
@@ -271,6 +279,31 @@ export const ChargingPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20 overflow-y-auto max-h-screen">
+      {/* Loading Overlay - показывается при запуске зарядки */}
+      {chargingLoading && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-white rounded-2xl p-6 mx-4 shadow-xl max-w-sm w-full">
+            <div className="flex flex-col items-center gap-4">
+              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center">
+                <div className="animate-spin rounded-full h-10 w-10 border-4 border-primary-500 border-t-transparent"></div>
+              </div>
+              <div className="text-center">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {t("charging.startingCharging")}
+                </h3>
+                <p className="text-sm text-gray-500 mt-1">
+                  {t("charging.pleaseWait")}
+                </p>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-400">
+                <Zap className="w-4 h-4 animate-pulse" />
+                <span>{t("charging.connectingToStation")}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-white shadow-sm sticky-header-safe z-10">
         <div className="flex items-center justify-between px-4 py-3">

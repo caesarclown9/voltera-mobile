@@ -22,11 +22,15 @@ export function HistoryPage() {
   const [activeTab, setActiveTab] = useState<TabType>("charging");
   const [showFilters, setShowFilters] = useState(false);
 
+  // Ленивая загрузка - загружаем данные только для активной вкладки
   const { data: chargingHistory, isLoading: isLoadingCharging } =
-    useChargingHistory();
+    useChargingHistory({ enabled: activeTab === "charging" || activeTab === "statistics" });
   const { data: transactionHistory, isLoading: isLoadingTransactions } =
-    useTransactionHistory();
-  const { data: statistics, isLoading: isLoadingStats } = useUsageStatistics();
+    useTransactionHistory({ enabled: activeTab === "transactions" });
+  const { data: statistics, isLoading: isLoadingStats } = useUsageStatistics({
+    enabled: activeTab === "statistics",
+    chargingHistory // Передаём уже загруженные данные
+  });
 
   const handleChargingItemClick = (item: ChargingHistoryItem) => {
     // Можно перейти на детальную страницу или показать модальное окно

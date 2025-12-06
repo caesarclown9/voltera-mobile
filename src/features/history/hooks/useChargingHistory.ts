@@ -52,8 +52,15 @@ interface MonthlyGroups {
   };
 }
 
+interface UseChargingHistoryOptions {
+  limit?: number;
+  enabled?: boolean;
+}
+
 // Хук для получения истории зарядок
-export const useChargingHistory = (limit: number = 50) => {
+export const useChargingHistory = (options: UseChargingHistoryOptions = {}) => {
+  const { limit = 50, enabled = true } = options;
+
   return useQuery({
     queryKey: ["charging-history", limit],
     queryFn: async (): Promise<ChargingHistoryItem[]> => {
@@ -126,14 +133,22 @@ export const useChargingHistory = (limit: number = 50) => {
         throw error;
       }
     },
+    enabled,
     staleTime: 5 * 60 * 1000, // 5 минут
     retry: 2,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 };
 
+interface UseTransactionHistoryOptions {
+  limit?: number;
+  enabled?: boolean;
+}
+
 // Хук для получения истории транзакций
-export const useTransactionHistory = (limit: number = 50) => {
+export const useTransactionHistory = (options: UseTransactionHistoryOptions = {}) => {
+  const { limit = 50, enabled = true } = options;
+
   return useQuery({
     queryKey: ["transaction-history", limit],
     queryFn: async (): Promise<TransactionHistoryItem[]> => {
@@ -188,14 +203,22 @@ export const useTransactionHistory = (limit: number = 50) => {
         throw error;
       }
     },
+    enabled,
     staleTime: 5 * 60 * 1000, // 5 минут
     retry: 2,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 };
 
+interface UseUsageStatisticsOptions {
+  enabled?: boolean;
+  chargingHistory?: ChargingHistoryItem[]; // Можно передать уже загруженные данные
+}
+
 // Хук для получения статистики использования
-export const useUsageStatistics = () => {
+export const useUsageStatistics = (options: UseUsageStatisticsOptions = {}) => {
+  const { enabled = true } = options;
+
   return useQuery({
     queryKey: ["usage-statistics"],
     queryFn: async (): Promise<UsageStatistics> => {
@@ -341,6 +364,7 @@ export const useUsageStatistics = () => {
         throw error;
       }
     },
+    enabled,
     staleTime: 10 * 60 * 1000, // 10 минут
     retry: 2,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),

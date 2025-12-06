@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next";
 import { useStations } from "@/features/stations/hooks/useStations";
 import { useFavorites } from "@/features/favorites/hooks/useFavorites";
 import { useAuthStatus } from "@/features/auth/hooks/useAuth";
-import { DynamicPricingDisplay } from "@/features/pricing/components/DynamicPricingDisplay";
 import { StationListSkeleton } from "@/shared/components/Skeleton";
 
 /**
@@ -234,13 +233,8 @@ export const StationsList = () => {
                   </div>
                 </div>
 
-                {/* Dynamic Pricing Display */}
-                <div className="mt-3">
-                  <DynamicPricingDisplay
-                    stationId={station.serial_number}
-                    compact={true}
-                  />
-                </div>
+                {/* Цена - используем данные из API вместо отдельного запроса */}
+                {/* DynamicPricingDisplay убран из списка для оптимизации - данные уже есть в station */}
 
                 {/* Action Buttons */}
                 <div className="flex gap-2 mt-4">

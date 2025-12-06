@@ -116,7 +116,10 @@
     "energyDelivered": "Отдано энергии",
     "chargingTime": "Время зарядки",
     "totalCost": "Итоговая сумма",
-    "toStations": "К станциям"
+    "toStations": "К станциям",
+    "startingCharging": "Запуск зарядки",
+    "pleaseWait": "Подождите, подключаемся к станции...",
+    "connectingToStation": "Соединение со станцией"
   },
   "balance": {
     "current": "Текущий баланс",

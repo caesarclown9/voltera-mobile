@@ -116,7 +116,10 @@
     "energyDelivered": "Energy delivered",
     "chargingTime": "Charging time",
     "totalCost": "Total cost",
-    "toStations": "To stations"
+    "toStations": "To stations",
+    "startingCharging": "Starting charging",
+    "pleaseWait": "Please wait, connecting to station...",
+    "connectingToStation": "Connecting to station"
   },
   "balance": {
     "current": "Current balance",

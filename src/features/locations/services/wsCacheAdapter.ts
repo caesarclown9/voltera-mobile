@@ -6,6 +6,7 @@ import type {
   StationStatusResponse,
   ConnectorStatus,
 } from "../../../api/types";
+import { logger } from "@/shared/utils/logger";
 
 interface StationWithConnectors {
   id: string;
@@ -36,7 +37,7 @@ export class WebSocketCacheAdapter {
         this.handleStationUpdate(data);
         break;
       default:
-        console.warn("Unknown WebSocket message type:", data);
+        logger.warn("Unknown WebSocket message type:", data);
     }
   }
 

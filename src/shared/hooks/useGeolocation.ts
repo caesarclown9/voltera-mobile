@@ -1,24 +1,25 @@
-import { useState, useEffect, useCallback } from 'react'
-import { geolocationService, type Coordinates } from '@/lib/platform'
+import { useState, useEffect, useCallback } from "react";
+import { geolocationService, type Coordinates } from "@/lib/platform";
+import { logger } from "@/shared/utils/logger";
 
 interface GeolocationState {
-  loading: boolean
-  accuracy?: number
-  altitude?: number | null
-  altitudeAccuracy?: number | null
-  heading?: number | null
-  latitude?: number
-  longitude?: number
-  speed?: number | null
-  timestamp?: number
-  error?: string
+  loading: boolean;
+  accuracy?: number;
+  altitude?: number | null;
+  altitudeAccuracy?: number | null;
+  heading?: number | null;
+  latitude?: number;
+  longitude?: number;
+  speed?: number | null;
+  timestamp?: number;
+  error?: string;
 }
 
 interface UseGeolocationOptions {
-  enableHighAccuracy?: boolean
-  maximumAge?: number
-  timeout?: number
-  watchPosition?: boolean
+  enableHighAccuracy?: boolean;
+  maximumAge?: number;
+  timeout?: number;
+  watchPosition?: boolean;
 }
 
 /**
@@ -31,13 +32,13 @@ export const useGeolocation = (options: UseGeolocationOptions = {}) => {
     maximumAge = 0,
     timeout = 10000,
     watchPosition = false,
-  } = options
+  } = options;
 
   const [state, setState] = useState<GeolocationState>({
     loading: false,
-  })
+  });
 
-  const [watchId, setWatchId] = useState<string | number | null>(null)
+  const [watchId, setWatchId] = useState<string | number | null>(null);
 
   const updateStateFromCoords = useCallback((coords: Coordinates) => {
     setState({
@@ -50,72 +51,80 @@ export const useGeolocation = (options: UseGeolocationOptions = {}) => {
       longitude: coords.longitude,
       speed: coords.speed,
       timestamp: Date.now(),
-    })
-  }, [])
+    });
+  }, []);
 
   const getCurrentPosition = useCallback(async () => {
-    setState(prevState => ({ ...prevState, loading: true, error: undefined }))
+    setState((prevState) => ({
+      ...prevState,
+      loading: true,
+      error: undefined,
+    }));
 
     const result = await geolocationService.getCurrentPosition({
       enableHighAccuracy,
       maximumAge,
       timeout,
-    })
+    });
 
     if (result.success && result.coords) {
-      updateStateFromCoords(result.coords)
+      updateStateFromCoords(result.coords);
     } else {
-      setState(prevState => ({
+      setState((prevState) => ({
         ...prevState,
         loading: false,
-        error: result.error || 'Не удалось получить местоположение',
-      }))
+        error: result.error || "Не удалось получить местоположение",
+      }));
     }
-  }, [enableHighAccuracy, maximumAge, timeout, updateStateFromCoords])
+  }, [enableHighAccuracy, maximumAge, timeout, updateStateFromCoords]);
 
   useEffect(() => {
-    let mounted = true
-    let currentWatchId: string | number | null = null
+    let mounted = true;
+    let currentWatchId: string | number | null = null;
 
     const startLocationTracking = async () => {
-      if (!mounted) return
+      if (!mounted) return;
 
-      setState(prevState => ({ ...prevState, loading: true, error: undefined }))
+      setState((prevState) => ({
+        ...prevState,
+        loading: true,
+        error: undefined,
+      }));
 
       if (watchPosition) {
         // Используем отслеживание позиции
         try {
           currentWatchId = await geolocationService.watchPosition(
             (result) => {
-              if (!mounted) return
+              if (!mounted) return;
 
               if (result.success && result.coords) {
-                updateStateFromCoords(result.coords)
+                updateStateFromCoords(result.coords);
               } else {
-                setState(prevState => ({
+                setState((prevState) => ({
                   ...prevState,
                   loading: false,
-                  error: result.error || 'Ошибка отслеживания местоположения',
-                }))
+                  error: result.error || "Ошибка отслеживания местоположения",
+                }));
               }
             },
             {
               enableHighAccuracy,
               maximumAge,
               timeout,
-            }
-          )
+            },
+          );
 
-          setWatchId(currentWatchId)
+          setWatchId(currentWatchId);
         } catch (error) {
-          if (!mounted) return
+          if (!mounted) return;
 
-          console.error('[Geolocation] Failed to watch position:', error)
-          setState(prevState => ({
+          logger.error("[Geolocation] Failed to watch position:", error);
+          setState((prevState) => ({
             ...prevState,
             loading: false,
-            error: 'Не удалось начать отслеживание местоположения',
-          }))
+            error: "Не удалось начать отслеживание местоположения",
+          }));
         }
       } else {
         // Получаем позицию один раз
@@ -123,46 +132,52 @@ export const useGeolocation = (options: UseGeolocationOptions = {}) => {
           enableHighAccuracy,
           maximumAge,
           timeout,
-        })
+        });
 
-        if (!mounted) return
+        if (!mounted) return;
 
         if (result.success && result.coords) {
-          updateStateFromCoords(result.coords)
+          updateStateFromCoords(result.coords);
         } else {
-          setState(prevState => ({
+          setState((prevState) => ({
             ...prevState,
             loading: false,
-            error: result.error || 'Не удалось получить местоположение',
-          }))
+            error: result.error || "Не удалось получить местоположение",
+          }));
         }
       }
-    }
+    };
 
-    startLocationTracking()
+    startLocationTracking();
 
     return () => {
-      mounted = false
+      mounted = false;
 
       // Очищаем отслеживание при размонтировании
       if (currentWatchId !== null) {
-        geolocationService.clearWatch(currentWatchId)
+        geolocationService.clearWatch(currentWatchId);
       }
-    }
-  }, [enableHighAccuracy, maximumAge, timeout, watchPosition, updateStateFromCoords])
+    };
+  }, [
+    enableHighAccuracy,
+    maximumAge,
+    timeout,
+    watchPosition,
+    updateStateFromCoords,
+  ]);
 
   // Очищаем отслеживание при изменении watchId
   useEffect(() => {
     return () => {
       if (watchId !== null) {
-        geolocationService.clearWatch(watchId)
+        geolocationService.clearWatch(watchId);
       }
-    }
-  }, [watchId])
+    };
+  }, [watchId]);
 
   return {
     ...state,
     getCurrentPosition,
     isSupported: true, // Платформенная абстракция всегда поддерживается
-  }
-}
+  };
+};

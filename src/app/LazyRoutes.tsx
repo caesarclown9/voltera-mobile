@@ -4,6 +4,7 @@
  */
 
 import { lazy, type ComponentType } from "react";
+import { logger } from "@/shared/utils/logger";
 
 // Тип для lazy компонента с prefetch
 interface LazyRoute {
@@ -134,7 +135,7 @@ export const prefetchCriticalRoutes = async () => {
       routes.ChargingPage.prefetch(),
     ]);
   } catch (error) {
-    console.error("Failed to prefetch critical routes:", error);
+    logger.error("Failed to prefetch critical routes:", error);
   }
 };
 
@@ -146,7 +147,7 @@ export const prefetchRoute = async (routeName: keyof typeof routes) => {
       await route.prefetch();
     }
   } catch (error) {
-    console.error(`Failed to prefetch route ${routeName}:`, error);
+    logger.error(`Failed to prefetch route ${routeName}:`, error);
   }
 };
 

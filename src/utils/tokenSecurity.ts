@@ -4,6 +4,7 @@
  */
 
 import { authStorage } from "@/lib/platform/secureStorage";
+import { logger } from "@/shared/utils/logger";
 
 /**
  * Менеджер безопасного хранения токенов
@@ -29,7 +30,7 @@ export class SecureTokenStorage {
       // Время жизни сохраняем отдельно для быстрого доступа
       sessionStorage.setItem(this.EXPIRY_KEY, expiry.toString());
     } catch (error) {
-      console.error("Failed to store token securely:", error);
+      logger.error("Failed to store token securely:", error);
     }
   }
 
@@ -50,7 +51,7 @@ export class SecureTokenStorage {
       const token = await authStorage.getAuthToken();
       return token;
     } catch (error) {
-      console.error("Failed to retrieve token:", error);
+      logger.error("Failed to retrieve token:", error);
       return null;
     }
   }
@@ -140,7 +141,7 @@ export class SecurityMonitor {
     this.lastAttemptTime = Date.now();
 
     if (this.failedAttempts >= this.MAX_ATTEMPTS) {
-      console.warn("Multiple failed auth attempts detected");
+      logger.warn("Multiple failed auth attempts detected");
       // В production можно отправить алерт на сервер
     }
   }

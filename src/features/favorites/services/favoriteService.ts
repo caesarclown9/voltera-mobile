@@ -1,4 +1,5 @@
 import { supabase } from "../../../shared/config/supabase";
+import { logger } from "@/shared/utils/logger";
 
 export class FavoriteService {
   private static instance: FavoriteService;
@@ -21,13 +22,13 @@ export class FavoriteService {
         .eq("user_id", userId);
 
       if (error) {
-        console.error("Error fetching favorites:", error);
+        logger.error("Error fetching favorites:", error);
         return [];
       }
 
       return data?.map((f) => f.location_id) || [];
     } catch (error) {
-      console.error("Failed to fetch favorites:", error);
+      logger.error("Failed to fetch favorites:", error);
       return [];
     }
   }
@@ -45,13 +46,13 @@ export class FavoriteService {
         if (error.code === "23505") {
           return true;
         }
-        console.error("Error adding to favorites:", error);
+        logger.error("Error adding to favorites:", error);
         return false;
       }
 
       return true;
     } catch (error) {
-      console.error("Failed to add to favorites:", error);
+      logger.error("Failed to add to favorites:", error);
       return false;
     }
   }
@@ -69,13 +70,13 @@ export class FavoriteService {
         .eq("location_id", locationId);
 
       if (error) {
-        console.error("Error removing from favorites:", error);
+        logger.error("Error removing from favorites:", error);
         return false;
       }
 
       return true;
     } catch (error) {
-      console.error("Failed to remove from favorites:", error);
+      logger.error("Failed to remove from favorites:", error);
       return false;
     }
   }
@@ -91,7 +92,7 @@ export class FavoriteService {
         return await this.addToFavorites(userId, stationId);
       }
     } catch (error) {
-      console.error("Failed to toggle favorite:", error);
+      logger.error("Failed to toggle favorite:", error);
       return false;
     }
   }
@@ -102,7 +103,7 @@ export class FavoriteService {
       const favorites = await this.getFavorites(userId);
       return favorites.includes(stationId);
     } catch (error) {
-      console.error("Failed to check favorite status:", error);
+      logger.error("Failed to check favorite status:", error);
       return false;
     }
   }

@@ -10,6 +10,7 @@ import {
   balanceService,
   type NormalizedTopupQRResponse,
 } from "../services/balanceService";
+import { logger } from "@/shared/utils/logger";
 
 // Get balance query - берем из БД Supabase
 export const useBalance = () => {
@@ -83,7 +84,7 @@ export const useCancelPayment = () => {
   return useMutation<void, Error, string>({
     mutationFn: async () => {
       // Placeholder - backend не поддерживает отмену
-      console.warn("Cancel payment not supported by backend API");
+      logger.warn("Cancel payment not supported by backend API");
     },
   });
 };

@@ -14,6 +14,8 @@
  * @module shared/utils/errorMonitoring
  */
 
+import { logger } from "./logger";
+
 interface ErrorInfo {
   message: string;
   stack?: string;
@@ -59,7 +61,7 @@ class ErrorMonitor {
 
   captureError(error: ErrorInfo) {
     if (import.meta.env.DEV) {
-      console.error("Error captured:", error);
+      logger.error("Error captured:", error);
       return;
     }
 

@@ -4,6 +4,7 @@ import {
   extractStationsFromLocations,
   type StationWithLocation,
 } from "../types";
+import { logger } from "@/shared/utils/logger";
 
 // Get all stations from API with location data
 export const useStations = (
@@ -33,7 +34,7 @@ export const useStations = (
 
         return filteredStations;
       } catch (error) {
-        console.error("Failed to load stations:", error);
+        logger.error("Failed to load stations:", error);
         throw error;
       }
     },

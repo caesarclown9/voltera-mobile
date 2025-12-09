@@ -13,6 +13,7 @@ import {
 import { motion } from "framer-motion";
 import { evpowerApi } from "../services/evpowerApi";
 import { useAuthStatus } from "@/features/auth/hooks/useAuth";
+import { logger } from "@/shared/utils/logger";
 
 interface ChargingCompleteData {
   sessionId: string;
@@ -75,7 +76,7 @@ export const ChargingCompletePage = () => {
           }
         }
       } catch (error) {
-        console.error("Error fetching session data:", error);
+        logger.error("Error fetching session data:", error);
         // Используем mock данные если не удалось получить с сервера
         setSessionData({
           sessionId: sessionId,
@@ -150,7 +151,13 @@ export const ChargingCompletePage = () => {
       <div className="bg-white shadow-sm sticky-header-safe z-10">
         <div className="flex items-center justify-between px-4 py-3">
           <button
-            onClick={() => navigate(sessionData?.stationId ? `/charging/${sessionData.stationId}` : "/")}
+            onClick={() =>
+              navigate(
+                sessionData?.stationId
+                  ? `/charging/${sessionData.stationId}`
+                  : "/",
+              )
+            }
             className="p-2 -ml-2 rounded-full hover:bg-gray-100"
           >
             <ChevronLeft className="w-6 h-6" />
@@ -226,7 +233,12 @@ export const ChargingCompletePage = () => {
           className="bg-white rounded-2xl shadow-lg p-6 mb-6"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7, type: "spring", stiffness: 200, damping: 20 }}
+          transition={{
+            delay: 0.7,
+            type: "spring",
+            stiffness: 200,
+            damping: 20,
+          }}
         >
           <h3 className="font-semibold text-lg mb-4">Детали сессии</h3>
 

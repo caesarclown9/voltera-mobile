@@ -1,5 +1,6 @@
 import { useChargingPolling } from "../hooks/useChargingPolling";
 import { useCharging } from "../hooks/useCharging";
+import { logger } from "@/shared/utils/logger";
 
 interface ChargingSession {
   sessionId: string;
@@ -39,7 +40,7 @@ export function ChargingStatus({
         onSessionEnd?.();
       }
     } catch (error) {
-      console.error("Error stopping charging:", error);
+      logger.error("Error stopping charging:", error);
     }
   };
 

@@ -1,4 +1,5 @@
 import { supabase } from "../config/supabase";
+import { logger } from "./logger";
 
 // Проверка валидности Supabase конфигурации
 export const isSupabaseConfigured = (): boolean => {
@@ -29,7 +30,7 @@ export async function supabaseWithTimeout<T>(
   ]).catch((error) => {
     // В dev режиме не логируем timeout'ы - они ожидаемы
     if (import.meta.env.PROD) {
-      console.warn("Supabase request failed:", error.message);
+      logger.warn("Supabase request failed:", error.message);
     }
     if (fallback !== undefined) {
       return fallback;

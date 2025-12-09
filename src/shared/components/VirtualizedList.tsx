@@ -1,4 +1,11 @@
-import React, { useState, useEffect, useRef, useCallback, type ReactNode } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  type ReactNode,
+} from "react";
+import { logger } from "@/shared/utils/logger";
 
 interface VirtualizedListProps<T> {
   items: T[];
@@ -33,9 +40,9 @@ export function VirtualizedList<T>({
   // Вычисляем высоту элемента
   const getItemHeight = useCallback(
     (index: number) => {
-      return typeof itemHeight === 'function' ? itemHeight(index) : itemHeight;
+      return typeof itemHeight === "function" ? itemHeight(index) : itemHeight;
     },
-    [itemHeight]
+    [itemHeight],
   );
 
   // Вычисляем общую высоту списка
@@ -83,31 +90,34 @@ export function VirtualizedList<T>({
       }
       return offset;
     },
-    [getItemHeight]
+    [getItemHeight],
   );
 
   // Обработчик скролла с дебаунсом
-  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-    const target = e.currentTarget;
-    setScrollTop(target.scrollTop);
+  const handleScroll = useCallback(
+    (e: React.UIEvent<HTMLDivElement>) => {
+      const target = e.currentTarget;
+      setScrollTop(target.scrollTop);
 
-    // Проверяем, достигли ли конца списка
-    if (onEndReached) {
-      const scrollPercentage =
-        (target.scrollTop + target.clientHeight) / target.scrollHeight;
+      // Проверяем, достигли ли конца списка
+      if (onEndReached) {
+        const scrollPercentage =
+          (target.scrollTop + target.clientHeight) / target.scrollHeight;
 
-      if (scrollPercentage >= endReachedThreshold && !hasReachedEnd.current) {
-        hasReachedEnd.current = true;
-        onEndReached();
+        if (scrollPercentage >= endReachedThreshold && !hasReachedEnd.current) {
+          hasReachedEnd.current = true;
+          onEndReached();
 
-        // Сбрасываем флаг через некоторое время
-        clearTimeout(scrollTimeoutRef.current);
-        scrollTimeoutRef.current = setTimeout(() => {
-          hasReachedEnd.current = false;
-        }, 500);
+          // Сбрасываем флаг через некоторое время
+          clearTimeout(scrollTimeoutRef.current);
+          scrollTimeoutRef.current = setTimeout(() => {
+            hasReachedEnd.current = false;
+          }, 500);
+        }
       }
-    }
-  }, [onEndReached, endReachedThreshold]);
+    },
+    [onEndReached, endReachedThreshold],
+  );
 
   // Обновляем высоту контейнера при изменении размера
   useEffect(() => {
@@ -141,7 +151,7 @@ export function VirtualizedList<T>({
         <div
           key={i}
           style={{
-            position: 'absolute',
+            position: "absolute",
             top: getOffsetForIndex(i),
             left: 0,
             right: 0,
@@ -150,7 +160,7 @@ export function VirtualizedList<T>({
           className={className}
         >
           {renderItem(item, i)}
-        </div>
+        </div>,
       );
     }
   }
@@ -159,11 +169,11 @@ export function VirtualizedList<T>({
     <div
       ref={containerRef}
       onScroll={handleScroll}
-      className={`relative overflow-auto ${containerClassName || ''}`}
-      style={{ height: '100%' }}
+      className={`relative overflow-auto ${containerClassName || ""}`}
+      style={{ height: "100%" }}
     >
       {/* Spacer для правильного размера скролла */}
-      <div style={{ height: totalHeight, position: 'relative' }}>
+      <div style={{ height: totalHeight, position: "relative" }}>
         {visibleItems}
       </div>
     </div>
@@ -175,7 +185,7 @@ export function VirtualizedList<T>({
  */
 export function useVirtualizedData<T>(
   initialItems: T[],
-  loadMore: () => Promise<T[]>
+  loadMore: () => Promise<T[]>,
 ) {
   const [items, setItems] = useState(initialItems);
   const [isLoading, setIsLoading] = useState(false);
@@ -191,10 +201,10 @@ export function useVirtualizedData<T>(
       if (newItems.length === 0) {
         setHasMore(false);
       } else {
-        setItems(prev => [...prev, ...newItems]);
+        setItems((prev) => [...prev, ...newItems]);
       }
     } catch (error) {
-      console.error('Failed to load more items:', error);
+      logger.error("Failed to load more items:", error);
     } finally {
       setIsLoading(false);
     }
@@ -208,7 +218,7 @@ export function useVirtualizedData<T>(
     resetItems: () => {
       setItems(initialItems);
       setHasMore(true);
-    }
+    },
   };
 }
 
@@ -218,5 +228,5 @@ export function useVirtualizedData<T>(
 export const VirtualizedItem = React.memo(
   ({ children }: { children: ReactNode }) => {
     return <>{children}</>;
-  }
+  },
 );

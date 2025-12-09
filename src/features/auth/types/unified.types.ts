@@ -3,6 +3,8 @@
  * Обеспечивают целостность и единообразие
  */
 
+import { logger } from "@/shared/utils/logger";
+
 /**
  * Основной тип пользователя
  * ID всегда UUID из Supabase Auth
@@ -118,7 +120,7 @@ export class UnifiedIdHelper {
   static getClientId(user: UnifiedUser | null): string | null {
     if (!user || !user.id) return null;
     if (!this.isValidUUID(user.id)) {
-      console.error("Invalid user ID format:", user.id);
+      logger.error("Invalid user ID format:", user.id);
       return null;
     }
     return user.id;

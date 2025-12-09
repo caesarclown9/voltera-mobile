@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Download, FileText, FileSpreadsheet } from "lucide-react";
 import { ExportService } from "../services/exportService";
 import type { ChargingHistoryItem, TransactionHistoryItem } from "../types";
+import { logger } from "@/shared/utils/logger";
 
 interface ExportButtonProps {
   data: ChargingHistoryItem[] | TransactionHistoryItem[];
@@ -30,7 +31,7 @@ export const ExportButton: React.FC<ExportButtonProps> = ({
         );
       }
     } catch (error) {
-      console.error("Export to PDF failed:", error);
+      logger.error("Export to PDF failed:", error);
       alert("Не удалось экспортировать в PDF");
     } finally {
       setIsExporting(false);
@@ -50,7 +51,7 @@ export const ExportButton: React.FC<ExportButtonProps> = ({
         );
       }
     } catch (error) {
-      console.error("Export to CSV failed:", error);
+      logger.error("Export to CSV failed:", error);
       alert("Не удалось экспортировать в CSV");
     } finally {
       setIsExporting(false);

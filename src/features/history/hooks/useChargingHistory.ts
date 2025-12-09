@@ -5,6 +5,7 @@ import type {
   TransactionHistoryItem,
   UsageStatistics,
 } from "../types";
+import { logger } from "@/shared/utils/logger";
 
 interface ChargingSessionData {
   id: string;
@@ -91,8 +92,17 @@ export const useChargingHistory = (options: UseChargingHistoryOptions = {}) => {
             durationHours > 0 ? energyKwh / durationHours : 0;
 
           // Нормализуем статус
-          let normalizedStatus: "completed" | "stopped" | "failed";
-          if (session.status === "stopped" || session.status === "completed") {
+          let normalizedStatus:
+            | "completed"
+            | "stopped"
+            | "failed"
+            | "in_progress";
+          if (session.status === "started") {
+            normalizedStatus = "in_progress";
+          } else if (
+            session.status === "stopped" ||
+            session.status === "completed"
+          ) {
             normalizedStatus = "completed";
           } else if (
             session.status === "error" ||
@@ -129,7 +139,7 @@ export const useChargingHistory = (options: UseChargingHistoryOptions = {}) => {
           };
         });
       } catch (error) {
-        console.error("Failed to fetch charging history:", error);
+        logger.error("Failed to fetch charging history:", error);
         throw error;
       }
     },
@@ -146,7 +156,9 @@ interface UseTransactionHistoryOptions {
 }
 
 // Хук для получения истории транзакций
-export const useTransactionHistory = (options: UseTransactionHistoryOptions = {}) => {
+export const useTransactionHistory = (
+  options: UseTransactionHistoryOptions = {},
+) => {
   const { limit = 50, enabled = true } = options;
 
   return useQuery({
@@ -199,7 +211,7 @@ export const useTransactionHistory = (options: UseTransactionHistoryOptions = {}
           };
         });
       } catch (error) {
-        console.error("Failed to fetch transaction history:", error);
+        logger.error("Failed to fetch transaction history:", error);
         throw error;
       }
     },
@@ -360,7 +372,7 @@ export const useUsageStatistics = (options: UseUsageStatisticsOptions = {}) => {
           }>,
         };
       } catch (error) {
-        console.error("Failed to fetch usage statistics:", error);
+        logger.error("Failed to fetch usage statistics:", error);
         throw error;
       }
     },

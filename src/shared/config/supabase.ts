@@ -1,5 +1,21 @@
 import { createClient } from "@supabase/supabase-js";
 
+// Logger импортируется динамически чтобы избежать циклической зависимости
+// (supabase -> logger -> supabaseHelpers -> supabase)
+const logError = (message: string, data?: unknown) => {
+  if (import.meta.env.DEV) {
+    // eslint-disable-next-line no-console
+    console.error(message, data);
+  }
+};
+
+const logWarn = (message: string) => {
+  if (import.meta.env.DEV) {
+    // eslint-disable-next-line no-console
+    console.warn(message);
+  }
+};
+
 const supabaseUrl = import.meta.env["VITE_SUPABASE_URL"];
 const supabaseAnonKey = import.meta.env["VITE_SUPABASE_ANON_KEY"];
 
@@ -9,7 +25,7 @@ let key: string;
 // In production, Supabase config is required
 if (!supabaseUrl || !supabaseAnonKey) {
   if (import.meta.env.PROD || import.meta.env["VITE_USE_REAL_API"] === "true") {
-    console.error("Missing Supabase configuration:", {
+    logError("Missing Supabase configuration:", {
       hasUrl: !!supabaseUrl,
       hasKey: !!supabaseAnonKey,
     });
@@ -19,7 +35,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
   url = "https://dummy.supabase.co";
   key = "dummy.key.for.development";
 
-  console.warn("Using dummy Supabase config for development");
+  logWarn("Using dummy Supabase config for development");
 } else {
   url = supabaseUrl;
   key = supabaseAnonKey;

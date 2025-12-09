@@ -2,6 +2,7 @@ import { z } from "zod";
 // import { Capacitor } from "@capacitor/core"; // Reserved for future native HTTP implementation
 import { Http } from "@capacitor-community/http";
 import { ApiError, handleApiError } from "@/shared/errors/apiErrors";
+import { logger } from "@/shared/utils/logger";
 
 // Re-export for backward compatibility
 export { ApiError, handleApiError };
@@ -111,12 +112,12 @@ export async function fetchJson<T>(
             errorObj?.["error"]) as string | undefined;
 
           if (import.meta.env.DEV) {
-            console.error(
+            logger.error(
               `[UnifiedClient] Native HTTP error: ${status} ${message}`,
             );
-            console.error(`[UnifiedClient] URL: ${url}`);
-            console.error(`[UnifiedClient] Method: ${options.method ?? "GET"}`);
-            console.error(`[UnifiedClient] Error code: ${errorCode || "none"}`);
+            logger.error(`[UnifiedClient] URL: ${url}`);
+            logger.error(`[UnifiedClient] Method: ${options.method ?? "GET"}`);
+            logger.error(`[UnifiedClient] Error code: ${errorCode || "none"}`);
           }
 
           throw new TransportError(String(message), {
@@ -126,8 +127,8 @@ export async function fetchJson<T>(
         }
       } catch (err) {
         if (import.meta.env.DEV) {
-          console.error("[UnifiedClient] Capacitor HTTP error:", err);
-          console.error("[UnifiedClient] URL:", url);
+          logger.error("[UnifiedClient] Capacitor HTTP error:", err);
+          logger.error("[UnifiedClient] URL:", url);
         }
 
         // Re-throw TransportError as-is, wrap others
@@ -155,7 +156,7 @@ export async function fetchJson<T>(
       if (!contentType.includes("application/json")) {
         const textResponse = await resp.text();
         if (import.meta.env.DEV) {
-          console.error(
+          logger.error(
             `[UnifiedClient] Backend non-JSON response: ${status} ${contentType}`,
           );
         }
@@ -185,14 +186,14 @@ export async function fetchJson<T>(
     const parsed = schema.safeParse(json);
     if (!parsed.success) {
       if (import.meta.env.DEV) {
-        console.error(
+        logger.error(
           `[UnifiedClient] Validation failed: ${options.method ?? "GET"} ${url}`,
         );
-        console.error(
+        logger.error(
           "[UnifiedClient] Validation errors:",
           JSON.stringify(parsed.error.errors, null, 2),
         );
-        console.error(
+        logger.error(
           "[UnifiedClient] Response data:",
           JSON.stringify(json, null, 2),
         );

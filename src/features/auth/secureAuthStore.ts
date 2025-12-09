@@ -11,6 +11,7 @@ import {
   XSSDetector,
 } from "../../utils/tokenSecurity";
 import { supabase } from "../../shared/config/supabase";
+import { logger } from "@/shared/utils/logger";
 
 interface SecureAuthState {
   user: UnifiedUser | null;
@@ -75,7 +76,7 @@ export const useSecureAuthStore = create<SecureAuthState>((set, get) => ({
     try {
       await supabase.auth.signOut();
     } catch (error) {
-      console.error("Supabase signout error:", error);
+      logger.error("Supabase signout error:", error);
     }
 
     set({
@@ -144,7 +145,7 @@ export const useSecureAuthStore = create<SecureAuthState>((set, get) => ({
         }
       }
     } catch (error) {
-      console.error("Auth check failed:", error);
+      logger.error("Auth check failed:", error);
       await get().logout();
     }
   },
@@ -169,7 +170,7 @@ export const useSecureAuthStore = create<SecureAuthState>((set, get) => ({
       // Обновляем данные пользователя
       await get().checkAuth();
     } catch (error) {
-      console.error("Token refresh failed:", error);
+      logger.error("Token refresh failed:", error);
       await get().logout();
     }
   },

@@ -35,9 +35,9 @@ supabase-mcp-config.json
 # API Keys and Credentials
 **/credentials.json
 **/service-account.json
-**/google-services.json
-**/GoogleService-Info.plist
 **/serviceAccountKey.json
+# Note: google-services.json and GoogleService-Info.plist are safe to commit
+# They contain only public Firebase project identifiers, not secret keys
 
 # Editor directories
 .vscode/*

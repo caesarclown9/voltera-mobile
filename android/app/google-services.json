@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "131096890748",
+    "project_id": "volterakg-10866",
+    "storage_bucket": "volterakg-10866.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:131096890748:android:b10bfe4c6b1029514de8f9",
+        "android_client_info": {
+          "package_name": "kg.voltera.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD6fgFKY9zaj-kYPPsm7gIprJ6YO8Jcd64"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

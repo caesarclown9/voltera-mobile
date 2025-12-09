@@ -1135,65 +1135,44 @@ class EvPowerApiService {
   }
 
   /**
-   * Инициировать удаление аккаунта и связанных пользовательских данных
+   * Полное удаление аккаунта: удаляет из auth.users и анонимизирует данные в clients
    * (операция необратима; платежные записи могут храниться по закону)
    */
   async requestAccountDeletion(): Promise<{ success: true; message?: string }> {
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session) {
       throw new Error("User not authenticated");
     }
 
-    // Вызываем RPC (предпочтительный способ)
-    const { error } = await supabase.rpc("request_account_deletion");
+    // Вызываем Edge Function для полного удаления аккаунта
+    // Edge Function использует service_role для удаления из auth.users
+    const { data, error } = await supabase.functions.invoke("delete-account", {
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    });
+
     if (error) {
-      const errorObj = error as unknown as Record<string, unknown>;
-      const msg = String(errorObj?.["message"] || "");
-      const code = String(errorObj?.["code"] || "");
-      const isMissingFn =
-        code === "PGRST202" || /Could not find the function/i.test(msg);
-      if (!isMissingFn) {
-        throw error;
-      }
-
-      // Fallback: если RPC нет в схеме, отметим удаление напрямую в таблице
-      const nowIso = new Date().toISOString();
-      const { error: updError } = await supabase
-        .from("clients")
-        .update({ delete_requested_at: nowIso, status: "inactive" })
-        .eq("id", user.id)
-        .select("id")
-        .single();
-
-      if (updError) {
-        const updErrorObj = updError as unknown as Record<string, unknown>;
-        const msg2 = String(updErrorObj?.["message"] || "");
-        const code2 = String(updErrorObj?.["code"] || "");
-        const missingCol =
-          code2 === "PGRST204" || /delete_requested_at/i.test(msg2);
-        if (!missingCol) throw updError;
-
-        // Колонки нет — минимальный фоллбек: меняем только статус
-        const { error: updStatusOnly } = await supabase
-          .from("clients")
-          .update({ status: "inactive" })
-          .eq("id", user.id)
-          .select("id")
-          .single();
-        if (updStatusOnly) throw updStatusOnly;
-        return {
-          success: true,
-          message: "Удаление аккаунта запрошено (status-only fallback)",
-        };
-      }
-      return {
-        success: true,
-        message: "Удаление аккаунта запрошено (fallback)",
-      };
+      logger.error("[requestAccountDeletion] Edge function error:", error);
+      throw new Error(error.message || "Не удалось удалить аккаунт");
     }
-    return { success: true, message: "Удаление аккаунта запрошено" };
+
+    const response = data as {
+      success: boolean;
+      message?: string;
+      error?: string;
+    };
+
+    if (!response.success) {
+      throw new Error(response.error || "Не удалось удалить аккаунт");
+    }
+
+    return {
+      success: true,
+      message: response.message || "Аккаунт успешно удалён",
+    };
   }
 
   /**

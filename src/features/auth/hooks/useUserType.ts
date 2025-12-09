@@ -22,20 +22,22 @@ import { logger } from "@/shared/utils/logger";
 async function fetchUserType(userId: string): Promise<UserTypeInfo> {
   try {
     // Проверяем, есть ли пользователь в таблице users (операторы/админы)
+    // Используем maybeSingle() чтобы избежать HTTP 406 ошибки при отсутствии записи
     const { data: operatorData, error } = await supabase
       .from("users")
       .select("id, email, role, is_active, admin_id, created_at, updated_at")
       .eq("id", userId)
-      .single();
+      .maybeSingle();
 
     if (error) {
-      // PGRST116 - не найдено (это нормально для клиентов)
-      if (error.code === "PGRST116") {
-        logger.debug("[useUserType] User is a client (not found in users table)");
-        return { type: "client" };
-      }
       logger.error("[useUserType] Error fetching user type:", error);
       // По умолчанию считаем клиентом
+      return { type: "client" };
+    }
+
+    // Пользователь не найден в users — это обычный клиент
+    if (!operatorData) {
+      logger.debug("[useUserType] User is a client (not found in users table)");
       return { type: "client" };
     }
 

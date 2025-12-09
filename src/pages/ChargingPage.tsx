@@ -163,8 +163,11 @@ export const ChargingPage = () => {
     }
   }, [selectedConnector, connectorPrices]);
 
-  const handleStartCharging = async () => {
+  const handleStartCharging = async (overrideLimits?: ChargingLimits) => {
     if (!selectedConnector || !station) return;
+
+    // Используем переданные лимиты или текущее состояние
+    const effectiveLimits = overrideLimits || chargingLimits;
 
     // Дополнительная валидация station
     if (!station.id || !station.connectors || station.connectors.length === 0) {
@@ -188,11 +191,11 @@ export const ChargingPage = () => {
     try {
       // Проверяем баланс для лимитированной зарядки
       if (
-        chargingLimits.type !== "none" &&
+        effectiveLimits.type !== "none" &&
         balance &&
         balance.balance !== null
       ) {
-        const requiredBalance = chargingLimits.estimatedCost || 0;
+        const requiredBalance = effectiveLimits.estimatedCost || 0;
         if (balance.balance < requiredBalance) {
           setChargingError("Недостаточно средств на балансе");
           return;
@@ -212,10 +215,10 @@ export const ChargingPage = () => {
       };
 
       // Добавляем лимиты в зависимости от типа
-      if (chargingLimits.type === "amount") {
-        chargingParams.amount_som = chargingLimits.amount_som;
-      } else if (chargingLimits.type === "energy") {
-        chargingParams.energy_kwh = chargingLimits.energy_kwh;
+      if (effectiveLimits.type === "amount") {
+        chargingParams.amount_som = effectiveLimits.amount_som;
+      } else if (effectiveLimits.type === "energy") {
+        chargingParams.energy_kwh = effectiveLimits.energy_kwh;
       }
       // Для типа 'none' (полный бак) не передаём лимиты
 
@@ -227,7 +230,7 @@ export const ChargingPage = () => {
         navigate(`/charging-process/${result.sessionId}`, {
           state: {
             stationId: station.id,
-            chargingLimits: chargingLimits,
+            chargingLimits: effectiveLimits,
           },
         });
       } else if (result) {
@@ -533,8 +536,7 @@ export const ChargingPage = () => {
               <button
                 className="w-full bg-primary-500 text-white py-4 rounded-xl font-semibold hover:bg-primary-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 onClick={() => {
-                  setChargingLimits({ type: "none" });
-                  handleStartCharging();
+                  handleStartCharging({ type: "none" });
                 }}
                 disabled={chargingLoading || !selectedConnector}
               >
@@ -656,10 +658,11 @@ export const ChargingPage = () => {
                 <button
                   className="w-full bg-primary-500 text-white py-3 rounded-xl font-semibold hover:bg-primary-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                   onClick={() => {
-                    if (chargingLimits.type !== "amount") {
-                      setChargingLimits({ type: "amount", amount_som: 100 });
-                    }
-                    handleStartCharging();
+                    const limitsToUse =
+                      chargingLimits.type === "amount"
+                        ? chargingLimits
+                        : { type: "amount" as const, amount_som: 100 };
+                    handleStartCharging(limitsToUse);
                   }}
                   disabled={
                     chargingLoading ||

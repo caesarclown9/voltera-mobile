@@ -70,16 +70,22 @@ export const ProfilePage = () => {
   };
 
   const handleDeleteAccount = async () => {
-    if (!confirm("Удалить аккаунт и данные? Это действие необратимо.")) return;
+    if (
+      !confirm(
+        "Удалить аккаунт и все данные? Это действие необратимо и вы не сможете восстановить аккаунт.",
+      )
+    )
+      return;
     try {
+      setDeleteRequested(true); // Показываем состояние загрузки
       await evpowerApi.requestAccountDeletion();
-      alert(
-        "Запрос на удаление отправлен. Мы обработаем его в ближайшее время.",
-      );
-      setDeleteRequested(true);
+      alert("Ваш аккаунт и все данные успешно удалены.");
       await handleLogout();
     } catch (e) {
-      alert("Не удалось запросить удаление. Попробуйте позже.");
+      setDeleteRequested(false);
+      const errorMessage =
+        e instanceof Error ? e.message : "Неизвестная ошибка";
+      alert(`Не удалось удалить аккаунт: ${errorMessage}`);
       logger.error("Failed to delete account:", e);
     }
   };

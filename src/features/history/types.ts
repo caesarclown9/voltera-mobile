@@ -13,7 +13,7 @@ export interface ChargingHistoryItem {
   totalCost: number; // сом
   averagePower: number; // кВт
   maxPower: number; // кВт
-  status: "completed" | "stopped" | "failed";
+  status: "completed" | "stopped" | "failed" | "in_progress";
   limitType?: "energy" | "amount" | "none";
   limitValue?: number;
   meterStart?: number;

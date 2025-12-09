@@ -33,6 +33,8 @@ export function ChargingHistoryCard({
     switch (item.status) {
       case "completed":
         return "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400";
+      case "in_progress":
+        return "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400";
       case "stopped":
         return "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400";
       case "failed":
@@ -46,6 +48,8 @@ export function ChargingHistoryCard({
     switch (item.status) {
       case "completed":
         return "Завершена";
+      case "in_progress":
+        return "Заряжается";
       case "stopped":
         return "Остановлена";
       case "failed":

@@ -24,21 +24,6 @@ export class AuthService {
     password: string,
     phone?: string,
   ): Promise<AuthResponse> {
-    // Блокируем повторную регистрацию, если аккаунт уже существует и деактивирован
-    try {
-      const { data: existing } = await supabase
-        .from("clients")
-        .select("status")
-        .eq("email", email)
-        .maybeSingle();
-      if (existing && existing.status && existing.status !== "active") {
-        throw new Error(
-          "Аккаунт деактивирован/в процессе удаления. Восстановите доступ перед регистрацией.",
-        );
-      }
-    } catch {
-      // Ignore error - user may already exist in Supabase
-    }
     // Создаем пользователя через Supabase Auth с телефоном в метаданных
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
@@ -86,15 +71,6 @@ export class AuthService {
         .single();
 
       if (!clientError && client) {
-        if (
-          (client as { status?: string }).status &&
-          (client as { status?: string }).status !== "active"
-        ) {
-          // Сессию не убиваем — она нужна для восстановления через RPC
-          throw new Error(
-            "Аккаунт деактивирован/в процессе удаления. Обратитесь в поддержку.",
-          );
-        }
         clientData = client as Client;
       } else {
         logger.warn(
@@ -238,15 +214,6 @@ export class AuthService {
         client: newClient,
         session: authData.session || undefined,
       };
-    }
-
-    // Блокируем вход если аккаунт помечен как неактивный/удаляемый/удалённый
-    if (
-      (clientData as { status?: string }).status &&
-      (clientData as { status?: string }).status !== "active"
-    ) {
-      // Оставляем сессию активной для RPC восстановления
-      throw new Error("Аккаунт деактивирован или в процессе удаления");
     }
 
     return {
@@ -399,13 +366,6 @@ export class AuthService {
         }
 
         if (!error && clientData) {
-          if (
-            (clientData as { status?: string }).status &&
-            (clientData as { status?: string }).status !== "active"
-          ) {
-            // Для UI — считаем как неавторизованного
-            return null;
-          }
           return clientData;
         }
       }

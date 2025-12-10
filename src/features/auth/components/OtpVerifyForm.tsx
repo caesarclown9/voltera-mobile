@@ -200,8 +200,8 @@ export function OtpVerifyForm({
 
       {/* Header */}
       <div className="text-center mb-6">
-        <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <MessageSquare className="w-8 h-8 text-emerald-600" />
+        <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <MessageSquare className="w-8 h-8 text-primary-600" />
         </div>
         <h2 className="text-xl font-bold text-gray-900">Введите код</h2>
         <p className="text-gray-500 mt-1">
@@ -228,8 +228,8 @@ export function OtpVerifyForm({
             disabled={isLoading}
             className={`
               w-12 h-14 text-center text-2xl font-bold rounded-xl border-2 transition-all
-              ${error ? "border-red-300" : digit ? "border-emerald-500" : "border-gray-200"}
-              focus:border-emerald-500 focus:outline-none focus:ring-0
+              ${error ? "border-red-300" : digit ? "border-primary-500" : "border-gray-200"}
+              focus:border-primary-500 focus:outline-none focus:ring-0
               disabled:bg-gray-50 disabled:text-gray-400
             `}
           />
@@ -249,7 +249,7 @@ export function OtpVerifyForm({
 
       {/* Loading */}
       {isLoading && (
-        <div className="flex items-center justify-center gap-2 text-emerald-600 mb-4">
+        <div className="flex items-center justify-center gap-2 text-primary-600 mb-4">
           <Loader2 className="w-5 h-5 animate-spin" />
           <span>Проверка...</span>
         </div>
@@ -272,7 +272,7 @@ export function OtpVerifyForm({
           <button
             onClick={handleResend}
             disabled={isLoading}
-            className="flex items-center justify-center gap-2 mx-auto text-emerald-600 hover:text-emerald-700 font-medium transition-colors"
+            className="flex items-center justify-center gap-2 mx-auto text-primary-600 hover:text-primary-700 font-medium transition-colors"
           >
             <RefreshCw className="w-4 h-4" />
             Отправить код повторно

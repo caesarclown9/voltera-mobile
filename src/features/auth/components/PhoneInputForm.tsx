@@ -19,7 +19,7 @@ interface PhoneInputFormProps {
 }
 
 /**
- * Форматирует номер для отображения (996 XX XXX XX XX)
+ * Форматирует номер для отображения (+996 XXX XXX XXX)
  */
 function formatPhoneDisplay(value: string): string {
   // Оставляем только цифры
@@ -28,15 +28,13 @@ function formatPhoneDisplay(value: string): string {
   // Убираем код страны если есть
   const phone = digits.startsWith("996") ? digits.slice(3) : digits;
 
-  // Форматируем
-  if (phone.length <= 2) {
+  // Форматируем в формат XXX XXX XXX
+  if (phone.length <= 3) {
     return phone;
-  } else if (phone.length <= 5) {
-    return `${phone.slice(0, 2)} ${phone.slice(2)}`;
-  } else if (phone.length <= 7) {
-    return `${phone.slice(0, 2)} ${phone.slice(2, 5)} ${phone.slice(5)}`;
+  } else if (phone.length <= 6) {
+    return `${phone.slice(0, 3)} ${phone.slice(3)}`;
   } else {
-    return `${phone.slice(0, 2)} ${phone.slice(2, 5)} ${phone.slice(5, 7)} ${phone.slice(7, 9)}`;
+    return `${phone.slice(0, 3)} ${phone.slice(3, 6)} ${phone.slice(6, 9)}`;
   }
 }
 
@@ -140,8 +138,8 @@ export function PhoneInputForm({ onOtpSent, onError }: PhoneInputFormProps) {
     >
       {/* Header */}
       <div className="text-center mb-6">
-        <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Phone className="w-8 h-8 text-emerald-600" />
+        <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <Phone className="w-8 h-8 text-primary-600" />
         </div>
         <h2 className="text-xl font-bold text-gray-900">Вход в аккаунт</h2>
         <p className="text-gray-500 mt-1">
@@ -168,11 +166,11 @@ export function PhoneInputForm({ onOtpSent, onError }: PhoneInputFormProps) {
               id="phone"
               value={phone}
               onChange={handlePhoneChange}
-              placeholder="70 123 45 67"
+              placeholder=""
               className={`
                 w-full pl-16 pr-4 py-3 rounded-xl border-2 transition-colors
                 text-lg font-medium tracking-wide
-                ${error ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-emerald-500"}
+                ${error ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-primary-500"}
                 focus:outline-none focus:ring-0
               `}
               autoComplete="tel"
@@ -200,7 +198,7 @@ export function PhoneInputForm({ onOtpSent, onError }: PhoneInputFormProps) {
             flex items-center justify-center gap-2
             ${
               isValid && !isLoading
-                ? "bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98]"
+                ? "bg-primary-500 hover:bg-primary-600 active:scale-[0.98]"
                 : "bg-gray-300 cursor-not-allowed"
             }
           `}

@@ -1,4 +1,12 @@
 #!/bin/sh
 
-echo "[pre-push] Running typecheck, lint, and tests..."
-npm run typecheck && npm run lint && npm test
+echo "[pre-push] Running typecheck and lint..."
+npm run typecheck && npm run lint
+
+# Run tests only if test files exist
+if find src -name "*.test.ts" -o -name "*.test.tsx" -o -name "*.spec.ts" -o -name "*.spec.tsx" 2>/dev/null | grep -q .; then
+  echo "[pre-push] Running tests..."
+  npm test
+else
+  echo "[pre-push] No test files found, skipping tests"
+fi

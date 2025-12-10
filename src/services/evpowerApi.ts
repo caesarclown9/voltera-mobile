@@ -3,13 +3,13 @@
  * Интеграция с бэкендом OCPP сервера
  *
  * ВАЖНО:
- * - НЕ использует JWT токены
- * - Передает client_id в каждом запросе
- * - client_id = Supabase User ID
+ * - Использует JWT токены из tokenService (phone + OTP авторизация)
+ * - client_id получается из tokenService
  * - Это ЕДИНСТВЕННЫЙ файл для всех API вызовов
  */
 
 import { supabase } from "../shared/config/supabase";
+import { tokenService } from "@/features/auth/services/tokenService";
 import { logger } from "@/shared/utils/logger";
 import { fetchJson } from "@/api/unifiedClient";
 import { generateIdempotencyKey } from "@/shared/utils/idempotency";
@@ -292,16 +292,14 @@ class EvPowerApiService {
   }
 
   /**
-   * Получить текущий client_id из Supabase Auth
+   * Получить текущий client_id из tokenService
    */
   private async getClientId(): Promise<string> {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
+    const clientId = await tokenService.getClientId();
+    if (!clientId) {
       throw new Error("User not authenticated");
     }
-    return user.id;
+    return clientId;
   }
 
   /**
@@ -314,26 +312,27 @@ class EvPowerApiService {
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
     logger.debug(`[VolteraAPI] ${options.method || "GET"} ${url}`);
-    // Добавляем Authorization: Bearer <Supabase JWT> если доступен
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+
+    // Получаем access token из tokenService (phone + OTP авторизация)
+    const accessToken = await tokenService.getAccessToken();
     const method = options.method || "GET";
     const headers: Record<string, string> = {};
-    if (session?.access_token) {
-      headers["Authorization"] = `Bearer ${session.access_token}`;
+
+    if (accessToken) {
+      headers["Authorization"] = `Bearer ${accessToken}`;
       // Debug: логируем первые и последние символы токена
-      const token = session.access_token;
       logger.debug(
-        `[VolteraAPI] Auth token: ${token.substring(0, 20)}...${token.substring(token.length - 20)}`,
+        `[VolteraAPI] Auth token: ${accessToken.substring(0, 20)}...${accessToken.substring(accessToken.length - 20)}`,
       );
     } else {
-      logger.warn("[VolteraAPI] No access token found in session!");
+      logger.warn("[VolteraAPI] No access token found!");
     }
+
     // Добавляем Idempotency-Key для критичных операций (предотвращает дубликаты)
     if (method === "POST" || method === "PUT" || method === "DELETE") {
       headers["Idempotency-Key"] = generateIdempotencyKey();
     }
+
     return await fetchJson<T>(
       url,
       { method, body: options.body, timeoutMs: 10000, retries: 2, headers },
@@ -1059,8 +1058,8 @@ class EvPowerApiService {
    * Подписаться на изменения баланса
    */
   subscribeToBalance(callback: (balance: number) => void) {
-    const subscription = supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) return null;
+    const subscription = tokenService.getClientId().then((clientId) => {
+      if (!clientId) return null;
 
       return supabase
         .channel("balance-changes")
@@ -1070,7 +1069,7 @@ class EvPowerApiService {
             event: "UPDATE",
             schema: "public",
             table: "clients",
-            filter: `id=eq.${user.id}`,
+            filter: `id=eq.${clientId}`,
           },
           (payload) => {
             callback(payload.new["balance"]);
@@ -1108,15 +1107,13 @@ class EvPowerApiService {
    * Получить текущего пользователя
    */
   async getCurrentUser() {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return null;
+    const clientId = await tokenService.getClientId();
+    if (!clientId) return null;
 
     const { data: client } = await supabase
       .from("clients")
       .select("*")
-      .eq("id", user.id)
+      .eq("id", clientId)
       .single();
 
     return client;
@@ -1135,44 +1132,48 @@ class EvPowerApiService {
   }
 
   /**
-   * Полное удаление аккаунта: удаляет из auth.users и анонимизирует данные в clients
+   * Полное удаление аккаунта: удаляет данные клиента
    * (операция необратима; платежные записи могут храниться по закону)
    */
   async requestAccountDeletion(): Promise<{ success: true; message?: string }> {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) {
+    const accessToken = await tokenService.getAccessToken();
+    if (!accessToken) {
       throw new Error("User not authenticated");
     }
 
-    // Вызываем Edge Function для полного удаления аккаунта
-    // Edge Function использует service_role для удаления из auth.users
-    const { data, error } = await supabase.functions.invoke("delete-account", {
-      headers: {
-        Authorization: `Bearer ${session.access_token}`,
-      },
-    });
+    // Вызываем API endpoint для удаления аккаунта
+    try {
+      const response = await this.apiRequest<{
+        success: boolean;
+        message?: string;
+        error?: string;
+      }>(
+        "/auth/delete-account",
+        { method: "POST" },
+        z.object({
+          success: z.boolean(),
+          message: z.string().optional(),
+          error: z.string().optional(),
+        }),
+      );
 
-    if (error) {
-      logger.error("[requestAccountDeletion] Edge function error:", error);
-      throw new Error(error.message || "Не удалось удалить аккаунт");
+      if (!response.success) {
+        throw new Error(response.error || "Не удалось удалить аккаунт");
+      }
+
+      // Очищаем локальные токены после удаления
+      await tokenService.clearTokens();
+
+      return {
+        success: true,
+        message: response.message || "Аккаунт успешно удалён",
+      };
+    } catch (error) {
+      logger.error("[requestAccountDeletion] API error:", error);
+      throw new Error(
+        error instanceof Error ? error.message : "Не удалось удалить аккаунт",
+      );
     }
-
-    const response = data as {
-      success: boolean;
-      message?: string;
-      error?: string;
-    };
-
-    if (!response.success) {
-      throw new Error(response.error || "Не удалось удалить аккаунт");
-    }
-
-    return {
-      success: true,
-      message: response.message || "Аккаунт успешно удалён",
-    };
   }
 
   /**

@@ -32,11 +32,6 @@
     "logout": "Sign out",
     "register": "Sign up",
     "phone": "Phone number",
-    "email": "Email",
-    "password": "Password",
-    "forgotPassword": "Forgot password?",
-    "noAccount": "Don't have an account?",
-    "hasAccount": "Already have an account?",
     "loginRequired": "Authorization required",
     "enterToView": "Sign in to view charging history and manage balance"
   },

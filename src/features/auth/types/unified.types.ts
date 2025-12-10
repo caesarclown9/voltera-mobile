@@ -7,13 +7,12 @@ import { logger } from "@/shared/utils/logger";
 
 /**
  * Основной тип пользователя
- * ID всегда UUID из Supabase Auth
+ * ID - UUID, идентификация через phone + OTP (WhatsApp)
  */
 export interface UnifiedUser {
-  // Основные данные (из Supabase Auth)
+  // Основные данные
   id: string; // UUID - единственный идентификатор везде
-  email: string | null;
-  phone: string | null;
+  phone: string | null; // Телефон в формате E.164 (+996XXXXXXXXX)
 
   // Профиль (из таблицы clients)
   name: string;

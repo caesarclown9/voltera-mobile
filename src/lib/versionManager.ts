@@ -9,7 +9,7 @@ import { logger } from "@/shared/utils/logger";
 
 // Текущая версия приложения (синхронизируется с package.json)
 export const APP_VERSION = "1.1.2";
-export const APP_BUILD = 91; // Увеличивается при каждой сборке
+export const APP_BUILD = 92; // Увеличивается при каждой сборке
 
 // Ключи для хранения
 const VERSION_STORAGE_KEY = "voltera_app_version";

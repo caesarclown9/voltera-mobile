@@ -2,10 +2,10 @@ import { User } from "lucide-react";
 
 interface ProfileHeaderProps {
   name: string;
-  email?: string;
+  phone?: string;
 }
 
-export function ProfileHeader({ name, email }: ProfileHeaderProps) {
+export function ProfileHeader({ name, phone }: ProfileHeaderProps) {
   return (
     <div className="flex items-center gap-4 p-4">
       <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900/30 rounded-full flex items-center justify-center">
@@ -15,8 +15,8 @@ export function ProfileHeader({ name, email }: ProfileHeaderProps) {
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
           {name}
         </h2>
-        {email && (
-          <p className="text-sm text-gray-500 dark:text-gray-400">{email}</p>
+        {phone && (
+          <p className="text-sm text-gray-500 dark:text-gray-400">{phone}</p>
         )}
       </div>
     </div>

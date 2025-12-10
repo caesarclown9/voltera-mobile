@@ -1,126 +1,85 @@
+/**
+ * Auth Hooks - хуки для авторизации
+ *
+ * Использует phone + OTP авторизацию через WhatsApp (wappi.pro)
+ */
+
 import { useMutation } from "@tanstack/react-query";
 import { useAuthStore } from "../store";
-import { authService } from "../services/authService";
+import { authService, type VerifyOtpResponse } from "../services/authService";
+import { tokenService } from "../services/tokenService";
 import { useNavigate } from "react-router-dom";
 import { logger } from "@/shared/utils/logger";
 
-interface SignInRequest {
-  email?: string;
-  phone?: string;
-  password: string;
-}
-
-interface SignUpRequest {
-  email: string;
-  phone: string;
-  password: string;
-}
-
-// Sign In mutation - для входа существующих пользователей
-export const useSignIn = () => {
-  const { login } = useAuthStore();
-  const navigate = useNavigate();
-
+/**
+ * Hook для отправки OTP кода
+ */
+export const useSendOtp = () => {
   return useMutation({
-    mutationFn: async (data: SignInRequest) => {
-      // Определяем, что использовать - email или phone
-      if (data.phone) {
-        const result = await authService.signInWithPhone(
-          data.phone,
-          data.password,
-        );
-        return result;
-      } else if (data.email) {
-        const result = await authService.signInWithEmail(
-          data.email,
-          data.password,
-        );
-        return result;
-      } else {
-        throw new Error("Email или телефон обязателен");
-      }
-    },
-    onSuccess: (data, _variables) => {
-      if (data.success && data.client) {
-        // Преобразуем Client в UnifiedUser
-        const unifiedUser = {
-          id: data.client.id,
-          email: data.client.email,
-          phone: data.client.phone || null,
-          name: data.client.name || "User",
-          balance: data.client.balance || 0,
-          status: "active" as const,
-          favoriteStations: [],
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-
-        login(unifiedUser);
-        navigate("/", { replace: true });
-      }
-    },
-  });
-};
-
-// Sign Up mutation - для регистрации новых пользователей
-export const useSignUp = () => {
-  const { login } = useAuthStore();
-  const navigate = useNavigate();
-
-  return useMutation({
-    mutationFn: async (data: SignUpRequest) => {
-      const result = await authService.signUpWithEmail(
-        data.email,
-        data.password,
-        data.phone,
-      );
+    mutationFn: async (phone: string) => {
+      const result = await authService.sendOtp(phone);
       return result;
     },
-    onSuccess: (data, _variables) => {
-      // Автоматический login только если есть session (email подтвержден)
-      // Если session === undefined, значит требуется подтверждение email
-      if (data.success && data.client && data.session) {
-        // Преобразуем Client в UnifiedUser
-        const unifiedUser = {
-          id: data.client.id,
-          email: data.client.email,
-          phone: data.client.phone || null,
-          name: data.client.name || "User",
-          balance: data.client.balance || 0,
-          status: "active" as const,
-          favoriteStations: [],
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-        login(unifiedUser);
-        navigate("/", { replace: true });
-      }
-      // Если session нет - обработка в компоненте (показ сообщения о подтверждении)
+    onError: (error) => {
+      logger.error("[useSendOtp] Error:", error);
     },
   });
 };
 
-// Старый хук для обратной совместимости
-export const useLogin = useSignIn;
+/**
+ * Hook для верификации OTP и входа
+ */
+export const useVerifyOtp = () => {
+  const { login } = useAuthStore();
+  const navigate = useNavigate();
 
-// Logout mutation
+  return useMutation({
+    mutationFn: async ({ phone, code }: { phone: string; code: string }) => {
+      const result = await authService.verifyOtp(phone, code);
+      return result;
+    },
+    onSuccess: (data: VerifyOtpResponse) => {
+      logger.info("[useVerifyOtp] OTP verified successfully");
+
+      // Преобразуем AuthUser в UnifiedUser
+      const unifiedUser = {
+        id: data.user.id,
+        phone: data.user.phone || null,
+        name: ("name" in data.user && data.user.name) || "User",
+        balance: ("balance" in data.user && data.user.balance) || 0,
+        status: "active" as const,
+        favoriteStations: [],
+        createdAt: data.user.created_at || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      login(unifiedUser);
+      navigate("/", { replace: true });
+    },
+    onError: (error) => {
+      logger.error("[useVerifyOtp] Error:", error);
+    },
+  });
+};
+
+/**
+ * Hook для выхода из системы
+ */
 export const useLogout = () => {
   const { logout } = useAuthStore();
   const navigate = useNavigate();
 
   return useMutation({
     mutationFn: async () => {
-      if (!import.meta.env.PROD) logger.debug("[useLogout] Starting logout...");
+      logger.debug("[useLogout] Starting logout...");
       await authService.signOut();
-      if (!import.meta.env.PROD)
-        logger.debug("[useLogout] AuthService signOut completed");
+      logger.debug("[useLogout] AuthService signOut completed");
       return Promise.resolve();
     },
     onSuccess: () => {
-      if (!import.meta.env.PROD)
-        logger.debug(
-          "[useLogout] onSuccess called, clearing store and navigating...",
-        );
+      logger.debug(
+        "[useLogout] onSuccess called, clearing store and navigating...",
+      );
       logout();
       try {
         localStorage.removeItem("skipped_auth");
@@ -131,13 +90,16 @@ export const useLogout = () => {
       navigate("/", { replace: true });
     },
     onError: (error) => {
-      if (!import.meta.env.PROD)
-        logger.error("[useLogout] Error during logout:", error);
+      logger.error("[useLogout] Error during logout:", error);
+      // Все равно очищаем локальное состояние
+      logout();
     },
   });
 };
 
-// Check if user is authenticated
+/**
+ * Hook для проверки статуса авторизации
+ */
 export const useAuthStatus = () => {
   const { isAuthenticated, user, isInitialized } = useAuthStore();
 
@@ -150,5 +112,20 @@ export const useAuthStatus = () => {
   };
 };
 
-// Alias for useAuthStatus for backward compatibility
+/**
+ * Hook для получения client_id
+ */
+export const useClientId = () => {
+  const { user } = useAuthStore();
+  return user?.id || null;
+};
+
+/**
+ * Hook для получения типа пользователя
+ */
+export const useUserType = () => {
+  return tokenService.getUserType();
+};
+
+// Alias для обратной совместимости
 export const useAuth = useAuthStatus;

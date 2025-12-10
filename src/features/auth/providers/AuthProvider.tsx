@@ -1,6 +1,14 @@
+/**
+ * AuthProvider - провайдер авторизации
+ *
+ * Инициализирует состояние авторизации при загрузке приложения.
+ * Использует phone + OTP авторизацию через tokenService.
+ */
+
 import { useEffect } from "react";
 import { useAuthStore } from "../store";
 import { authService } from "../services/authService";
+import { tokenService } from "../services/tokenService";
 import { logger } from "@/shared/utils/logger";
 
 interface AuthProviderProps {
@@ -14,10 +22,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // Rehydrate the store on mount
     useAuthStore.persist.rehydrate();
 
-    // Initialize auth state - проверяем сохраненную сессию
+    // Initialize auth state - проверяем сохраненные токены
     const initializeAuth = async () => {
       try {
         logger.debug("[AuthProvider] Initializing auth...");
+
+        // Проверяем есть ли сохраненные токены
+        const hasTokens = await tokenService.hasTokens();
+        logger.debug("[AuthProvider] Has tokens:", hasTokens);
+
+        if (!hasTokens) {
+          logger.debug(
+            "[AuthProvider] No tokens found, user not authenticated",
+          );
+          setInitialized(true);
+          return;
+        }
+
+        // Пробуем получить данные пользователя
         const user = await authService.getCurrentUser();
         logger.debug(
           "[AuthProvider] InitializeAuth: Got user:",
@@ -25,30 +47,57 @@ export function AuthProvider({ children }: AuthProviderProps) {
         );
 
         if (user) {
-          // Преобразуем Client в UnifiedUser
+          // Преобразуем AuthUser в UnifiedUser
           const unifiedUser = {
             id: user.id,
-            email: user.email,
             phone: user.phone || null,
-            name: user.name || "User",
-            balance: user.balance || 0,
+            name: ("name" in user && user.name) || "User",
+            balance: ("balance" in user && user.balance) || 0,
             status: "active" as const,
             favoriteStations: [],
-            createdAt: new Date().toISOString(),
+            createdAt: user.created_at || new Date().toISOString(),
             updatedAt: new Date().toISOString(),
           };
           logger.debug("[AuthProvider] InitializeAuth: Logging in user");
           login(unifiedUser);
         } else {
           logger.debug(
-            "[AuthProvider] InitializeAuth: No user data yet, will wait for INITIAL_SESSION event",
+            "[AuthProvider] InitializeAuth: User data not found, tokens may be invalid",
           );
-          // НЕ вызываем logout - просто ждем INITIAL_SESSION event
-          // который придет с валидными данными
+          // Токены есть, но пользователь не найден - возможно токены устарели
+          // Пробуем обновить токен
+          const refreshed = await tokenService.refreshAccessToken();
+          if (refreshed) {
+            // Повторно пробуем получить данные
+            const retryUser = await authService.getCurrentUser();
+            if (retryUser) {
+              const unifiedUser = {
+                id: retryUser.id,
+                phone: retryUser.phone || null,
+                name: ("name" in retryUser && retryUser.name) || "User",
+                balance: ("balance" in retryUser && retryUser.balance) || 0,
+                status: "active" as const,
+                favoriteStations: [],
+                createdAt: retryUser.created_at || new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+              };
+              login(unifiedUser);
+            } else {
+              // Не удалось получить пользователя даже после refresh
+              await tokenService.clearTokens();
+              logout();
+            }
+          } else {
+            // Refresh не удался - очищаем токены
+            await tokenService.clearTokens();
+            logout();
+          }
         }
       } catch (error) {
         logger.error("[AuthProvider] Error initializing auth:", error);
-        setInitialized(true);
+        // При ошибке очищаем состояние
+        await tokenService.clearTokens();
+        logout();
       } finally {
         // Всегда помечаем как инициализировано
         setInitialized(true);
@@ -56,105 +105,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     };
 
     initializeAuth();
-
-    // Listen for auth state changes
-    const {
-      data: { subscription },
-    } = authService.onAuthStateChange(async (event, session) => {
-      logger.debug("[AuthProvider] Auth state change:", {
-        event,
-        userId: session?.user?.id,
-        hasSession: !!session,
-      });
-
-      if (event === "SIGNED_IN" && session?.user) {
-        logger.debug("[AuthProvider] SIGNED_IN event, fetching user data...");
-
-        // Retry механизм для устранения race condition
-        let user = await authService.getCurrentUser();
-        let retries = 0;
-        const maxRetries = 3;
-
-        while (!user && retries < maxRetries) {
-          logger.debug(
-            `[AuthProvider] SIGNED_IN: Retry ${retries + 1}/${maxRetries}...`,
-          );
-          await new Promise((resolve) => setTimeout(resolve, 300)); // Ждем 300ms
-          user = await authService.getCurrentUser();
-          retries++;
-        }
-
-        logger.debug(
-          "[AuthProvider] SIGNED_IN: Got user:",
-          user ? user.id : "null",
-        );
-
-        if (user) {
-          // Преобразуем Client в UnifiedUser
-          const unifiedUser = {
-            id: user.id,
-            email: user.email,
-            phone: user.phone || null,
-            name: user.name || "User",
-            balance: user.balance || 0,
-            status: "active" as const,
-            favoriteStations: [],
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          };
-          logger.debug("[AuthProvider] SIGNED_IN: Logging in user");
-          login(unifiedUser);
-        } else {
-          logger.warn(
-            "[AuthProvider] SIGNED_IN: User data not found after retries, cannot login",
-          );
-        }
-      } else if (event === "INITIAL_SESSION") {
-        logger.debug("[AuthProvider] INITIAL_SESSION event");
-        // INITIAL_SESSION может приходить с или без session
-        if (session?.user) {
-          logger.debug(
-            "[AuthProvider] INITIAL_SESSION: Has session, fetching user data...",
-          );
-          const user = await authService.getCurrentUser();
-          logger.debug(
-            "[AuthProvider] INITIAL_SESSION: Got user:",
-            user ? user.id : "null",
-          );
-
-          if (user) {
-            const unifiedUser = {
-              id: user.id,
-              email: user.email,
-              phone: user.phone || null,
-              name: user.name || "User",
-              balance: user.balance || 0,
-              status: "active" as const,
-              favoriteStations: [],
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            };
-            logger.debug("[AuthProvider] INITIAL_SESSION: Logging in user");
-            login(unifiedUser);
-          } else {
-            logger.warn(
-              "[AuthProvider] INITIAL_SESSION: Session exists but user data not found",
-            );
-          }
-        } else {
-          logger.debug("[AuthProvider] INITIAL_SESSION: No session");
-        }
-      } else if (event === "SIGNED_OUT") {
-        logger.debug("[AuthProvider] SIGNED_OUT - clearing state");
-        logout();
-      } else if (event === "TOKEN_REFRESHED") {
-        logger.debug("[AuthProvider] Token refreshed");
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
   }, [login, logout, setInitialized]);
 
   return <>{children}</>;

@@ -140,7 +140,9 @@ export function AdminDashboard() {
             Ошибка загрузки
           </h2>
           <p className="text-sm text-gray-500 mb-4">
-            {error instanceof Error ? error.message : "Не удалось загрузить данные"}
+            {error instanceof Error
+              ? error.message
+              : "Не удалось загрузить данные"}
           </p>
           <button
             onClick={handleRefresh}
@@ -162,7 +164,8 @@ export function AdminDashboard() {
             <div>
               <h1 className="text-xl font-bold">Панель управления</h1>
               <p className="text-white/70 text-sm">
-                {roleLabels[role ?? "operator"]} - {operatorData?.email ?? user?.email}
+                {roleLabels[role ?? "operator"]} -{" "}
+                {operatorData?.email ?? user?.phone}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -171,7 +174,10 @@ export function AdminDashboard() {
                 disabled={isFetching}
                 className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors disabled:opacity-50"
               >
-                <RefreshCw size={20} className={isFetching ? "animate-spin" : ""} />
+                <RefreshCw
+                  size={20}
+                  className={isFetching ? "animate-spin" : ""}
+                />
               </button>
               <button
                 onClick={handleLogout}
@@ -190,25 +196,25 @@ export function AdminDashboard() {
           <StatCard
             icon={Zap}
             label="Всего станций"
-            value={isLoading ? "..." : stats?.stations.total ?? 0}
+            value={isLoading ? "..." : (stats?.stations.total ?? 0)}
             color="primary"
           />
           <StatCard
             icon={CheckCircle}
             label="Онлайн"
-            value={isLoading ? "..." : stats?.stations.online ?? 0}
+            value={isLoading ? "..." : (stats?.stations.online ?? 0)}
             color="success"
           />
           <StatCard
             icon={Clock}
             label="Офлайн"
-            value={isLoading ? "..." : stats?.stations.offline ?? 0}
+            value={isLoading ? "..." : (stats?.stations.offline ?? 0)}
             color="warning"
           />
           <StatCard
             icon={AlertTriangle}
             label="Ошибки"
-            value={isLoading ? "..." : stats?.stations.error ?? 0}
+            value={isLoading ? "..." : (stats?.stations.error ?? 0)}
             color="error"
           />
         </div>
@@ -225,7 +231,7 @@ export function AdminDashboard() {
               <div>
                 <p className="text-sm text-gray-500">Активных сессий</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {isLoading ? "..." : stats?.sessions.active ?? 0}
+                  {isLoading ? "..." : (stats?.sessions.active ?? 0)}
                 </p>
               </div>
             </div>

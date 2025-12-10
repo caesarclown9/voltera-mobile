@@ -179,8 +179,8 @@ export const ProfilePage = () => {
       {/* Profile Header */}
       <div className="bg-white dark:bg-gray-800">
         <ProfileHeader
-          name={user.name || user.email?.split("@")[0] || t("common.user")}
-          email={user.email ?? undefined}
+          name={user.name || t("common.user")}
+          phone={user.phone ?? undefined}
         />
       </div>
 

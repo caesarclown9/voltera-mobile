@@ -8,6 +8,7 @@
  */
 
 import { useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { Phone, Loader2 } from "lucide-react";
 import { authService } from "../services/authService";
@@ -46,6 +47,7 @@ function extractDigits(formatted: string): string {
 }
 
 export function PhoneInputForm({ onOtpSent, onError }: PhoneInputFormProps) {
+  const { t } = useTranslation();
   const [phone, setPhone] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -72,7 +74,7 @@ export function PhoneInputForm({ onOtpSent, onError }: PhoneInputFormProps) {
 
       // Валидация
       if (digits.length !== 9) {
-        setError("Введите 9 цифр номера телефона");
+        setError(t("auth.invalidPhone"));
         return;
       }
 
@@ -90,7 +92,7 @@ export function PhoneInputForm({ onOtpSent, onError }: PhoneInputFormProps) {
       ];
       const prefix = digits.slice(0, 2);
       if (!validPrefixes.includes(prefix)) {
-        setError("Неверный код оператора");
+        setError(t("auth.invalidOperator"));
         return;
       }
 
@@ -114,7 +116,7 @@ export function PhoneInputForm({ onOtpSent, onError }: PhoneInputFormProps) {
         // Проверяем на rate limit
         if ((err as { code?: string }).code === "rate_limit") {
           const retryAfter = (err as { retryAfter?: number }).retryAfter || 60;
-          setError(`Подождите ${retryAfter} секунд перед повторной отправкой`);
+          setError(t("auth.waitBeforeResend", { seconds: retryAfter }));
         } else {
           setError(errorMessage);
         }
@@ -125,7 +127,7 @@ export function PhoneInputForm({ onOtpSent, onError }: PhoneInputFormProps) {
         setIsLoading(false);
       }
     },
-    [phone, onOtpSent, onError],
+    [phone, onOtpSent, onError, t],
   );
 
   const isValid = extractDigits(phone).length === 9;
@@ -141,10 +143,10 @@ export function PhoneInputForm({ onOtpSent, onError }: PhoneInputFormProps) {
         <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <Phone className="w-8 h-8 text-primary-600" />
         </div>
-        <h2 className="text-xl font-bold text-gray-900">Вход в аккаунт</h2>
-        <p className="text-gray-500 mt-1">
-          Введите номер телефона для получения кода в WhatsApp
-        </p>
+        <h2 className="text-xl font-bold text-gray-900">
+          {t("auth.loginTitle")}
+        </h2>
+        <p className="text-gray-500 mt-1">{t("auth.loginSubtitle")}</p>
       </div>
 
       {/* Form */}
@@ -155,7 +157,7 @@ export function PhoneInputForm({ onOtpSent, onError }: PhoneInputFormProps) {
             htmlFor="phone"
             className="block text-sm font-medium text-gray-700 mb-1"
           >
-            Номер телефона
+            {t("auth.phone")}
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
@@ -206,17 +208,17 @@ export function PhoneInputForm({ onOtpSent, onError }: PhoneInputFormProps) {
           {isLoading ? (
             <>
               <Loader2 className="w-5 h-5 animate-spin" />
-              Отправка...
+              {t("auth.sending")}
             </>
           ) : (
-            "Получить код"
+            t("auth.getCode")
           )}
         </button>
       </form>
 
       {/* Footer */}
       <p className="text-center text-xs text-gray-400 mt-6">
-        Нажимая «Получить код», вы соглашаетесь с условиями использования
+        {t("auth.termsNotice")}
       </p>
     </motion.div>
   );

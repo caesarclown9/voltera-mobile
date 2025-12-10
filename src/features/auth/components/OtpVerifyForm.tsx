@@ -8,6 +8,7 @@
  */
 
 import { useState, useCallback, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { MessageSquare, ArrowLeft, Loader2, RefreshCw } from "lucide-react";
 import { authService, type VerifyOtpResponse } from "../services/authService";
@@ -32,6 +33,7 @@ export function OtpVerifyForm({
   onBack,
   onError,
 }: OtpVerifyFormProps) {
+  const { t } = useTranslation();
   const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(""));
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -195,7 +197,7 @@ export function OtpVerifyForm({
         className="flex items-center gap-1 text-gray-500 hover:text-gray-700 transition-colors mb-4"
       >
         <ArrowLeft className="w-4 h-4" />
-        <span className="text-sm">Изменить номер</span>
+        <span className="text-sm">{t("auth.changeNumber")}</span>
       </button>
 
       {/* Header */}
@@ -203,9 +205,11 @@ export function OtpVerifyForm({
         <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <MessageSquare className="w-8 h-8 text-primary-600" />
         </div>
-        <h2 className="text-xl font-bold text-gray-900">Введите код</h2>
+        <h2 className="text-xl font-bold text-gray-900">
+          {t("auth.enterCode")}
+        </h2>
         <p className="text-gray-500 mt-1">
-          Код отправлен на WhatsApp
+          {t("auth.codeSentTo")}
           <br />
           <span className="font-medium text-gray-700">{displayPhone}</span>
         </p>
@@ -251,14 +255,14 @@ export function OtpVerifyForm({
       {isLoading && (
         <div className="flex items-center justify-center gap-2 text-primary-600 mb-4">
           <Loader2 className="w-5 h-5 animate-spin" />
-          <span>Проверка...</span>
+          <span>{t("auth.verifying")}</span>
         </div>
       )}
 
       {/* Timer */}
       {expiryTime > 0 && (
         <p className="text-center text-sm text-gray-400 mb-4">
-          Код действителен ещё{" "}
+          {t("auth.codeValidFor")}{" "}
           <span className="font-medium">
             {Math.floor(expiryTime / 60)}:
             {String(expiryTime % 60).padStart(2, "0")}
@@ -275,12 +279,14 @@ export function OtpVerifyForm({
             className="flex items-center justify-center gap-2 mx-auto text-primary-600 hover:text-primary-700 font-medium transition-colors"
           >
             <RefreshCw className="w-4 h-4" />
-            Отправить код повторно
+            {t("auth.resendCode")}
           </button>
         ) : (
           <p className="text-gray-400 text-sm">
-            Отправить повторно через{" "}
-            <span className="font-medium">{countdown} сек</span>
+            {t("auth.resendIn")}{" "}
+            <span className="font-medium">
+              {countdown} {t("auth.sec")}
+            </span>
           </p>
         )}
       </div>

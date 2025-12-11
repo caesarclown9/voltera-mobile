@@ -51,5 +51,7 @@
     <string>Сканирование QR‑кода для начала/оплаты зарядки.</string>
     <key>NSLocationWhenInUseUsageDescription</key>
     <string>Поиск ближайших зарядных станций рядом с вами.</string>
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>Поиск ближайших зарядных станций рядом с вами.</string>
 </dict>
 </plist>

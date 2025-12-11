@@ -5,7 +5,13 @@ import {
   Clusterer,
   ZoomControl,
 } from "@pbe/react-yandex-maps";
-import { useState, useRef } from "react";
+import {
+  useState,
+  useRef,
+  useImperativeHandle,
+  forwardRef,
+  useEffect,
+} from "react";
 import { StationSelectionModal } from "@/shared/components/StationSelectionModal";
 import type { Location } from "@/api/types";
 import { logger } from "@/shared/utils/logger";
@@ -41,6 +47,18 @@ interface MapInstance {
       margin?: number[];
     },
   ) => void;
+  setCenter: (
+    center: number[],
+    zoom?: number,
+    options?: {
+      duration?: number;
+    },
+  ) => void;
+}
+
+// Публичный интерфейс для управления картой извне
+export interface StationMapRef {
+  panTo: (lat: number, lng: number, zoom?: number) => void;
 }
 
 interface StationMapProps {
@@ -57,263 +75,300 @@ interface StationMapProps {
  * - ЖЁЛТЫЙ: location.status === 'occupied' (все коннекторы всех станций заняты)
  * - СЕРЫЙ: location.status === 'offline' или 'maintenance' (станции недоступны)
  */
-export function StationMap({
-  locations = [],
-  userLocation,
-  focusLocation,
-}: StationMapProps) {
-  const [selectedLocation, setSelectedLocation] = useState<Location | null>(
-    null,
-  );
-  const mapRef = useRef<MapInstance | null>(null);
-  const clustererRef = useRef<Cluster | null>(null);
+export const StationMap = forwardRef<StationMapRef, StationMapProps>(
+  function StationMap({ locations = [], userLocation, focusLocation }, ref) {
+    const [selectedLocation, setSelectedLocation] = useState<Location | null>(
+      null,
+    );
+    const mapRef = useRef<MapInstance | null>(null);
+    const clustererRef = useRef<Cluster | null>(null);
 
-  // Центр карты - используем focusLocation если есть, иначе текущую локацию или Бишкек
-  const mapCenter: [number, number] = focusLocation
-    ? [focusLocation.lat, focusLocation.lng]
-    : userLocation || [42.8746, 74.5698];
+    // Флаг: было ли уже выполнено автоцентрирование на пользователе
+    const hasAutoCenteredRef = useRef(false);
 
-  // Зум карты - используем focusLocation.zoom если есть, иначе стандартный
-  const mapZoom = focusLocation?.zoom || 13;
+    // Экспортируем метод для центрирования карты
+    useImperativeHandle(
+      ref,
+      () => ({
+        panTo: (lat: number, lng: number, zoom?: number) => {
+          if (mapRef.current) {
+            mapRef.current.setCenter([lat, lng], zoom ?? 15, { duration: 300 });
+          }
+        },
+      }),
+      [],
+    );
 
-  /**
-   * Определяет цвет маркера локации на основе её статуса
-   * Использует данные из API (location.status уже рассчитан на backend)
-   */
-  const getLocationMarkerColor = (location: Location): string => {
-    switch (location.status) {
-      case "available":
-      case "partial":
-        // Есть хотя бы 1 свободный коннектор
-        return "#2196F3"; // primary-500 (Voltera blue)
+    // Автоцентрирование при первом получении геолокации
+    // Срабатывает только один раз, когда userLocation появляется после загрузки карты
+    useEffect(() => {
+      // Условия для автоцентрирования:
+      // 1. userLocation получен
+      // 2. Ещё не центрировались автоматически
+      // 3. Нет focusLocation (он имеет приоритет - например, при переходе со списка станций)
+      // 4. Карта уже инициализирована
+      if (
+        userLocation &&
+        !hasAutoCenteredRef.current &&
+        !focusLocation &&
+        mapRef.current
+      ) {
+        mapRef.current.setCenter(userLocation, 14, { duration: 300 });
+        hasAutoCenteredRef.current = true;
+        logger.debug(
+          "[StationMap] Auto-centered on user location:",
+          userLocation,
+        );
+      }
+    }, [userLocation, focusLocation]);
 
-      case "occupied":
-        // Все коннекторы заняты, но станции работают
-        return "#eab308"; // yellow-500
+    // Центр карты - используем focusLocation если есть, иначе текущую локацию или Бишкек
+    const mapCenter: [number, number] = focusLocation
+      ? [focusLocation.lat, focusLocation.lng]
+      : userLocation || [42.8746, 74.5698];
 
-      case "offline":
-      case "maintenance":
-      default:
-        // Станции недоступны
-        return "#9CA3AF"; // gray-400
-    }
-  };
+    // Зум карты - используем focusLocation.zoom если есть, иначе стандартный
+    const mapZoom = focusLocation?.zoom || 13;
 
-  /**
-   * Генерирует SVG иконку для маркера локации
-   */
-  const getLocationIcon = (location: Location) => {
-    const fillColor = getLocationMarkerColor(location);
-    const stationsCount =
-      location.stations?.length || location.stations_count || 1;
+    /**
+     * Определяет цвет маркера локации на основе её статуса
+     * Использует данные из API (location.status уже рассчитан на backend)
+     */
+    const getLocationMarkerColor = (location: Location): string => {
+      switch (location.status) {
+        case "available":
+        case "partial":
+          // Есть хотя бы 1 свободный коннектор
+          return "#2196F3"; // primary-500 (Voltera blue)
 
-    return {
-      iconLayout: "default#image",
-      iconImageHref: `data:image/svg+xml;base64,${btoa(`
+        case "occupied":
+          // Все коннекторы заняты, но станции работают
+          return "#eab308"; // yellow-500
+
+        case "offline":
+        case "maintenance":
+        default:
+          // Станции недоступны
+          return "#9CA3AF"; // gray-400
+      }
+    };
+
+    /**
+     * Генерирует SVG иконку для маркера локации
+     */
+    const getLocationIcon = (location: Location) => {
+      const fillColor = getLocationMarkerColor(location);
+      const stationsCount =
+        location.stations?.length || location.stations_count || 1;
+
+      return {
+        iconLayout: "default#image",
+        iconImageHref: `data:image/svg+xml;base64,${btoa(`
         <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
           <circle cx="20" cy="20" r="18" fill="${fillColor}" stroke="#fff" stroke-width="2"/>
           <text x="20" y="20" text-anchor="middle" dominant-baseline="central" fill="white" font-family="Arial" font-size="14" font-weight="bold">${stationsCount}</text>
         </svg>
       `)}`,
-      iconImageSize: [40, 40],
-      iconImageOffset: [-20, -20],
+        iconImageSize: [40, 40],
+        iconImageOffset: [-20, -20],
+      };
     };
-  };
 
-  /**
-   * Иконка для маркера местоположения пользователя
-   */
-  const getUserLocationIcon = () => ({
-    iconLayout: "default#image",
-    iconImageHref: `data:image/svg+xml;base64,${btoa(`
+    /**
+     * Иконка для маркера местоположения пользователя
+     */
+    const getUserLocationIcon = () => ({
+      iconLayout: "default#image",
+      iconImageHref: `data:image/svg+xml;base64,${btoa(`
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <circle cx="12" cy="12" r="8" fill="#3B82F6" stroke="#fff" stroke-width="2"/>
         <circle cx="12" cy="12" r="3" fill="#fff"/>
       </svg>
     `)}`,
-    iconImageSize: [24, 24],
-    iconImageOffset: [-12, -12],
-  });
+      iconImageSize: [24, 24],
+      iconImageOffset: [-12, -12],
+    });
 
-  /**
-   * Обработчик клика по маркеру локации
-   * Открывает модальное окно со списком станций
-   */
-  const handleLocationClick = (location: Location) => {
-    setSelectedLocation(location);
-  };
+    /**
+     * Обработчик клика по маркеру локации
+     * Открывает модальное окно со списком станций
+     */
+    const handleLocationClick = (location: Location) => {
+      setSelectedLocation(location);
+    };
 
-  /**
-   * Закрытие модального окна
-   */
-  const handleCloseModal = () => {
-    setSelectedLocation(null);
-  };
+    /**
+     * Закрытие модального окна
+     */
+    const handleCloseModal = () => {
+      setSelectedLocation(null);
+    };
 
-  /**
-   * Создаем кастомный макет для кластеров
-   */
-  const createClusterLayout = (ymaps: YMapsApi) => {
-    if (!ymaps) return null;
+    /**
+     * Создаем кастомный макет для кластеров
+     */
+    const createClusterLayout = (ymaps: YMapsApi) => {
+      if (!ymaps) return null;
 
-    const ClusterIconLayout = ymaps.templateLayoutFactory.createClass(
-      '<div style="position: absolute; width: 40px; height: 40px; left: -20px; top: -20px; font-family: Arial, sans-serif;">' +
-        '<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">' +
-        '<circle cx="20" cy="20" r="18" fill="#2196F3" stroke="#fff" stroke-width="2"/>' +
-        "</svg>" +
-        '<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-weight: bold; font-size: 14px;">{{ properties.geoObjects.length }}</div>' +
-        "</div>",
+      const ClusterIconLayout = ymaps.templateLayoutFactory.createClass(
+        '<div style="position: absolute; width: 40px; height: 40px; left: -20px; top: -20px; font-family: Arial, sans-serif;">' +
+          '<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">' +
+          '<circle cx="20" cy="20" r="18" fill="#2196F3" stroke="#fff" stroke-width="2"/>' +
+          "</svg>" +
+          '<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-weight: bold; font-size: 14px;">{{ properties.geoObjects.length }}</div>' +
+          "</div>",
+      );
+
+      return ClusterIconLayout;
+    };
+
+    // Фильтруем локации с валидными координатами
+    const validLocations = locations.filter(
+      (loc) => loc.latitude != null && loc.longitude != null,
     );
 
-    return ClusterIconLayout;
-  };
+    logger.debug("[StationMap] Received locations:", locations.length);
+    logger.debug("[StationMap] Valid locations:", validLocations.length);
+    if (validLocations.length > 0) {
+      logger.debug("[StationMap] First location:", validLocations[0]);
+    }
 
-  // Фильтруем локации с валидными координатами
-  const validLocations = locations.filter(
-    (loc) => loc.latitude != null && loc.longitude != null,
-  );
-
-  logger.debug("[StationMap] Received locations:", locations.length);
-  logger.debug("[StationMap] Valid locations:", validLocations.length);
-  if (validLocations.length > 0) {
-    logger.debug("[StationMap] First location:", validLocations[0]);
-  }
-
-  return (
-    <div className="relative h-full w-full">
-      <YMaps
-        query={{
-          // Если ключ не задан, не передаем параметр apikey вовсе
-          ...(import.meta.env.VITE_YANDEX_MAPS_API_KEY
-            ? { apikey: import.meta.env.VITE_YANDEX_MAPS_API_KEY as string }
-            : {}),
-          load: "package.full",
-        }}
-      >
-        <Map
-          instanceRef={(ref) => {
-            mapRef.current = ref as MapInstance;
-          }}
-          defaultState={{
-            center: mapCenter,
-            zoom: mapZoom,
-            controls: [], // Правильный способ убрать стандартные контролы
-          }}
-          width="100%"
-          height="100%"
-          options={{
-            suppressMapOpenBlock: true,
-            yandexMapDisablePoiInteractivity: true,
-          }}
-          modules={["templateLayoutFactory"]}
-          onLoad={(ymaps: YMapsApi) => {
-            // Создаем кастомный макет для кластеров после загрузки карты
-            const clusterLayout = createClusterLayout(ymaps);
-            if (
-              clustererRef.current &&
-              clusterLayout &&
-              "options" in clustererRef.current
-            ) {
-              const cluster = clustererRef.current as unknown as {
-                options: { set: (opts: Record<string, unknown>) => void };
-              };
-              cluster.options.set({
-                clusterIconContentLayout: clusterLayout,
-              });
-            }
+    return (
+      <div className="relative h-full w-full">
+        <YMaps
+          query={{
+            // Если ключ не задан, не передаем параметр apikey вовсе
+            ...(import.meta.env.VITE_YANDEX_MAPS_API_KEY
+              ? { apikey: import.meta.env.VITE_YANDEX_MAPS_API_KEY as string }
+              : {}),
+            load: "package.full",
           }}
         >
-          <ZoomControl />
-
-          <Clusterer
-            instanceRef={(ref: Cluster) => {
-              clustererRef.current = ref;
-              // Настраиваем обработчик клика кластера
-              if (ref && "events" in ref && ref.events) {
-                (
-                  ref.events as {
-                    add: (
-                      event: string,
-                      handler: (e: ClusterEvent) => void,
-                    ) => void;
-                  }
-                ).add("click", (e: ClusterEvent) => {
-                  const cluster = e.get("target");
-                  const geoObjects = cluster.getGeoObjects
-                    ? cluster.getGeoObjects()
-                    : [];
-
-                  if (geoObjects && geoObjects.length > 1) {
-                    // Получаем bounds всех объектов в кластере
-                    const bounds = cluster.getBounds();
-
-                    // Зумируем с отступом, чтобы все маркеры были видны
-                    mapRef.current?.setBounds(bounds, {
-                      checkZoomRange: true,
-                      duration: 300,
-                      margin: [50, 50, 50, 50],
-                    });
-                  }
+          <Map
+            instanceRef={(ref) => {
+              mapRef.current = ref as MapInstance;
+            }}
+            defaultState={{
+              center: mapCenter,
+              zoom: mapZoom,
+              controls: [], // Правильный способ убрать стандартные контролы
+            }}
+            width="100%"
+            height="100%"
+            options={{
+              suppressMapOpenBlock: true,
+              yandexMapDisablePoiInteractivity: true,
+            }}
+            modules={["templateLayoutFactory"]}
+            onLoad={(ymaps: YMapsApi) => {
+              // Создаем кастомный макет для кластеров после загрузки карты
+              const clusterLayout = createClusterLayout(ymaps);
+              if (
+                clustererRef.current &&
+                clusterLayout &&
+                "options" in clustererRef.current
+              ) {
+                const cluster = clustererRef.current as unknown as {
+                  options: { set: (opts: Record<string, unknown>) => void };
+                };
+                cluster.options.set({
+                  clusterIconContentLayout: clusterLayout,
                 });
               }
             }}
-            options={{
-              preset: "islands#invertedGreenClusterIcons",
-              clusterNumbers: [2, 3, 5, 10],
-              groupByCoordinates: false,
-              clusterDisableClickZoom: true,
-              clusterHideIconOnBalloonOpen: false,
-              geoObjectHideIconOnBalloonOpen: false,
-              hasBalloon: false,
-              hasHint: false,
-              gridSize: 60,
-              minClusterSize: 2,
-            }}
           >
-            {validLocations.map((location) => (
+            <ZoomControl />
+
+            <Clusterer
+              instanceRef={(ref: Cluster) => {
+                clustererRef.current = ref;
+                // Настраиваем обработчик клика кластера
+                if (ref && "events" in ref && ref.events) {
+                  (
+                    ref.events as {
+                      add: (
+                        event: string,
+                        handler: (e: ClusterEvent) => void,
+                      ) => void;
+                    }
+                  ).add("click", (e: ClusterEvent) => {
+                    const cluster = e.get("target");
+                    const geoObjects = cluster.getGeoObjects
+                      ? cluster.getGeoObjects()
+                      : [];
+
+                    if (geoObjects && geoObjects.length > 1) {
+                      // Получаем bounds всех объектов в кластере
+                      const bounds = cluster.getBounds();
+
+                      // Зумируем с отступом, чтобы все маркеры были видны
+                      mapRef.current?.setBounds(bounds, {
+                        checkZoomRange: true,
+                        duration: 300,
+                        margin: [50, 50, 50, 50],
+                      });
+                    }
+                  });
+                }
+              }}
+              options={{
+                preset: "islands#invertedGreenClusterIcons",
+                clusterNumbers: [2, 3, 5, 10],
+                groupByCoordinates: false,
+                clusterDisableClickZoom: true,
+                clusterHideIconOnBalloonOpen: false,
+                geoObjectHideIconOnBalloonOpen: false,
+                hasBalloon: false,
+                hasHint: false,
+                gridSize: 60,
+                minClusterSize: 2,
+              }}
+            >
+              {validLocations.map((location) => (
+                <Placemark
+                  key={location.id}
+                  geometry={[location.latitude!, location.longitude!]}
+                  options={{
+                    ...getLocationIcon(location),
+                    hideIconOnBalloonOpen: false,
+                    openBalloonOnClick: false,
+                    openHintOnHover: false,
+                    hasBalloon: false,
+                    hasHint: false,
+                  }}
+                  properties={{
+                    balloonContent: "",
+                    hintContent: "",
+                  }}
+                  onClick={() => handleLocationClick(location)}
+                />
+              ))}
+            </Clusterer>
+
+            {/* Маркер местоположения пользователя */}
+            {userLocation && (
               <Placemark
-                key={location.id}
-                geometry={[location.latitude!, location.longitude!]}
+                geometry={userLocation}
                 options={{
-                  ...getLocationIcon(location),
-                  hideIconOnBalloonOpen: false,
+                  ...getUserLocationIcon(),
                   openBalloonOnClick: false,
                   openHintOnHover: false,
-                  hasBalloon: false,
-                  hasHint: false,
                 }}
-                properties={{
-                  balloonContent: "",
-                  hintContent: "",
-                }}
-                onClick={() => handleLocationClick(location)}
               />
-            ))}
-          </Clusterer>
+            )}
+          </Map>
+        </YMaps>
 
-          {/* Маркер местоположения пользователя */}
-          {userLocation && (
-            <Placemark
-              geometry={userLocation}
-              options={{
-                ...getUserLocationIcon(),
-                openBalloonOnClick: false,
-                openHintOnHover: false,
-              }}
-            />
-          )}
-        </Map>
-      </YMaps>
-
-      {/* Модальное окно выбора станции */}
-      {selectedLocation && selectedLocation.stations && (
-        <StationSelectionModal
-          stations={selectedLocation.stations}
-          locationName={selectedLocation.name}
-          isOpen={!!selectedLocation}
-          onClose={handleCloseModal}
-        />
-      )}
-    </div>
-  );
-}
+        {/* Модальное окно выбора станции */}
+        {selectedLocation && selectedLocation.stations && (
+          <StationSelectionModal
+            stations={selectedLocation.stations}
+            locationName={selectedLocation.name}
+            isOpen={!!selectedLocation}
+            onClose={handleCloseModal}
+          />
+        )}
+      </div>
+    );
+  },
+);

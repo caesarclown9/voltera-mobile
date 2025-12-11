@@ -1,6 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocations } from "../features/locations/hooks/useLocations";
-import { StationMap } from "../features/stations/components/StationMap";
+import {
+  StationMap,
+  StationMapRef,
+} from "../features/stations/components/StationMap";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../features/auth/hooks/useAuth";
 import { useBalance } from "../features/balance/hooks/useBalance";
@@ -10,7 +13,7 @@ import {
   useNavigate,
   useLocation as useRouterLocation,
 } from "react-router-dom";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Navigation } from "lucide-react";
 
 export default function MapHome() {
   const navigate = useNavigate();
@@ -24,8 +27,22 @@ export default function MapHome() {
   const { user } = useAuth();
   const { data: balance } = useBalance();
 
+  // Ref для управления картой
+  const mapRef = useRef<StationMapRef>(null);
+
   // Получаем локации со станциями (requestGeolocation: true для карты)
-  const { locations, isLoading, error, userLocation } = useLocations(true);
+  const { locations, isLoading, error, userLocation, refreshGeolocation } =
+    useLocations(true);
+
+  // Обработчик кнопки "Моё местоположение"
+  const handleMyLocationClick = () => {
+    if (userLocation) {
+      // Если геолокация уже есть - центрируем карту
+      mapRef.current?.panTo(userLocation.lat, userLocation.lng, 15);
+    }
+    // В любом случае запрашиваем обновление геолокации
+    refreshGeolocation();
+  };
 
   // WS для локаций отключён. Обновления по статусам обеспечиваются через периодические запросы/кеш.
 
@@ -99,6 +116,7 @@ export default function MapHome() {
           </div>
         ) : (
           <StationMap
+            ref={mapRef}
             locations={filteredLocations}
             userLocation={userLocationCoords}
             focusLocation={focusLocation}
@@ -214,21 +232,21 @@ export default function MapHome() {
         </motion.div>
       )}
 
-      {/* Location indicator (показываем только статус) */}
-      {userLocation && (
-        <div className="absolute bottom-24 right-4 bg-white rounded-full shadow-lg p-4">
-          <div className="relative">
-            <svg
-              className="w-6 h-6 text-success-600"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z" />
-            </svg>
-            <div className="absolute -top-1 -right-1 w-2 h-2 bg-success-500 rounded-full animate-pulse"></div>
-          </div>
+      {/* Кнопка "Моё местоположение" */}
+      <button
+        onClick={handleMyLocationClick}
+        className="absolute bottom-24 right-4 bg-white rounded-full shadow-lg p-4 hover:shadow-xl transition-shadow active:scale-95"
+        title="Моё местоположение"
+      >
+        <div className="relative">
+          <Navigation
+            className={`w-6 h-6 ${userLocation ? "text-primary-600" : "text-gray-400"}`}
+          />
+          {userLocation && (
+            <div className="absolute -top-1 -right-1 w-2 h-2 bg-success-500 rounded-full"></div>
+          )}
         </div>
-      )}
+      </button>
 
       {/* Quick Actions (Bottom Left) */}
       <div className="absolute bottom-24 left-4 flex flex-col gap-2">

@@ -1,10 +1,15 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { evpowerApi } from "@/services/evpowerApi";
 // WebSocket для локаций отключён, используем только HTTP + Supabase там, где нужно
 import { calculateDistance } from "@/shared/utils/geo";
 import { logger } from "@/shared/utils/logger";
 import type { Location, StationStatusResponse } from "../../../api/types";
+
+// Кеш геолокации на уровне модуля (сохраняется между размонтированиями компонентов)
+let cachedUserLocation: { lat: number; lng: number } | null = null;
+let lastGeolocationTime: number = 0;
+const GEOLOCATION_CACHE_TTL = 5 * 60 * 1000; // 5 минут
 
 // Helper: добавляет расстояние к локациям
 function addDistanceToLocations(
@@ -31,29 +36,75 @@ function addDistanceToLocations(
 }
 
 /**
+ * Запрашивает геолокацию и обновляет кеш
+ */
+function requestGeolocationUpdate(
+  onSuccess: (coords: { lat: number; lng: number }) => void,
+  onError?: (error: GeolocationPositionError) => void,
+): void {
+  if (!navigator.geolocation) {
+    logger.debug("Геолокация не поддерживается браузером");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const coords = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      };
+      cachedUserLocation = coords;
+      lastGeolocationTime = Date.now();
+      onSuccess(coords);
+    },
+    (error) => {
+      logger.debug("Геолокация недоступна:", error);
+      onError?.(error);
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 60000,
+    },
+  );
+}
+
+/**
  * Хук для получения списка всех локаций
  */
 export function useLocations(requestGeolocation: boolean = false) {
+  // Инициализируем из кеша если есть свежие данные
   const [userLocation, setUserLocation] = useState<{
     lat: number;
     lng: number;
-  } | null>(null);
+  } | null>(() => {
+    const isCacheValid =
+      Date.now() - lastGeolocationTime < GEOLOCATION_CACHE_TTL;
+    return isCacheValid ? cachedUserLocation : null;
+  });
+
+  // Функция для принудительного обновления геолокации
+  const refreshGeolocation = useCallback(() => {
+    requestGeolocationUpdate(
+      (coords) => setUserLocation(coords),
+      () => {}, // Ошибку просто игнорируем
+    );
+  }, []);
 
   // Получаем геолокацию пользователя только если явно запрошено
   useEffect(() => {
-    if (requestGeolocation && navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
-        },
-        (error) => {
-          logger.debug("Геолокация недоступна:", error);
-        },
-      );
+    if (!requestGeolocation) return;
+
+    // Если кеш свежий - используем его и не запрашиваем заново
+    const isCacheValid =
+      Date.now() - lastGeolocationTime < GEOLOCATION_CACHE_TTL;
+    if (isCacheValid && cachedUserLocation) {
+      setUserLocation(cachedUserLocation);
+      return;
     }
+
+    // Запрашиваем новую геолокацию
+    requestGeolocationUpdate((coords) => setUserLocation(coords));
   }, [requestGeolocation]);
 
   const {
@@ -99,6 +150,7 @@ export function useLocations(requestGeolocation: boolean = false) {
     error,
     refetch,
     userLocation,
+    refreshGeolocation,
   };
 }
 
@@ -157,7 +209,9 @@ export function useStationStatus(stationId: string) {
     refetchOnWindowFocus: true,
     // Используем кэшированные данные для мгновенного отображения
     placeholderData: () => {
-      return queryClient.getQueryData(["station-status", stationId]) as StationStatusResponse | undefined;
+      return queryClient.getQueryData(["station-status", stationId]) as
+        | StationStatusResponse
+        | undefined;
     },
   });
 }

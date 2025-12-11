@@ -23,6 +23,8 @@ import {
   zTopupCardResponse,
   zPaymentStatus,
   zStationStatusResponse,
+  zFavoritesListResponse,
+  zFavoriteActionResponse,
 } from "@/api/schemas";
 import { z } from "zod";
 
@@ -1308,6 +1310,109 @@ class EvPowerApiService {
         );
       }
       return { success: false };
+    }
+  }
+
+  // ============== FAVORITES (избранные локации) ==============
+
+  /**
+   * Получить список избранных локаций текущего пользователя
+   *
+   * @returns Массив location_id
+   */
+  async getFavorites(): Promise<string[]> {
+    try {
+      const response = await this.apiRequest(
+        "/favorites",
+        { method: "GET" },
+        zFavoritesListResponse,
+      );
+
+      if (!response.success) {
+        logger.warn("[VolteraAPI] Failed to get favorites:", response.error);
+        return [];
+      }
+
+      return response.favorites;
+    } catch (error) {
+      logger.error("[VolteraAPI] Failed to fetch favorites:", error as Error);
+      return [];
+    }
+  }
+
+  /**
+   * Добавить локацию в избранное
+   *
+   * @param locationId - ID локации для добавления
+   * @returns true если успешно добавлено
+   */
+  async addToFavorites(locationId: string): Promise<boolean> {
+    try {
+      const response = await this.apiRequest(
+        "/favorites",
+        { method: "POST", body: { location_id: locationId } },
+        zFavoriteActionResponse,
+      );
+
+      if (!response.success) {
+        logger.warn("[VolteraAPI] Failed to add to favorites:", response.error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      logger.error("[VolteraAPI] Failed to add to favorites:", error as Error);
+      return false;
+    }
+  }
+
+  /**
+   * Удалить локацию из избранного
+   *
+   * @param locationId - ID локации для удаления
+   * @returns true если успешно удалено
+   */
+  async removeFromFavorites(locationId: string): Promise<boolean> {
+    try {
+      const response = await this.apiRequest(
+        `/favorites/${locationId}`,
+        { method: "DELETE" },
+        zFavoriteActionResponse,
+      );
+
+      if (!response.success) {
+        logger.warn(
+          "[VolteraAPI] Failed to remove from favorites:",
+          response.error,
+        );
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      logger.error(
+        "[VolteraAPI] Failed to remove from favorites:",
+        error as Error,
+      );
+      return false;
+    }
+  }
+
+  /**
+   * Переключить статус избранного для локации
+   *
+   * @param locationId - ID локации
+   * @param currentFavorites - Текущий список избранных (для оптимизации)
+   * @returns true если операция успешна
+   */
+  async toggleFavorite(
+    locationId: string,
+    currentFavorites: string[],
+  ): Promise<boolean> {
+    if (currentFavorites.includes(locationId)) {
+      return this.removeFromFavorites(locationId);
+    } else {
+      return this.addToFavorites(locationId);
     }
   }
 }

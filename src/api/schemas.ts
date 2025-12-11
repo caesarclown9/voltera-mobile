@@ -381,3 +381,26 @@ export type StopChargingResponse = z.infer<typeof zStopChargingResponse>;
 export type TopupQRResponse = z.infer<typeof zTopupQRResponse>;
 export type TopupCardResponse = z.infer<typeof zTopupCardResponse>;
 export type PaymentStatus = z.infer<typeof zPaymentStatus>;
+
+// ============== FAVORITES ==============
+
+/**
+ * Схема для ответа GET /api/v1/favorites
+ */
+export const zFavoritesListResponse = z.object({
+  success: z.boolean(),
+  favorites: z.array(z.string()),
+  error: z.string().optional(),
+});
+
+/**
+ * Схема для ответа POST/DELETE /api/v1/favorites
+ */
+export const zFavoriteActionResponse = z.object({
+  success: z.boolean(),
+  message: z.string().optional(),
+  error: z.string().optional(),
+});
+
+export type FavoritesListResponse = z.infer<typeof zFavoritesListResponse>;
+export type FavoriteActionResponse = z.infer<typeof zFavoriteActionResponse>;

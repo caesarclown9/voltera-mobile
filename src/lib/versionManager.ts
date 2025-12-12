@@ -5,11 +5,12 @@
  * при обновлении приложения
  */
 
+import { Capacitor } from "@capacitor/core";
 import { logger } from "@/shared/utils/logger";
 
 // Текущая версия приложения (синхронизируется с package.json)
-export const APP_VERSION = "1.1.2";
-export const APP_BUILD = 99; // Увеличивается при каждой сборке
+export const APP_VERSION = "1.1.3";
+export const APP_BUILD = 100; // Увеличивается при каждой сборке
 
 // Ключи для хранения
 const VERSION_STORAGE_KEY = "voltera_app_version";
@@ -187,8 +188,20 @@ class VersionManager {
 
   /**
    * Очищает Service Worker кеш
+   * ВАЖНО: Service Worker НЕ поддерживается в iOS WKWebView (Capacitor)
+   * navigator.serviceWorker.getRegistration() зависает навечно на iOS
+   * См. https://github.com/ionic-team/capacitor/issues/7069
    */
   private async clearServiceWorkerCache(): Promise<void> {
+    // Service Worker не поддерживается на нативных платформах (iOS/Android)
+    // На iOS вызов getRegistration() зависает навечно и блокирует загрузку приложения
+    if (Capacitor.isNativePlatform()) {
+      logger.debug(
+        "[VersionManager] Skipping SW cache clear on native platform",
+      );
+      return;
+    }
+
     if ("serviceWorker" in navigator && "caches" in window) {
       logger.debug("[VersionManager] Clearing Service Worker caches...");
 
@@ -203,11 +216,15 @@ class VersionManager {
         }),
       );
 
-      // Обновляем Service Worker
-      const registration = await navigator.serviceWorker.getRegistration();
-      if (registration) {
-        await registration.update();
-        logger.debug("[VersionManager] Service Worker updated");
+      // Обновляем Service Worker (только для web)
+      try {
+        const registration = await navigator.serviceWorker.getRegistration();
+        if (registration) {
+          await registration.update();
+          logger.debug("[VersionManager] Service Worker updated");
+        }
+      } catch (error) {
+        logger.warn("[VersionManager] Failed to update Service Worker:", error);
       }
     }
   }

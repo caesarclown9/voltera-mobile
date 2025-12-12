@@ -3,7 +3,6 @@ import {
   ChevronLeft,
   Phone,
   Mail,
-  MessageCircle,
   MapPin,
   Clock,
   ExternalLink,
@@ -16,16 +15,9 @@ export const SupportPage = () => {
     {
       icon: Phone,
       title: "Телефон",
-      value: "+996 XXX XXX XXX",
-      action: () => window.open("tel:+996XXXXXXXXX"),
+      value: "+996 559 974 545",
+      action: () => window.open("tel:+996559974545"),
       color: "primary",
-    },
-    {
-      icon: MessageCircle,
-      title: "WhatsApp",
-      value: "Написать в чат",
-      action: () => window.open("https://wa.me/996XXXXXXXXX"),
-      color: "success",
     },
     {
       icon: Mail,

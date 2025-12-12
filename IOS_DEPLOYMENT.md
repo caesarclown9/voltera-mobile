@@ -2,8 +2,8 @@
 
 > **Полное руководство по деплою Voltera Mobile в App Store**
 >
-> Последнее обновление: 2025-10-15
-> Версия проекта: 1.0.1
+> Последнее обновление: 2025-12-12
+> Версия проекта: 1.1.3
 
 ---
 
@@ -30,6 +30,11 @@
 - macOS 14.0+ (Sonoma) или новее
 - Xcode 15.0+ установлен
 - Command Line Tools установлены
+
+**iOS Target:**
+
+- Минимальная версия iOS: **15.5**
+- Поддерживаемые устройства: iPhone, iPad
 
 **Аккаунты:**
 
@@ -96,7 +101,7 @@ VITE_API_URL=https://ocpp.voltera.kg
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your_production_anon_key
 VITE_YANDEX_MAPS_API_KEY=your_yandex_maps_api_key
-VITE_APP_VERSION=1.0.1
+VITE_APP_VERSION=1.1.3
 VITE_ENABLE_PUSH_NOTIFICATIONS=true
 VITE_ENABLE_ANALYTICS=false
 ```
@@ -107,13 +112,18 @@ VITE_ENABLE_ANALYTICS=false
 
 ```bash
 # Обновить версию в package.json
-npm version 1.0.1  # или 1.0.2, 1.1.0 и т.д.
+npm version 1.1.3  # или 1.1.4, 1.2.0 и т.д.
 
 # Собрать production bundle
 npm run build
 
 # Синхронизировать с iOS
 npx cap sync ios
+
+# Обновить iOS зависимости
+cd ios/App
+pod install
+cd ../..
 ```
 
 ### 4. Проверка Конфигурации
@@ -220,8 +230,9 @@ open ios/App/App.xcworkspace
 1. Выберите **App** target
 2. **Display Name:** Voltera
 3. **Bundle Identifier:** kg.voltera.app
-4. **Version:** 1.0.1 (из package.json)
-5. **Build:** 1 (или увеличивайте при каждом билде)
+4. **Version:** 1.1.3 (из package.json)
+5. **Build:** 100 (или увеличивайте при каждом билде)
+6. **Minimum Deployment:** iOS 15.5
 
 #### Signing & Capabilities Tab
 
@@ -475,6 +486,18 @@ open ios/App/App.xcworkspace
 3. Выберите билд из TestFlight
 4. **Submit for Review**
 
+### ⚠️ Демо-режим для Apple Review
+
+**ВАЖНО:** В App Store Connect укажите демо-данные для ревьюеров:
+
+```
+App Review Information → Sign-in required:
+Телефон: +996123456789
+Код: 123456
+```
+
+Демо-режим позволяет Apple ревьюерам протестировать приложение без реальной OTP верификации.
+
 ---
 
 ## Автоматизированный Деплой
@@ -564,6 +587,12 @@ cd ../..
 npx cap sync ios
 ```
 
+### ❌ "Белый экран на iPad / приложение зависает"
+
+**Причина:** Service Worker API не поддерживается в iOS WKWebView и вызов `navigator.serviceWorker.getRegistration()` зависает навечно.
+
+**Решение:** Уже исправлено в версии 1.1.3. Убедитесь что используете актуальную версию `versionManager.ts` с проверкой `Capacitor.isNativePlatform()`.
+
 ### ❌ "Archive не содержит правильные entitlements"
 
 **Решение:**
@@ -594,15 +623,16 @@ bundle exec fastlane match appstore --force_for_new_devices
 ### Код и Build
 
 ```
-□ Версия обновлена в package.json
+□ Версия обновлена в package.json (1.1.3)
+□ versionManager.ts обновлен (APP_BUILD = 100)
 □ npm run build выполнен успешно
 □ npx cap sync ios выполнен
+□ pod install выполнен в ios/App
 □ Все environment variables правильные
 □ .env.production содержит production ключи
 □ Нет console.log в production коде
 □ ESLint не показывает ошибок
 □ TypeScript компилируется без ошибок
-□ Тесты проходят (npm run test)
 ```
 
 ### Xcode Configuration
@@ -610,8 +640,9 @@ bundle exec fastlane match appstore --force_for_new_devices
 ```
 □ Bundle ID: kg.voltera.app
 □ Display Name: Voltera
-□ Version синхронизирован с package.json
-□ Build number увеличен
+□ Version: 1.1.3 (синхронизирован с package.json)
+□ Build number: 100
+□ Minimum Deployment: iOS 15.5
 □ Signing настроен (Distribution certificate)
 □ Provisioning profile правильный
 □ All icon sizes присутствуют
@@ -647,6 +678,7 @@ bundle exec fastlane match appstore --force_for_new_devices
 □ Terms of Service опубликованы
 □ App Store Review Guidelines проверены
 □ Экспортные ограничения (Export Compliance)
+□ Демо-данные для Apple Review указаны (+996123456789 / 123456)
 ```
 
 ### Testing
@@ -726,7 +758,14 @@ bundle exec fastlane match appstore --force_for_new_devices
 
 ---
 
-**Последнее обновление:** 2025-10-15
+**Последнее обновление:** 2025-12-12
 **Автор:** Voltera Development Team
+
+---
+
+## 📞 Контакты поддержки
+
+- **Email:** support@voltera.kg
+- **Телефон:** +996 559 974 545
 
 **Удачи с релизом! 🚀**

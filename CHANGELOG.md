@@ -7,6 +7,109 @@
 
 ---
 
+## [1.1.3] - Build 100 - 2025-12-12 🍎 **App Store Ready**
+
+### 🎯 Цель: Исправление проблем для Apple App Store Review
+
+Исправлены все проблемы, выявленные при ревью Apple:
+
+- Guideline 2.1: Белый экран на iPad
+- Guideline 2.1: Неработающий демо-аккаунт
+- Guideline 4.2.3: Зависимость от WhatsApp
+
+### ✅ Исправлено
+
+#### 1. 🔧 Белый экран на iPad (критическое)
+
+- **Проблема:** Приложение показывало белый экран на iPad Air 11-inch (M3) с iPadOS 26.1
+- **Корневая причина:** `navigator.serviceWorker.getRegistration()` зависает навечно на iOS WKWebView (Capacitor)
+- **Решение:**
+  - Добавлена проверка `Capacitor.isNativePlatform()` перед вызовом Service Worker API
+  - Service Worker операции полностью пропускаются на нативных платформах
+- **Файлы:**
+  - `src/lib/versionManager.ts:8,195-203` - проверка платформы
+- **Ссылки:** [Capacitor Issue #7069](https://github.com/ionic-team/capacitor/issues/7069)
+
+#### 2. 🔐 Демо-режим для Apple Review
+
+- **Проблема:** Демо-аккаунт не работал
+- **Решение:** Добавлен полноценный демо-режим без реального API
+- **Демо-данные:**
+  - Телефон: `+996123456789`
+  - Код: `123456`
+- **Файлы:**
+  - `src/features/auth/services/authService.ts:35-46,133-141,185-219,333-337,402-406`
+- **Что делает:**
+  - `sendOtp()` - возвращает фейковый успешный ответ для демо-номера
+  - `verifyOtp()` - аутентифицирует демо-пользователя с фейковыми токенами
+  - `getCurrentUser()` - возвращает данные демо-пользователя
+  - `getClientData()` - возвращает демо-данные клиента
+
+#### 3. 📱 Убрана зависимость от WhatsApp
+
+- **Проблема:** Apple отклонил из-за требования WhatsApp для входа
+- **Решение:** Убраны все упоминания WhatsApp из пользовательского интерфейса
+- **Файлы:**
+  - `src/i18n/locales/ru.json` - убрано "WhatsApp" из текстов
+  - `src/i18n/locales/en.json` - убрано "WhatsApp" из текстов
+  - `src/i18n/locales/ky.json` - убрано "WhatsApp" из текстов
+  - `src/pages/SupportPage.tsx` - убран WhatsApp из контактов
+
+#### 4. 📞 Исправлены плейсхолдеры поддержки
+
+- **Проблема:** Страница поддержки содержала плейсхолдеры `+996 XXX XXX XXX`
+- **Решение:** Указан реальный номер поддержки
+- **Файл:** `src/pages/SupportPage.tsx:17-21`
+- **Контакты:**
+  - Телефон: +996 559 974 545
+  - Email: support@voltera.kg
+
+#### 5. 📋 iOS Deployment Target
+
+- **Изменение:** iOS deployment target обновлён с 14.0 до 15.5
+- **Файлы:**
+  - `ios/App/Podfile` - `platform :ios, '15.5'`
+  - `ios/App/App.xcodeproj/project.pbxproj` - `IPHONEOS_DEPLOYMENT_TARGET = 15.5`
+
+### 📂 Измененные файлы
+
+**Критические исправления:**
+
+- `src/lib/versionManager.ts` - Service Worker fix для iOS
+- `src/features/auth/services/authService.ts` - демо-режим
+
+**UI/UX:**
+
+- `src/pages/SupportPage.tsx` - убран WhatsApp, добавлен реальный телефон
+- `src/i18n/locales/ru.json` - убраны упоминания WhatsApp
+- `src/i18n/locales/en.json` - убраны упоминания WhatsApp
+- `src/i18n/locales/ky.json` - убраны упоминания WhatsApp
+
+**iOS конфигурация:**
+
+- `ios/App/Podfile` - iOS 15.5
+- `ios/App/App.xcodeproj/project.pbxproj` - iOS 15.5
+
+### ✅ Проверки
+
+- ✅ TypeScript компиляция: 0 ошибок
+- ✅ Production build: успешно
+- ✅ Демо-режим: работает
+- ✅ iOS 15.5+ совместимость: да
+- ✅ iPadOS 26.1 совместимость: да
+
+### 📋 Для Apple Review
+
+В App Store Connect указать:
+
+```
+App Review Information → Sign-in required:
+Телефон: +996123456789
+Код: 123456
+```
+
+---
+
 ## [1.1.2] - Build 88 - 2025-12-06 🚀 **Performance & UX Optimization**
 
 ### 🎯 Цель: Оптимизация производительности и улучшение UX
@@ -65,15 +168,16 @@
 
 ### 📝 Новые переводы
 
-| Ключ | RU | EN | KY |
-|------|-----|-----|-----|
-| `charging.startingCharging` | Запуск зарядки | Starting charging | Заряддоо башталууда |
-| `charging.pleaseWait` | Подождите, подключаемся к станции... | Please wait, connecting to station... | Күтө туруңуз, станцияга туташууда... |
-| `charging.connectingToStation` | Соединение со станцией | Connecting to station | Станцияга туташуу |
+| Ключ                           | RU                                   | EN                                    | KY                                   |
+| ------------------------------ | ------------------------------------ | ------------------------------------- | ------------------------------------ |
+| `charging.startingCharging`    | Запуск зарядки                       | Starting charging                     | Заряддоо башталууда                  |
+| `charging.pleaseWait`          | Подождите, подключаемся к станции... | Please wait, connecting to station... | Күтө туруңуз, станцияга туташууда... |
+| `charging.connectingToStation` | Соединение со станцией               | Connecting to station                 | Станцияга туташуу                    |
 
 ### 📂 Измененные файлы
 
 **Оптимизация загрузки:**
+
 - `src/pages/ChargingPage.tsx` - loading overlay и состояние загрузки
 - `src/pages/HistoryPage.tsx` - ленивая загрузка вкладок
 - `src/pages/StationsList.tsx` - удален DynamicPricingDisplay
@@ -81,10 +185,12 @@
 - `src/features/locations/hooks/useLocations.ts` - кэширование статуса станции
 
 **Предзагрузка:**
+
 - `src/shared/components/DataPrefetcher.tsx` (новый) - prefetch данных
 - `src/App.tsx` - интеграция DataPrefetcher
 
 **Локализация:**
+
 - `src/i18n/locales/ru.json` - новые переводы
 - `src/i18n/locales/en.json` - новые переводы
 - `src/i18n/locales/ky.json` - новые переводы
@@ -136,9 +242,11 @@ END
 ### 📂 Измененные файлы
 
 **Исправление авторизации:**
+
 - `src/pages/ChargingCompletePage.tsx` - использование useAuthStatus() вместо sessionStorage
 
 **Синхронизация статусов:**
+
 - `src/api/types.ts` - обновлен тип `Station.status` на `available | occupied | offline | maintenance`
 - `src/pages/StationsList.tsx` - добавлена функция `isStationAvailable()`, обновлены все проверки
 - `src/features/stations/hooks/useStations.ts` - обновлены фильтры и статистика
@@ -148,11 +256,11 @@ END
 
 ### 🔗 Таблица соответствия статусов
 
-| Слой | Поле | Значения | Описание |
-|------|------|----------|----------|
-| БД (Supabase) | `stations.status` | `active`, `inactive`, `maintenance` | Admin-статус |
-| Backend API | `station.status` | `available`, `occupied`, `offline`, `maintenance` | Вычисленный статус |
-| Frontend | `Station.status` | `available`, `occupied`, `offline`, `maintenance` | ✅ Синхронизировано |
+| Слой          | Поле              | Значения                                          | Описание            |
+| ------------- | ----------------- | ------------------------------------------------- | ------------------- |
+| БД (Supabase) | `stations.status` | `active`, `inactive`, `maintenance`               | Admin-статус        |
+| Backend API   | `station.status`  | `available`, `occupied`, `offline`, `maintenance` | Вычисленный статус  |
+| Frontend      | `Station.status`  | `available`, `occupied`, `offline`, `maintenance` | ✅ Синхронизировано |
 
 ### ✅ Проверки
 
@@ -215,20 +323,24 @@ END
 ### 📂 Измененные файлы
 
 **Android:**
+
 - `android/build.gradle` - google-services plugin 4.4.4
 - `android/app/google-services.json` - Firebase config (новый)
 
 **iOS:**
+
 - `ios/App/Podfile` - Firebase pods
 - `ios/App/App/GoogleService-Info.plist` - Firebase config (новый)
 - `ios/App/App/AppDelegate.swift` - Firebase initialization
 
 **Backend (Voltera-backend):**
+
 - `credentials/firebase-adminsdk.json` - Service Account (новый)
 - `backend/.env.example` - Firebase env variables
 - `.gitignore` - Firebase credentials protection
 
 **Версии:**
+
 - `package.json` - version 1.1.0
 - `android/app/build.gradle` - versionCode 86, versionName 1.1.0
 - `src/lib/versionManager.ts` - APP_VERSION 1.1.0, APP_BUILD 86
@@ -236,16 +348,19 @@ END
 ### 🚀 Deployment Notes
 
 **Android (Google Play):**
+
 1. Собрать release bundle: `cd android && ./gradlew bundleRelease`
 2. AAB будет в `android/app/build/outputs/bundle/release/`
 3. Загрузить в Google Play Console
 
 **iOS (App Store):**
+
 1. Выполнить `cd ios/App && pod install`
 2. Открыть `App.xcworkspace` в Xcode
 3. Собрать и загрузить в App Store Connect
 
 **Backend (Coolify):**
+
 1. Добавить `FIREBASE_CREDENTIALS_JSON` в переменные окружения Coolify
 2. Значение: содержимое `firebase-adminsdk.json` одной строкой
 3. Перезапустить контейнер
@@ -259,6 +374,7 @@ Mobile App ──> FCM Token ──> Backend API ──> Supabase (device_tokens
 ```
 
 **Поток:**
+
 1. Приложение получает FCM token при старте
 2. Регистрирует token через `POST /api/v1/clients/devices`
 3. Backend сохраняет token в таблицу `device_tokens`

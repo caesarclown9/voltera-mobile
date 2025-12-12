@@ -4,8 +4,8 @@
 
 **Мобильное приложение для поиска и оплаты зарядки электромобилей в Кыргызстане**
 
-[![Version](https://img.shields.io/badge/version-1.1.2-blue.svg)](https://github.com/caesarclown9/evpower-mobile-app)
-[![Build](https://img.shields.io/badge/build-88-green.svg)](https://github.com/caesarclown9/evpower-mobile-app)
+[![Version](https://img.shields.io/badge/version-1.1.3-blue.svg)](https://github.com/caesarclown9/evpower-mobile-app)
+[![Build](https://img.shields.io/badge/build-100-green.svg)](https://github.com/caesarclown9/evpower-mobile-app)
 [![License](https://img.shields.io/badge/license-Proprietary-red.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Android%20%7C%20iOS-lightgrey.svg)](https://capacitorjs.com)
 [![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue.svg)](https://www.typescriptlang.org/)
@@ -47,7 +47,7 @@ Voltera - это современное кроссплатформенное м�
 
 - **Capacitor 7** - кроссплатформенная разработка
 - **Android SDK 23-35** - поддержка Android 6.0+
-- **iOS (планируется)** - поддержка iOS
+- **iOS 15.5+** - поддержка iPhone и iPad
 
 ### Backend Integration
 
@@ -246,7 +246,29 @@ evpower-mobile/
 
 ### App Store (iOS)
 
-_В разработке_
+1. Собрать web-версию:
+
+   ```bash
+   npm run build
+   npx cap sync ios
+   ```
+
+2. Открыть в Xcode:
+
+   ```bash
+   cd ios/App
+   pod install
+   open App.xcworkspace
+   ```
+
+3. Archive → Distribute → App Store Connect
+
+**Демо-режим для Apple Review:**
+
+```
+Телефон: +996123456789
+Код: 123456
+```
 
 ---
 
@@ -348,38 +370,33 @@ npm run test:coverage
 
 ## 📊 Статус проекта
 
-**Версия:** 1.1.2 | **Build:** 88 | **Последнее обновление:** 2025-12-06
+**Версия:** 1.1.3 | **Build:** 100 | **Последнее обновление:** 2025-12-12
 
 ### ✅ Production Ready!
 
 - ✅ **Android** - готово к релизу в Google Play
-- 🚧 **iOS** - подготовлено к деплою (требуется macOS для финального билда)
+- ✅ **iOS** - готово к релизу в App Store (iOS 15.5+)
 - ✅ **Backend Integration** - полная совместимость с бэкендом v1.1.0
 - ✅ **OCPP Backend** - работает (https://ocpp.voltera.kg)
 - ✅ **TypeScript** - 0 ошибок, strict mode включен
 - ✅ **Production Build** - успешно (~188KB gzip)
 - ✅ **Security** - все уязвимости устранены
 
-### Что нового в v1.1.2 (Build 88)
+### Что нового в v1.1.3 (Build 100)
 
-**🚀 Оптимизация производительности:**
+**🍎 App Store Ready:**
 
-- ✅ Loading overlay при запуске зарядки - пользователь сразу видит процесс
-- ✅ Ленивая загрузка вкладок в истории - на 66% меньше запросов
-- ✅ Кэширование статуса станции - мгновенные переходы
-- ✅ DataPrefetcher - предзагрузка данных в фоне
-- ✅ Оптимизация StationsList - убраны лишние API запросы
-
-**UX улучшения:**
-
-- ✅ Красивый оверлей "Запуск зарядки" с анимацией
-- ✅ Локализация на 3 языка (RU, EN, KY)
+- ✅ Исправлен белый экран на iPad (iOS WKWebView Service Worker fix)
+- ✅ Добавлен демо-режим для Apple Review (+996123456789 / 123456)
+- ✅ Убрана зависимость от WhatsApp в UI
+- ✅ iOS deployment target обновлён до 15.5
+- ✅ Исправлены плейсхолдеры на странице поддержки
 
 **Качество кода:**
 
 - ✅ TypeScript strict mode: 0 ошибок
 - ✅ Production build: успешно
-- ✅ PWA: 79 entries precached
+- ✅ Совместимость с iPadOS 26.1+
 
 📄 **Подробнее:** [CHANGELOG.md](./CHANGELOG.md)
 
@@ -389,11 +406,19 @@ npm run test:coverage
 
 - **Backend API:** https://ocpp.voltera.kg
 - **Supabase:** https://supabase.com
-- **Support:** support@voltera.kg
+- **Support:** support@voltera.kg | +996 559 974 545
 
 ---
 
 ## 📝 Changelog
+
+### v1.1.3 (2025-12-12)
+
+- ✅ Исправлен белый экран на iPad (Service Worker fix)
+- ✅ Демо-режим для Apple Review
+- ✅ Убран WhatsApp из UI
+- ✅ iOS deployment target: 15.5
+- ✅ Реальный номер поддержки: +996 559 974 545
 
 ### v1.1.2 (2025-12-06)
 

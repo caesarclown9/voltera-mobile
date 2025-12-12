@@ -1,10 +1,15 @@
 /**
- * Auth Service - авторизация через телефон + WhatsApp OTP
+ * Auth Service - авторизация через телефон + OTP
  *
  * Основной flow:
- * 1. sendOtp(phone) - отправить OTP код на WhatsApp
+ * 1. sendOtp(phone) - отправить OTP код на телефон
  * 2. verifyOtp(phone, code) - проверить код и получить токены
  * 3. logout() - выход из системы
+ *
+ * Demo mode для Apple Review:
+ * - Номер: +996123456789
+ * - Код: 123456
+ * - Позволяет войти без реального OTP для тестирования приложения
  *
  * Также поддерживает обновление токенов через tokenService
  */
@@ -26,6 +31,19 @@ export interface Client {
   status: "active" | "inactive" | "blocked";
   created_at: string | null;
 }
+
+// Demo mode для Apple Review
+// Позволяет войти без реального OTP для тестирования приложения
+const DEMO_PHONE = "+996123456789";
+const DEMO_OTP_CODE = "123456";
+const DEMO_USER: Client = {
+  id: "demo-user-apple-review",
+  phone: DEMO_PHONE,
+  name: "Demo User",
+  balance: 1000,
+  status: "active",
+  created_at: new Date().toISOString(),
+};
 
 export interface AdminUser {
   id: string;
@@ -104,11 +122,23 @@ class AuthServiceClass {
 
   /**
    * Отправляет OTP код на телефон через WhatsApp
+   * Для демо-номера (+996123456789) возвращает фейковый ответ
    */
   async sendOtp(phone: string): Promise<SendOtpResponse> {
     const normalizedPhone = normalizePhone(phone);
 
     logger.info(`Sending OTP to ${normalizedPhone.slice(0, 7)}***`);
+
+    // Demo mode для Apple Review
+    if (normalizedPhone === DEMO_PHONE) {
+      logger.info("[DEMO MODE] Returning fake OTP response for demo phone");
+      return {
+        success: true,
+        phone: normalizedPhone,
+        expires_in_seconds: 300,
+        resend_available_in_seconds: 60,
+      };
+    }
 
     const response = await fetch(`${API_URL}/api/v1/auth/send-otp`, {
       method: "POST",
@@ -144,11 +174,49 @@ class AuthServiceClass {
   /**
    * Проверяет OTP код и выполняет вход
    * При успехе сохраняет токены и возвращает данные пользователя
+   * Для демо-номера (+996123456789) с кодом 123456 возвращает демо-пользователя
    */
   async verifyOtp(phone: string, code: string): Promise<VerifyOtpResponse> {
     const normalizedPhone = normalizePhone(phone);
 
     logger.info(`Verifying OTP for ${normalizedPhone.slice(0, 7)}***`);
+
+    // Demo mode для Apple Review
+    if (normalizedPhone === DEMO_PHONE) {
+      if (code !== DEMO_OTP_CODE) {
+        throw new Error("Неверный код");
+      }
+
+      logger.info("[DEMO MODE] Authenticating demo user");
+
+      // Создаём фейковые токены для демо-пользователя
+      // Эти токены не будут работать с реальным API, но позволят
+      // Apple Review увидеть интерфейс приложения
+      const demoAccessToken = `demo.${btoa(JSON.stringify({ sub: DEMO_USER.id, type: "client", phone: DEMO_PHONE, exp: Math.floor(Date.now() / 1000) + 3600 }))}.demo`;
+      const demoRefreshToken = `demo-refresh-${Date.now()}`;
+
+      const result: VerifyOtpResponse = {
+        success: true,
+        access_token: demoAccessToken,
+        refresh_token: demoRefreshToken,
+        token_type: "Bearer",
+        expires_in: 3600,
+        user: DEMO_USER,
+        user_type: "client",
+        is_new_user: false,
+      };
+
+      // Сохраняем демо-токены
+      await tokenService.saveTokens({
+        accessToken: result.access_token,
+        refreshToken: result.refresh_token,
+        expiresIn: result.expires_in,
+      });
+
+      logger.info("[DEMO MODE] Demo user authenticated successfully");
+
+      return result;
+    }
 
     const response = await fetch(`${API_URL}/api/v1/auth/verify-otp`, {
       method: "POST",
@@ -252,6 +320,7 @@ class AuthServiceClass {
   /**
    * Получает текущего пользователя
    * Использует /auth/me endpoint или локальные данные
+   * Для демо-пользователя возвращает статические данные
    */
   async getCurrentUser(): Promise<AuthUser | null> {
     try {
@@ -259,6 +328,12 @@ class AuthServiceClass {
 
       if (!accessToken) {
         return null;
+      }
+
+      // Demo mode - возвращаем демо-пользователя без запроса к API
+      if (accessToken.startsWith("demo.")) {
+        logger.debug("[DEMO MODE] Returning demo user data");
+        return DEMO_USER;
       }
 
       const response = await fetch(`${API_URL}/api/v1/auth/me`, {
@@ -321,8 +396,15 @@ class AuthServiceClass {
   /**
    * Получает данные клиента из Supabase (для UI)
    * Используется для получения баланса и других данных
+   * Для демо-пользователя возвращает статические данные
    */
   async getClientData(clientId: string): Promise<Client | null> {
+    // Demo mode
+    if (clientId === DEMO_USER.id) {
+      logger.debug("[DEMO MODE] Returning demo client data");
+      return DEMO_USER;
+    }
+
     try {
       const { data, error } = await supabase
         .from("clients")

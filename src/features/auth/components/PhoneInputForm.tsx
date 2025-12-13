@@ -78,22 +78,29 @@ export function PhoneInputForm({ onOtpSent, onError }: PhoneInputFormProps) {
         return;
       }
 
+      // Демо-номер для Apple Review (пропускаем валидацию оператора)
+      const DEMO_PHONE_DIGITS = "123456789";
+      const isDemoPhone = digits === DEMO_PHONE_DIGITS;
+
       // Проверяем что номер начинается с правильного кода оператора
-      const validPrefixes = [
-        "70",
-        "77",
-        "55",
-        "99",
-        "50",
-        "22",
-        "75",
-        "76",
-        "78",
-      ];
-      const prefix = digits.slice(0, 2);
-      if (!validPrefixes.includes(prefix)) {
-        setError(t("auth.invalidOperator"));
-        return;
+      // (пропускаем для демо-номера)
+      if (!isDemoPhone) {
+        const validPrefixes = [
+          "70",
+          "77",
+          "55",
+          "99",
+          "50",
+          "22",
+          "75",
+          "76",
+          "78",
+        ];
+        const prefix = digits.slice(0, 2);
+        if (!validPrefixes.includes(prefix)) {
+          setError(t("auth.invalidOperator"));
+          return;
+        }
       }
 
       setIsLoading(true);

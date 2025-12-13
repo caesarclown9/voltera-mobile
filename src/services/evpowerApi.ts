@@ -28,6 +28,107 @@ import {
 } from "@/api/schemas";
 import { z } from "zod";
 
+// ============= Demo Mode Constants (Apple Review) =============
+
+/**
+ * Demo mode для Apple Review - позволяет тестировать зарядку без реального OCPP
+ * Демо-пользователь: +996123456789 / 123456
+ * Демо-станция: VOL-001-01 (Ахунбаева)
+ * Демо-локация: VOL-001
+ */
+const DEMO_STATION_ID = "VOL-001-01";
+const DEMO_LOCATION_ID = "VOL-001";
+const DEMO_USER_ID = "demo-user-apple-review";
+
+/**
+ * Применяет demo override к локациям для Apple Review
+ * Делает станцию VOL-001-01 и её локацию всегда доступными
+ */
+function applyDemoLocationOverride(locations: Location[]): Location[] {
+  return locations.map((location) => {
+    // Проверяем это ли демо-локация
+    if (location.id === DEMO_LOCATION_ID) {
+      logger.debug(
+        "[VolteraAPI] Demo mode: overriding location status to available",
+      );
+      return {
+        ...location,
+        status: "available" as const,
+        available_connectors: Math.max(location.available_connectors, 2),
+        stations: location.stations?.map((station) => {
+          if (station.id === DEMO_STATION_ID) {
+            return {
+              ...station,
+              status: "available" as const,
+            };
+          }
+          return station;
+        }),
+      };
+    }
+    return location;
+  });
+}
+
+/**
+ * Состояние демо-сессии зарядки (хранится в памяти)
+ */
+interface DemoSessionState {
+  sessionId: string;
+  stationId: string;
+  connectorId: number;
+  startTime: number;
+  isActive: boolean;
+  limitType: "energy" | "amount" | "none";
+  limitValue?: number;
+  ratePerKwh: number;
+}
+
+let demoSessionState: DemoSessionState | null = null;
+
+/**
+ * Генерирует симулированный прогресс зарядки на основе времени
+ * Симулирует ~7.5 kW зарядку (реалистично для Type 2 AC)
+ */
+function getDemoChargingProgress(state: DemoSessionState): {
+  energyConsumed: number;
+  currentCost: number;
+  durationMinutes: number;
+  limitReached: boolean;
+  limitPercentage: number;
+} {
+  const elapsedMs = Date.now() - state.startTime;
+  const durationMinutes = elapsedMs / 60000;
+  const energyRate = 0.125; // 7.5 kW = 0.125 kWh/min
+  let energyConsumed = durationMinutes * energyRate;
+
+  let limitReached = false;
+  let limitPercentage = 0;
+
+  if (state.limitType === "energy" && state.limitValue) {
+    limitPercentage = Math.min(100, (energyConsumed / state.limitValue) * 100);
+    if (energyConsumed >= state.limitValue) {
+      energyConsumed = state.limitValue;
+      limitReached = true;
+    }
+  } else if (state.limitType === "amount" && state.limitValue) {
+    const maxEnergy = state.limitValue / state.ratePerKwh;
+    limitPercentage = Math.min(100, (energyConsumed / maxEnergy) * 100);
+    if (energyConsumed >= maxEnergy) {
+      energyConsumed = maxEnergy;
+      limitReached = true;
+    }
+  }
+
+  return {
+    energyConsumed: Math.round(energyConsumed * 1000) / 1000,
+    currentCost: Math.round(energyConsumed * state.ratePerKwh * 100) / 100,
+    durationMinutes: Math.round(durationMinutes * 10) / 10,
+    limitReached,
+    limitPercentage: Math.round(limitPercentage),
+  };
+}
+
 // ============= Supabase Fallback Types =============
 
 /**
@@ -352,6 +453,46 @@ class EvPowerApiService {
     connectorId: number,
     limits?: { energy_kwh?: number; amount_som?: number },
   ): Promise<StartChargingResponse> {
+    // Demo mode для Apple Review
+    const clientId = await this.getClientId();
+    if (clientId === DEMO_USER_ID && stationId === DEMO_STATION_ID) {
+      logger.info("[VolteraAPI] Demo mode: simulating startCharging");
+
+      const sessionId = `demo-session-${Date.now()}`;
+      const ratePerKwh = 13.5;
+      const limitType = limits?.energy_kwh
+        ? "energy"
+        : limits?.amount_som
+          ? "amount"
+          : "none";
+      const limitValue = limits?.energy_kwh || limits?.amount_som;
+
+      // Сохраняем состояние демо-сессии
+      demoSessionState = {
+        sessionId,
+        stationId,
+        connectorId,
+        startTime: Date.now(),
+        isActive: true,
+        limitType,
+        limitValue,
+        ratePerKwh,
+      };
+
+      return {
+        success: true,
+        message: "Демо-зарядка успешно запущена",
+        session_id: sessionId,
+        connector_id: connectorId,
+        reserved_amount: limitValue || 500,
+        limit_type: limitType,
+        limit_value: limitValue,
+        rate_per_kwh: ratePerKwh,
+        session_fee: 0,
+        current_balance: 1000,
+      };
+    }
+
     return this.apiRequest(
       "/charging/start",
       {
@@ -375,6 +516,42 @@ class EvPowerApiService {
   async getChargingStatus(
     sessionId: string,
   ): Promise<import("../api/types").ChargingStatus> {
+    // Demo mode для Apple Review
+    if (sessionId.startsWith("demo-session-") && demoSessionState) {
+      logger.debug("[VolteraAPI] Demo mode: simulating getChargingStatus");
+
+      const progress = getDemoChargingProgress(demoSessionState);
+
+      // Если лимит достигнут или сессия завершена - статус stopped
+      const status =
+        !demoSessionState.isActive || progress.limitReached
+          ? "stopped"
+          : "started";
+
+      return {
+        success: true,
+        session: {
+          id: sessionId,
+          status,
+          station_id: demoSessionState.stationId,
+          connector_id: demoSessionState.connectorId,
+          start_time: new Date(demoSessionState.startTime).toISOString(),
+          stop_time:
+            status === "stopped" ? new Date().toISOString() : undefined,
+          energy_consumed: progress.energyConsumed,
+          current_cost: progress.currentCost,
+          reserved_amount: demoSessionState.limitValue || 500,
+          limit_type: demoSessionState.limitType,
+          limit_value: demoSessionState.limitValue,
+          limit_reached: progress.limitReached,
+          limit_percentage: progress.limitPercentage,
+          rate_per_kwh: demoSessionState.ratePerKwh,
+          session_fee: 0,
+          charging_duration_minutes: progress.durationMinutes,
+        },
+      };
+    }
+
     const parsed = await this.apiRequest(
       `/charging/status/${sessionId}`,
       { method: "GET" },
@@ -468,6 +645,26 @@ class EvPowerApiService {
    * Остановить зарядку
    */
   async stopCharging(sessionId: string): Promise<StopChargingResponse> {
+    // Demo mode для Apple Review
+    if (sessionId.startsWith("demo-session-") && demoSessionState) {
+      logger.info("[VolteraAPI] Demo mode: simulating stopCharging");
+
+      const progress = getDemoChargingProgress(demoSessionState);
+
+      // Завершаем демо-сессию
+      demoSessionState.isActive = false;
+
+      return {
+        success: true,
+        message: "Демо-зарядка успешно остановлена",
+        final_cost: progress.currentCost,
+        energy_consumed: progress.energyConsumed,
+        duration_minutes: progress.durationMinutes,
+        refunded_amount:
+          (demoSessionState.limitValue || 500) - progress.currentCost,
+      };
+    }
+
     return this.apiRequest(
       "/charging/stop",
       { method: "POST", body: { session_id: sessionId } },
@@ -549,7 +746,8 @@ class EvPowerApiService {
       logger.debug(
         `[VolteraAPI] Transformed ${transformedLocations.length} locations with coordinates`,
       );
-      return transformedLocations as Location[];
+      // Применяем demo override для Apple Review
+      return applyDemoLocationOverride(transformedLocations as Location[]);
     } catch (error) {
       if (
         import.meta.env.PROD &&
@@ -677,7 +875,8 @@ class EvPowerApiService {
         logger.debug(
           `[VolteraAPI] Returning ${mappedLocations.length} mapped locations`,
         );
-        return mappedLocations;
+        // Применяем demo override для Apple Review
+        return applyDemoLocationOverride(mappedLocations);
       } else {
         const { data: locations, error: locError } = await supabase
           .from("locations")
@@ -688,11 +887,13 @@ class EvPowerApiService {
 
         if (locError) throw locError;
 
-        return (locations || []).map((loc) => ({
+        const mappedLocs = (locations || []).map((loc) => ({
           ...loc,
           status: "available" as const,
           available_connectors: 0,
         }));
+        // Применяем demo override для Apple Review
+        return applyDemoLocationOverride(mappedLocs);
       }
     }
   }
@@ -756,6 +957,59 @@ class EvPowerApiService {
   async getStationStatus(
     stationId: string,
   ): Promise<import("../api/types").StationStatusResponse> {
+    // Demo mode для Apple Review - возвращаем hardcoded данные для демо-станции
+    if (stationId === DEMO_STATION_ID) {
+      logger.debug("[VolteraAPI] Demo mode: returning demo station status");
+      return {
+        success: true,
+        station_id: DEMO_STATION_ID,
+        serial_number: "VOL-001-01",
+        model: "Voltera AC",
+        manufacturer: "Voltera",
+        online: true,
+        station_status: "active",
+        location_status: "active",
+        available_for_charging: true,
+        location_id: DEMO_LOCATION_ID,
+        location_name: "Voltera Ахунбаева",
+        location_address: "ул. Ахунбаева 132",
+        connectors: [
+          {
+            id: 1,
+            type: "Type2",
+            power_kw: 22,
+            available: true,
+            status: "Available",
+            error: "NoError",
+          },
+          {
+            id: 2,
+            type: "Type2",
+            power_kw: 22,
+            available: true,
+            status: "Available",
+            error: "NoError",
+          },
+          {
+            id: 3,
+            type: "CCS",
+            power_kw: 50,
+            available: false,
+            status: "Occupied",
+            error: "NoError",
+          },
+        ],
+        total_connectors: 3,
+        available_connectors: 2,
+        occupied_connectors: 1,
+        faulted_connectors: 0,
+        tariff_rub_kwh: 13.5,
+        session_fee: 0,
+        currency: "KGS",
+        working_hours: "24/7",
+      };
+    }
+
     try {
       // В контракте tariff_rub_kwh может быть опциональным, но наш тип требует число.
       // Доверяем бэкенду: если поле отсутствует, считаем 13.5.
@@ -858,6 +1112,12 @@ class EvPowerApiService {
    */
   async getBalance(): Promise<number> {
     const client_id = await this.getClientId();
+
+    // Demo mode для Apple Review - возвращаем фиксированный баланс
+    if (client_id === DEMO_USER_ID) {
+      logger.debug("[VolteraAPI] Demo mode: returning demo balance 1000 KGS");
+      return 1000;
+    }
 
     try {
       // Пробуем получить баланс через API (источник истины)

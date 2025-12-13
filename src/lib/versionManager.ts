@@ -9,8 +9,8 @@ import { Capacitor } from "@capacitor/core";
 import { logger } from "@/shared/utils/logger";
 
 // Текущая версия приложения (синхронизируется с package.json)
-export const APP_VERSION = "1.1.3";
-export const APP_BUILD = 100; // Увеличивается при каждой сборке
+export const APP_VERSION = "1.1.4";
+export const APP_BUILD = 101; // Увеличивается при каждой сборке
 
 // Ключи для хранения
 const VERSION_STORAGE_KEY = "voltera_app_version";

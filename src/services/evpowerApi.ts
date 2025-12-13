@@ -1179,6 +1179,18 @@ class EvPowerApiService {
     description?: string,
   ): Promise<TopupQRResponse> {
     const client_id = await this.getClientId();
+
+    // Demo mode для Apple Review - баланс уже пополнен
+    if (client_id === DEMO_USER_ID) {
+      logger.debug("[VolteraAPI] Demo mode: topup not available for demo user");
+      return {
+        success: false,
+        error: "Демо-аккаунт уже имеет баланс 1000 сом для тестирования",
+        client_id: client_id,
+        current_balance: 1000,
+      };
+    }
+
     const requestBody = { client_id, amount, description };
     logger.debug("[volteraApi] topupWithQR request:", requestBody);
     return this.apiRequest(
